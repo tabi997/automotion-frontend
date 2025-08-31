@@ -263,11 +263,13 @@ const Index = () => {
               <CarouselItem key={index} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
                 <div className="automotive-card overflow-hidden hover-lift">
                   <div className="relative">
-                    <img 
-                      src={car.image}
-                      alt={`${car.brand} ${car.model}`}
-                      className="w-full h-48 object-cover"
-                    />
+                    <Link to="/stoc" className="block">
+                      <img 
+                        src={car.image}
+                        alt={`${car.brand} ${car.model}`}
+                        className="w-full h-48 object-cover cursor-pointer"
+                      />
+                    </Link>
                     <div className="absolute top-4 left-4 flex flex-wrap gap-2">
                       {car.badges.map((badge, badgeIndex) => (
                         <Badge key={badgeIndex} variant={badge.variant} size="sm">
@@ -278,9 +280,11 @@ const Index = () => {
                   </div>
                   
                   <div className="p-6">
-                    <h3 className="text-xl font-semibold mb-2">
-                      {car.brand} {car.model}
-                    </h3>
+                    <Link to="/stoc" className="block hover:text-primary transition-colors">
+                      <h3 className="text-xl font-semibold mb-2 cursor-pointer">
+                        {car.brand} {car.model}
+                      </h3>
+                    </Link>
                     <p className="text-muted-foreground mb-4">An: {car.year}</p>
                     
                     <div className="flex items-center justify-between">
@@ -290,8 +294,10 @@ const Index = () => {
                         </span>
                       </div>
                       
-                      <Button variant="outline" size="sm">
-                        Detalii
+                      <Button variant="outline" size="sm" asChild>
+                        <Link to="/stoc">
+                          Detalii
+                        </Link>
                       </Button>
                     </div>
                   </div>

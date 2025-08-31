@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Stock from "./pages/Stock";
+import VehicleDetail from "./pages/VehicleDetail";
 import VendeMasina from "./pages/VendeMasina";
 import Finantare from "./pages/Finantare";
 import Contact from "./pages/Contact";
@@ -32,6 +33,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/stoc" element={<Stock />} />
+          <Route path="/vehicul/:id" element={<VehicleDetail />} />
           <Route path="/buyback" element={<VendeMasina />} />
           <Route path="/finantare" element={<Finantare />} />
           <Route path="/contact" element={<Contact />} />
