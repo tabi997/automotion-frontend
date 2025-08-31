@@ -99,8 +99,10 @@ const Index = () => {
               </Link>
             </Button>
             
-            <Button variant="outline" size="xl" className="bg-white/10 border-white/30 text-white hover:bg-white hover:text-primary backdrop-blur-sm">
-              {settingsData.hero.cta_secondary.ro}
+            <Button variant="outline" size="xl" asChild className="bg-white/10 border-white/30 text-white hover:bg-white hover:text-primary backdrop-blur-sm">
+              <Link to="/comanda" className="flex items-center">
+                {settingsData.hero.cta_secondary.ro}
+              </Link>
             </Button>
           </div>
         </div>
@@ -418,9 +420,11 @@ const Index = () => {
             </Link>
           </Button>
           
-          <Button variant="outline" size="xl" className="bg-white/10 border-white/30 text-white hover:bg-white hover:text-primary backdrop-blur-sm">
-            <Car className="mr-2 h-5 w-5" />
-            Comandă Mașina
+          <Button variant="outline" size="xl" asChild className="bg-white/10 border-white/30 text-white hover:bg-white hover:text-primary backdrop-blur-sm">
+            <Link to="/comanda" className="flex items-center">
+              <Car className="mr-2 h-5 w-5" />
+              Comandă Mașina
+            </Link>
           </Button>
         </div>
       </div>

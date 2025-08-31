@@ -7,6 +7,7 @@ import Stock from "./pages/Stock";
 import VendeMasina from "./pages/VendeMasina";
 import Finantare from "./pages/Finantare";
 import Contact from "./pages/Contact";
+import ComandaMasina from "./pages/ComandaMasina";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Auth/Login";
 import AdminLayout from "./pages/Admin/AdminLayout";
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/buyback" element={<VendeMasina />} />
           <Route path="/finantare" element={<Finantare />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/comanda" element={<ComandaMasina />} />
           <Route path="/login" element={<Login />} />
           
           {/* Admin Routes - Protected by AuthGate */}

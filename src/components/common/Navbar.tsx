@@ -23,6 +23,7 @@ const navigation: NavItem[] = [
   { href: '/', label: 'Acasă' },
   { href: '/stoc', label: 'Stoc Auto' },
   { href: '/buyback', label: 'Vinde Mașina', badge: 'Nou' },
+  { href: '/comanda', label: 'Comandă Mașină' },
   { href: '/finantare', label: 'Finanțare' },
   { href: '/contact', label: 'Contact' },
 ];

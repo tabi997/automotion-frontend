@@ -8,6 +8,7 @@ type StockUpdate = Database["public"]["Tables"]["stock"]["Update"];
 type LeadSellRow = Database["public"]["Tables"]["lead_sell"]["Row"];
 type LeadFinanceRow = Database["public"]["Tables"]["lead_finance"]["Row"];
 type ContactMessageRow = Database["public"]["Tables"]["contact_messages"]["Row"];
+type LeadOrderRow = Database["public"]["Tables"]["lead_order"]["Row"];
 
 // Stock Management
 export async function getStock(): Promise<StockRow[]> {
@@ -30,6 +31,11 @@ export async function updateListing(id: string, input: StockUpdate): Promise<{ d
 
 export async function deleteListing(id: string): Promise<{ error: unknown }> {
   return await supabase.from("stock").delete().eq("id", id);
+}
+
+// Order Lead Management
+export async function createOrderLead(input: Database["public"]["Tables"]["lead_order"]["Insert"]): Promise<{ data: LeadOrderRow | null; error: unknown }> {
+  return await supabase.from("lead_order").insert([input]).select().single();
 }
 
 // Leads Management
@@ -63,8 +69,18 @@ export async function getContactLeads(): Promise<ContactMessageRow[]> {
   return data || [];
 }
 
+export async function getOrderLeads(): Promise<LeadOrderRow[]> {
+  const { data, error } = await supabase
+    .from("lead_order")
+    .select("*")
+    .order("created_at", { ascending: false });
+  
+  if (error) throw error;
+  return data || [];
+}
+
 export async function setLeadStatus(
-  table: "lead_sell" | "lead_finance" | "contact_messages", 
+  table: "lead_sell" | "lead_finance" | "contact_messages" | "lead_order", 
   id: string, 
   status: string
 ): Promise<{ error: unknown }> {
@@ -77,18 +93,21 @@ export async function getDashboardStats(): Promise<{
   sellLeadsCount: number;
   financeLeadsCount: number;
   contactCount: number;
+  orderLeadsCount: number;
 }> {
-  const [stock, sellLeads, financeLeads, contact] = await Promise.all([
+  const [stock, sellLeads, financeLeads, contact, orderLeads] = await Promise.all([
     supabase.from("stock").select("*", { count: "exact", head: true }),
     supabase.from("lead_sell").select("*", { count: "exact", head: true }),
     supabase.from("lead_finance").select("*", { count: "exact", head: true }),
-    supabase.from("contact_messages").select("*", { count: "exact", head: true })
+    supabase.from("contact_messages").select("*", { count: "exact", head: true }),
+    supabase.from("lead_order").select("*", { count: "exact", head: true })
   ]);
 
   return {
     stockCount: stock.count || 0,
     sellLeadsCount: sellLeads.count || 0,
     financeLeadsCount: financeLeads.count || 0,
-    contactCount: contact.count || 0
+    contactCount: contact.count || 0,
+    orderLeadsCount: orderLeads.count || 0
   };
 }

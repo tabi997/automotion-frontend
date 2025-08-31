@@ -242,6 +242,84 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_order: {
+        Row: {
+          id: string
+          created_at: string
+          marca: string
+          model: string | null
+          an_min: number | null
+          an_max: number | null
+          km_max: number | null
+          combustibil: string | null
+          transmisie: string | null
+          caroserie: string | null
+          culoare: string | null
+          pret_max: number | null
+          pret_min: number | null
+          caracteristici_speciale: string[] | null
+          urgent: boolean
+          observatii: string | null
+          nume: string
+          telefon: string
+          email: string
+          preferinta_contact: string | null
+          interval_orar: string | null
+          gdpr: boolean
+          status: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          marca: string
+          model?: string | null
+          an_min?: number | null
+          an_max?: number | null
+          km_max?: number | null
+          combustibil?: string | null
+          transmisie?: string | null
+          caroserie?: string | null
+          culoare?: string | null
+          pret_max?: number | null
+          pret_min?: number | null
+          caracteristici_speciale?: string[] | null
+          urgent?: boolean
+          observatii?: string | null
+          nume: string
+          telefon: string
+          email: string
+          preferinta_contact?: string | null
+          interval_orar?: string | null
+          gdpr?: boolean
+          status?: string
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          marca?: string
+          model?: string | null
+          an_min?: number | null
+          an_max?: number | null
+          km_max?: number | null
+          combustibil?: string | null
+          transmisie?: string | null
+          caroserie?: string | null
+          culoare?: string | null
+          pret_max?: number | null
+          pret_min?: number | null
+          caracteristici_speciale?: string[] | null
+          urgent?: boolean
+          observatii?: string | null
+          nume?: string
+          telefon?: string
+          email?: string
+          preferinta_contact?: string | null
+          interval_orar?: string | null
+          gdpr?: boolean
+          status?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

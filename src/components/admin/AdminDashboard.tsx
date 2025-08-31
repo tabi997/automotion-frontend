@@ -92,6 +92,17 @@ export default function AdminDashboard() {
       link: "/admin/leads",
       action: "Vezi Mesaje"
     },
+    {
+      title: "Lead-uri Comandă",
+      value: stats?.orderLeadsCount || 0,
+      description: "Cereri de comandă",
+      icon: Car,
+      color: "text-red-600",
+      bgColor: "bg-red-50",
+      borderColor: "border-red-200",
+      link: "/admin/leads",
+      action: "Vezi Comenzi"
+    },
   ];
 
   const quickActions = [
