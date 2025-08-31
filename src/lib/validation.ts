@@ -35,9 +35,8 @@ export const SellCarSchema = z.object({
   judet: z.string().min(1, "Județul este obligatoriu"),
   oras: z.string().min(1, "Orașul este obligatoriu"),
   
-  // Images
-  images: z.array(z.string())
-    .min(3, "Sunt necesare minimum 3 imagini"),
+  // Images - Optional for now
+  images: z.array(z.string()).optional().default([]),
   
   // Contact
   nume: z.string().min(2, "Numele trebuie să aibă minimum 2 caractere"),

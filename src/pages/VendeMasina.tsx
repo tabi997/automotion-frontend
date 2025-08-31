@@ -6,7 +6,7 @@ import { Footer } from "@/components/common/Footer";
 import { Container } from "@/components/common/Container";
 import { Section } from "@/components/common/Section";
 import { FormSection } from "@/components/forms/FormSection";
-import { UploadGallery } from "@/components/forms/UploadGallery";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,7 +32,7 @@ import { submitSellLead } from "@/lib/actions";
 import { useToast } from "@/hooks/use-toast";
 
 const steps = [
-  { id: 1, title: "Completezi formularul", description: "Adaugi detaliile mașinii și fotografii" },
+  { id: 1, title: "Completezi formularul", description: "Adaugi detaliile mașinii" },
   { id: 2, title: "Primești oferta", description: "Te contactăm în 24h cu o ofertă personalizată" },
   { id: 3, title: "Finalizezi vânzarea", description: "Semnezi actele și primești banii instant" }
 ];
@@ -73,8 +73,7 @@ export default function VendeMasina() {
     defaultValues: {
       negociabil: false,
       preferinta_contact: "telefon",
-      gdpr: false,
-      images: []
+      gdpr: false
     }
   });
 
@@ -429,28 +428,7 @@ export default function VendeMasina() {
                     </div>
                   </FormSection>
 
-                  {/* Images */}
-                  <FormSection 
-                    title="Fotografii" 
-                    description="Încarcă minimum 3 fotografii clare ale mașinii"
-                  >
-                    <FormField
-                      control={form.control}
-                      name="images"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <UploadGallery
-                              onImagesChange={field.onChange}
-                              minImages={3}
-                              maxImages={10}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </FormSection>
+
 
                   {/* Contact Details */}
                   <FormSection 
