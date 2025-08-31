@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { StockVehicle } from "@/types/vehicle";
-import { Car, Calendar, Gauge, Euro, MapPin, Settings, Palette, Hash, FileText, Star, Clock, CheckCircle, XCircle, Info } from "lucide-react";
+import { Car, Calendar, Gauge, Euro, MapPin, Settings, Palette, Hash, FileText, Star, Clock, CheckCircle, XCircle, Info, ArrowLeft } from "lucide-react";
 
 interface VehicleQuickViewProps {
   open: boolean;
@@ -186,6 +186,20 @@ const VehicleQuickView = ({ open, onOpenChange, vehicle }: VehicleQuickViewProps
                     <div className="flex items-center justify-between py-2 border-b border-gray-100">
                       <span className="text-gray-600">VIN</span>
                       <span className="font-medium font-mono text-sm">{vehicle.vin}</span>
+                    </div>
+                  )}
+                  {vehicle.openlane_url && (
+                    <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                      <span className="text-gray-600">OpenLane</span>
+                      <a 
+                        href={vehicle.openlane_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="font-medium text-blue-600 hover:text-blue-800 underline flex items-center gap-1"
+                      >
+                        Vezi licitația
+                        <ArrowLeft className="h-3 w-3 rotate-180" />
+                      </a>
                     </div>
                   )}
                   <div className="flex items-center justify-between py-2 border-b border-gray-100">

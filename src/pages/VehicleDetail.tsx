@@ -333,6 +333,41 @@ const VehicleDetail = () => {
                 </div>
               )}
 
+              {/* OpenLane Link */}
+              {vehicle.openlane_url && (
+                <div className="flex items-center gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex-shrink-0">
+                    <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">OL</span>
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm text-blue-700 font-medium mb-1">
+                      Vezi pe OpenLane
+                    </div>
+                    <div className="text-xs text-blue-600">
+                      Link către licitația oficială
+                    </div>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    asChild
+                    className="border-blue-300 text-blue-700 hover:bg-blue-50"
+                  >
+                    <a 
+                      href={vehicle.openlane_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2"
+                    >
+                      <span>Deschide</span>
+                      <ArrowLeft className="h-3 w-3 rotate-180" />
+                    </a>
+                  </Button>
+                </div>
+              )}
+
               {/* Description */}
               {vehicle.descriere && (
                 <div className="space-y-3">

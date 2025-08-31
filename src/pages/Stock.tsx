@@ -23,7 +23,8 @@ import {
   Fuel,
   Settings,
   MapPin,
-  Eye
+  Eye,
+  ArrowLeft
 } from 'lucide-react';
 import { MockAPI } from '@/lib/mockApi';
 import { Vehicle, VehicleFilters, VehicleSort, PaginatedVehicles, StockVehicle } from '@/types/vehicle';
@@ -60,6 +61,7 @@ const transformStockToVehicle = (stockVehicle: StockVehicle): Vehicle => ({
   condition: 'second-hand' as const, // Default value
   features: [], // No features in stock table
   financing: undefined, // No financing info in stock table
+  openlane_url: stockVehicle.openlane_url || '', // Add openlane_url to transformed vehicle
 });
 
 const Stock = () => {
@@ -145,6 +147,21 @@ const Stock = () => {
               {badge.text}
             </Badge>
           ))}
+          {/* OpenLane Badge */}
+          {vehicle.openlane_url && (
+            <Badge variant="info" size="sm" className="bg-blue-600 hover:bg-blue-700">
+              <a 
+                href={vehicle.openlane_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-white"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <span>OL</span>
+                <ArrowLeft className="h-3 w-3 rotate-180" />
+              </a>
+            </Badge>
+          )}
         </div>
         
         {/* Actions */}

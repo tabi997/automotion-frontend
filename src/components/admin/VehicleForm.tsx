@@ -33,6 +33,15 @@ const vehicleSchema = z.object({
   negociabil: z.boolean().default(false),
   descriere: z.string().min(10, "Descrierea trebuie să aibă cel puțin 10 caractere").max(2000, "Descrierea este prea lungă"),
   status: z.enum(["active", "inactive", "sold", "reserved"]).default("active"),
+  openlane_url: z.string().optional().refine((val) => {
+    if (!val || val === "") return true; // Allow empty strings
+    try {
+      new URL(val);
+      return true;
+    } catch {
+      return false;
+    }
+  }, "URL-ul OpenLane trebuie să fie valid"),
 });
 
 type VehicleFormData = z.infer<typeof vehicleSchema>;
@@ -90,6 +99,7 @@ export default function VehicleForm({ open, onOpenChange, vehicle, onSuccess }: 
       negociabil: vehicle?.negociabil || false,
       descriere: vehicle?.descriere || "Vehicul în stare excelentă, perfect întreținut, cu toate reviziile la zi. Ideal pentru familie sau uz personal. Toate documentele sunt în regulă și vehiculul este gata de înmatriculare.",
       status: (vehicle?.status as any) || "active",
+      openlane_url: vehicle?.openlane_url || "",
     },
     mode: "onChange",
   });
@@ -110,6 +120,7 @@ export default function VehicleForm({ open, onOpenChange, vehicle, onSuccess }: 
         negociabil: vehicle.negociabil || false,
         descriere: vehicle.descriere || "Vehicul în stare excelentă, perfect întreținut, cu toate reviziile la zi. Ideal pentru familie sau uz personal. Toate documentele sunt în regulă și vehiculul este gata de înmatriculare.",
         status: vehicle.status as any,
+        openlane_url: vehicle.openlane_url || "",
       });
       setImages(vehicle.images || []);
     }
@@ -137,6 +148,7 @@ export default function VehicleForm({ open, onOpenChange, vehicle, onSuccess }: 
         descriere: data.descriere,
         status: data.status,
         images: images,
+        openlane_url: data.openlane_url,
       };
 
       console.log('🔍 VehicleForm: vehicleData to send:', vehicleData);
@@ -443,6 +455,18 @@ export default function VehicleForm({ open, onOpenChange, vehicle, onSuccess }: 
                         <SelectItem value="reserved">Rezervat</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="openlane_url">URL OpenLane</Label>
+                    <Input
+                      id="openlane_url"
+                      {...form.register("openlane_url")}
+                      placeholder="https://openlane.com/listing/123456"
+                    />
+                    {form.formState.errors.openlane_url && (
+                      <p className="text-sm text-red-600">{form.formState.errors.openlane_url.message}</p>
+                    )}
                   </div>
                 </CardContent>
               </Card>
