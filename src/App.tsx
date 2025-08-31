@@ -18,6 +18,7 @@ import Dashboard from "./pages/Admin/Dashboard";
 import AdminStock from "./pages/Admin/Stock";
 import AdminLeads from "./pages/Admin/Leads";
 import TestUpload from "./pages/Admin/TestUpload";
+import Settings from "./pages/Admin/Settings";
 import AuthGate from "./components/auth/AuthGate";
 
 const queryClient = new QueryClient();
@@ -53,6 +54,7 @@ const App = () => (
             <Route index element={<Dashboard />} />
             <Route path="stock" element={<AdminStock />} />
             <Route path="leads" element={<AdminLeads />} />
+            <Route path="settings" element={<Settings />} />
             <Route path="test-upload" element={<TestUpload />} />
           </Route>
           

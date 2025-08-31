@@ -139,8 +139,10 @@ export default function AdminDashboard() {
       icon: Settings,
       color: "text-orange-600",
       bgColor: "bg-orange-50",
+      borderColor: "border-orange-200",
       link: "/admin/settings",
-      action: "Configurează"
+      action: "Configurează",
+      highlight: true
     },
   ];
 
@@ -242,7 +244,7 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {quickActions.map((action) => (
                 <Link key={action.title} to={action.link}>
-                  <div className={`p-4 rounded-lg border-2 ${action.bgColor} ${action.borderColor} hover:shadow-md transition-all duration-200 cursor-pointer`}>
+                  <div className={`p-4 rounded-lg border-2 ${action.bgColor} ${action.borderColor} hover:shadow-md transition-all duration-200 cursor-pointer ${action.highlight ? 'ring-2 ring-orange-300 ring-offset-2' : ''}`}>
                     <div className="flex items-center gap-3 mb-2">
                       <div className={`p-2 rounded-full ${action.bgColor}`}>
                         <action.icon className={`h-5 w-5 ${action.color}`} />
