@@ -43,6 +43,12 @@ const vehicleSchema = z.object({
       return false;
     }
   }, "URL-ul OpenLane trebuie să fie valid"),
+  badges: z.array(z.object({
+    id: z.string(),
+    text: z.string(),
+    type: z.enum(["success", "warning", "info", "urgent"]),
+    icon: z.string().optional(),
+  })).default([]),
 });
 
 type VehicleFormData = z.infer<typeof vehicleSchema>;
@@ -78,10 +84,19 @@ const caroserieOptions = [
   { value: "van", label: "Van", icon: "🚐" },
 ];
 
+const badgeOptions = [
+  { id: "hot", text: "În trend", type: "urgent" as const, icon: "🔥" },
+  { id: "demand", text: "Căutat", type: "warning" as const, icon: "⭐" },
+  { id: "reserved", text: "Rezervat", type: "info" as const, icon: "🔒" },
+  { id: "new", text: "Nou", type: "success" as const, icon: "🆕" },
+  { id: "discount", text: "Ofertă", type: "warning" as const, icon: "💰" },
+];
+
 export default function VehicleForm({ open, onOpenChange, vehicle, onSuccess }: VehicleFormProps) {
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<string[]>([]);
   const [selectedBrand, setSelectedBrand] = useState(vehicle?.marca || "");
+  const [selectedBadges, setSelectedBadges] = useState<string[]>([]);
   const { toast } = useToast();
   const isEditing = !!vehicle;
 
@@ -102,6 +117,7 @@ export default function VehicleForm({ open, onOpenChange, vehicle, onSuccess }: 
       descriere: vehicle?.descriere || "Vehicul în stare excelentă, perfect întreținut, cu toate reviziile la zi. Ideal pentru familie sau uz personal. Toate documentele sunt în regulă și vehiculul este gata de înmatriculare.",
       status: (vehicle?.status as any) || "active",
       openlane_url: vehicle?.openlane_url || "",
+      badges: vehicle?.badges || [],
     },
     mode: "onChange",
   });
@@ -123,11 +139,14 @@ export default function VehicleForm({ open, onOpenChange, vehicle, onSuccess }: 
         descriere: vehicle.descriere || "Vehicul în stare excelentă, perfect întreținut, cu toate reviziile la zi. Ideal pentru familie sau uz personal. Toate documentele sunt în regulă și vehiculul este gata de înmatriculare.",
         status: vehicle.status as any,
         openlane_url: vehicle.openlane_url || "",
+        badges: vehicle.badges || [],
       });
       setImages(vehicle.images || []);
       setSelectedBrand(vehicle.marca);
+      setSelectedBadges(vehicle.badges?.map(b => b.id) || []);
     } else {
       setSelectedBrand("");
+      setSelectedBadges([]);
     }
   }, [vehicle, form]);
 
@@ -154,6 +173,7 @@ export default function VehicleForm({ open, onOpenChange, vehicle, onSuccess }: 
         status: data.status,
         images: images,
         openlane_url: data.openlane_url,
+        badges: data.badges,
       };
 
       console.log('🔍 VehicleForm: vehicleData to send:', vehicleData);
@@ -493,6 +513,43 @@ export default function VehicleForm({ open, onOpenChange, vehicle, onSuccess }: 
                     {form.formState.errors.openlane_url && (
                       <p className="text-sm text-red-600">{form.formState.errors.openlane_url.message}</p>
                     )}
+                  </div>
+
+                  <Separator />
+
+                  <div className="space-y-2">
+                    <Label>Badge-uri vehicul</Label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {badgeOptions.map((badge) => (
+                        <div key={badge.id} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`badge-${badge.id}`}
+                            checked={selectedBadges.includes(badge.id)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setSelectedBadges(prev => [...prev, badge.id]);
+                                const currentBadges = form.getValues("badges");
+                                form.setValue("badges", [...currentBadges, badge]);
+                              } else {
+                                setSelectedBadges(prev => prev.filter(id => id !== badge.id));
+                                const currentBadges = form.getValues("badges");
+                                form.setValue("badges", currentBadges.filter(b => b.id !== badge.id));
+                              }
+                            }}
+                          />
+                          <Label 
+                            htmlFor={`badge-${badge.id}`} 
+                            className="text-sm flex items-center gap-2 cursor-pointer"
+                          >
+                            <span>{badge.icon}</span>
+                            {badge.text}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Badge-urile vor apărea pe fotografia vehiculului în pagina de stoc
+                    </p>
                   </div>
                 </CardContent>
               </Card>

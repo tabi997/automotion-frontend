@@ -27,7 +27,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { MockAPI } from '@/lib/mockApi';
-import { Vehicle, VehicleFilters, VehicleSort, PaginatedVehicles, StockVehicle } from '@/types/vehicle';
+import { Vehicle, VehicleFilters, VehicleSort, PaginatedVehicles, StockVehicle, VehicleBadge } from '@/types/vehicle';
 import { StockAPI } from '@/lib/stockApi';
 import { carBrands } from '@/data/carBrands';
 
@@ -53,7 +53,7 @@ const transformStockToVehicle = (stockVehicle: StockVehicle): Vehicle => ({
   status: stockVehicle.status as 'active' | 'inactive' | 'sold',
   dateAdded: stockVehicle.created_at,
   updatedAt: stockVehicle.updated_at,
-  badges: [], // No badges in stock vehicle
+  badges: stockVehicle.badges || [], // Include badges from stock vehicle
   images: stockVehicle.images || [],
   mainImage: stockVehicle.images?.[0] || '',
   horsePower: 0, // Placeholder - not in stock table
@@ -64,6 +64,55 @@ const transformStockToVehicle = (stockVehicle: StockVehicle): Vehicle => ({
   financing: undefined, // No financing info in stock table
   openlane_url: stockVehicle.openlane_url || '', // Add openlane_url to transformed vehicle
 });
+
+// Helper function to translate badge text to Romanian
+function translateBadgeText(badge: VehicleBadge) {
+  const translations: Record<string, { text: string; icon: string; className: string; glow: string; description: string }> = {
+    hot: {
+      text: 'În trend',
+      icon: '🔥',
+      className: 'bg-gradient-to-r from-red-500 to-red-600 text-white border-red-400',
+      glow: '0 4px 12px rgba(239, 68, 68, 0.4), 0 2px 4px rgba(0,0,0,0.1)',
+      description: 'Vehicul foarte căutat în această perioadă'
+    },
+    demand: {
+      text: 'Căutat',
+      icon: '⭐',
+      className: 'bg-gradient-to-r from-orange-500 to-orange-600 text-white border-orange-400',
+      glow: '0 4px 12px rgba(249, 115, 22, 0.4), 0 2px 4px rgba(0,0,0,0.1)',
+      description: 'Vehicul cu cerere ridicată'
+    },
+    reserved: {
+      text: 'Rezervat',
+      icon: '🚫',
+      className: 'bg-gradient-to-r from-blue-500 to-blue-600 text-white border-blue-400',
+      glow: '0 4px 12px rgba(59, 130, 246, 0.4), 0 2px 4px rgba(0,0,0,0.1)',
+      description: 'Vehicul rezervat temporar'
+    },
+    new: {
+      text: 'Nou',
+      icon: '🆕',
+      className: 'bg-gradient-to-r from-green-500 to-green-600 text-white border-green-400',
+      glow: '0 4px 12px rgba(34, 197, 94, 0.4), 0 2px 4px rgba(0,0,0,0.1)',
+      description: 'Vehicul nou adăugat în stoc'
+    },
+    discount: {
+      text: 'Ofertă',
+      icon: '💰',
+      className: 'bg-gradient-to-r from-purple-500 to-purple-600 text-white border-purple-400',
+      glow: '0 4px 12px rgba(147, 51, 234, 0.4), 0 2px 4px rgba(0,0,0,0.1)',
+      description: 'Preț redus - ofertă specială'
+    }
+  };
+  
+  return translations[badge.text.toLowerCase()] || {
+    text: badge.text,
+    icon: '🏷️',
+    className: 'bg-gradient-to-r from-gray-500 to-gray-600 text-white border-gray-400',
+    glow: '0 4px 12px rgba(107, 114, 128, 0.4), 0 2px 4px rgba(0,0,0,0.1)',
+    description: badge.text
+  };
+}
 
 const Stock = () => {
   const [vehicles, setVehicles] = useState<PaginatedVehicles | null>(null);
@@ -156,106 +205,138 @@ const Stock = () => {
           />
         </Link>
         
-        {/* Badges */}
-        <div className="absolute top-4 left-4 flex flex-wrap gap-2">
-          {vehicle.badges.map((badge) => (
-            <Badge key={badge.id} variant={badge.type} size="sm">
-              {badge.text}
-            </Badge>
-          ))}
-          {/* OpenLane Badge */}
-          {vehicle.openlane_url && (
-            <Badge variant="info" size="sm" className="bg-blue-600 hover:bg-blue-700">
-              <a 
-                href={vehicle.openlane_url} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-white"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <span>OL</span>
-                <ArrowLeft className="h-3 w-3 rotate-180" />
-              </a>
-            </Badge>
-          )}
-        </div>
+                 {/* Badges - Improved positioning and styling */}
+         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 max-w-[calc(100%-2rem)]">
+           {vehicle.badges.slice(0, 2).map((badge) => { // Limit to 2 badges to avoid overcrowding
+             const badgeConfig = translateBadgeText(badge);
+             return (
+               <div 
+                 key={badge.id} 
+                 className={`vehicle-badge ${badgeConfig.className}`}
+                 style={{
+                   boxShadow: badgeConfig.glow
+                 }}
+                 title={badgeConfig.description}
+               >
+                 <span className="text-xs">{badgeConfig.icon}</span>
+                 <span className="font-semibold tracking-wide">{badgeConfig.text}</span>
+               </div>
+             );
+           })}
+           {/* Show count if more than 2 badges */}
+           {vehicle.badges.length > 2 && (
+             <div 
+               className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-black/70 text-white text-xs font-bold backdrop-blur-sm"
+               title={`${vehicle.badges.length - 2} badge-uri suplimentare`}
+             >
+               +{vehicle.badges.length - 2}
+             </div>
+           )}
+         </div>
         
-        {/* Actions */}
-        <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-smooth">
-          <button className="p-2 bg-white/90 rounded-lg hover:bg-white shadow-medium">
-            <Heart className="h-4 w-4" />
-          </button>
-          <button className="p-2 bg-white/90 rounded-lg hover:bg-white shadow-medium">
-            <Share2 className="h-4 w-4" />
-          </button>
-        </div>
-        
-        {/* Price Badge */}
-        <div className="absolute bottom-4 right-4 bg-primary text-primary-foreground px-3 py-1 rounded-lg font-bold shadow-medium">
-          €{vehicle.price.toLocaleString()}
-        </div>
-      </div>
-      
-      <div className="p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <Link to={`/vehicul/${vehicle.id}`} className="block hover:text-primary transition-colors">
-              <h3 className="text-xl font-semibold mb-1 cursor-pointer">
-                {vehicle.brand} {vehicle.model}
-              </h3>
-            </Link>
-            <p className="text-muted-foreground text-sm">
-              {vehicle.year} • {vehicle.location}
-            </p>
-          </div>
-        </div>
-        
-        {/* Vehicle Details */}
-        <div className="grid grid-cols-2 gap-3 mb-6 text-sm">
-          <div className="flex items-center space-x-2 text-muted-foreground">
-            <Gauge className="h-4 w-4" />
-            <span>{vehicle.mileage.toLocaleString()} km</span>
-          </div>
-          <div className="flex items-center space-x-2 text-muted-foreground">
-            <Fuel className="h-4 w-4" />
-            <span className="capitalize">{vehicle.fuelType}</span>
-          </div>
-          <div className="flex items-center space-x-2 text-muted-foreground">
-            <Settings className="h-4 w-4" />
-            <span className="capitalize">{vehicle.transmission}</span>
-          </div>
-          <div className="flex items-center space-x-2 text-muted-foreground">
-            <Calendar className="h-4 w-4" />
-            <span>{vehicle.horsePower} CP</span>
-          </div>
-        </div>
-        
-        {/* Actions */}
-        <div className="flex gap-3">
-          <Button 
-            variant="premium" 
-            size="sm" 
-            className="flex-1"
-            asChild
-          >
-            <Link to={`/vehicul/${vehicle.id}`}>
-              <Eye className="h-4 w-4 mr-2" />
-              Detalii
-            </Link>
-          </Button>
-          <Button variant="outline" size="sm">
-            <Phone className="h-4 w-4" />
-          </Button>
-        </div>
-        
-        {/* Financing Info */}
-        {vehicle.financing?.available && (
-          <div className="mt-4 p-3 bg-accent/10 rounded-lg">
-            <p className="text-sm text-accent font-medium">
-              De la €{vehicle.financing.monthlyPayment}/lună
-            </p>
-          </div>
-        )}
+                 {/* Actions */}
+         <div className="absolute top-3 right-3 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-smooth">
+           <button className="p-1.5 bg-white/90 rounded-lg hover:bg-white shadow-medium">
+             <Heart className="h-3.5 w-3.5" />
+           </button>
+           <button className="p-1.5 bg-white/90 rounded-lg hover:bg-white shadow-medium">
+             <Share2 className="h-3.5 w-3.5" />
+           </button>
+         </div>
+         
+         {/* Price Badge - Improved positioning */}
+         <div className="absolute bottom-3 right-3 bg-primary text-primary-foreground px-3 py-1.5 rounded-lg font-bold shadow-medium">
+           €{vehicle.price.toLocaleString()}
+         </div>
+       </div>
+       
+       <div className="vehicle-card-content">
+         <div className="flex items-start justify-between mb-3">
+           <div className="flex-1 min-w-0">
+             <Link to={`/vehicul/${vehicle.id}`} className="block hover:text-primary transition-colors">
+               <h3 className="vehicle-card-title">
+                 {vehicle.brand} {vehicle.model}
+               </h3>
+             </Link>
+             <p className="text-muted-foreground text-sm">
+               {vehicle.year} • {vehicle.location}
+             </p>
+           </div>
+         </div>
+         
+         {/* Vehicle Details - Improved grid layout */}
+         <div className="vehicle-card-details">
+           <div className="flex items-center space-x-2 text-muted-foreground">
+             <Gauge className="h-3.5 w-3.5 flex-shrink-0" />
+             <span className="truncate">{vehicle.mileage.toLocaleString()} km</span>
+           </div>
+           <div className="flex items-center space-x-2 text-muted-foreground">
+             <Fuel className="h-3.5 w-3.5 flex-shrink-0" />
+             <span className="capitalize truncate">{vehicle.fuelType}</span>
+           </div>
+           <div className="flex items-center space-x-2 text-muted-foreground">
+             <Settings className="h-3.5 w-3.5 flex-shrink-0" />
+             <span className="capitalize truncate">{vehicle.transmission}</span>
+           </div>
+           <div className="flex items-center space-x-2 text-muted-foreground">
+             <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
+             <span className="truncate">{vehicle.horsePower} CP</span>
+           </div>
+         </div>
+         
+         {/* Actions - Improved layout with better spacing */}
+         <div className="vehicle-card-actions">
+           <Button 
+             variant="premium" 
+             size="sm" 
+             className="vehicle-card-action-btn flex-1"
+             asChild
+           >
+             <Link to={`/vehicul/${vehicle.id}`}>
+               <Eye className="h-3.5 w-3.5 mr-1.5" />
+               Detalii
+             </Link>
+           </Button>
+           
+           <Button 
+             variant="outline" 
+             size="sm" 
+             className="vehicle-card-action-btn compact"
+             title="Contactează"
+           >
+             <Phone className="h-3.5 w-3.5" />
+           </Button>
+           
+           {/* OpenLane Button - Improved styling */}
+           {vehicle.openlane_url && (
+             <Button 
+               variant="outline" 
+               size="sm"
+               className="vehicle-card-action-btn compact bg-blue-600 hover:bg-blue-700 text-white border-blue-600 hover:border-blue-700"
+               asChild
+               title="Vezi pe OpenLane"
+             >
+               <a 
+                 href={vehicle.openlane_url} 
+                 target="_blank" 
+                 rel="noopener noreferrer"
+                 className="flex items-center justify-center"
+                 onClick={(e) => e.stopPropagation()}
+               >
+                 <span className="text-xs font-semibold">OL</span>
+               </a>
+             </Button>
+           )}
+         </div>
+         
+         {/* Financing Info - Improved styling */}
+         {vehicle.financing?.available && (
+           <div className="mt-3 p-2.5 bg-accent/10 rounded-lg border border-accent/20">
+             <p className="text-xs text-accent font-medium text-center">
+               De la €{vehicle.financing.monthlyPayment}/lună
+             </p>
+           </div>
+         )}
       </div>
     </div>
   );
