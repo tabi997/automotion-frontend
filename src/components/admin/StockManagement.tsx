@@ -14,6 +14,7 @@ import { Plus, Edit, Trash2, Search, Filter, Eye, Car } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { StockVehicle } from "@/types/vehicle";
+import { UploadGallery } from "@/components/forms/UploadGallery";
 
 interface VehicleFormData {
   marca: string;
@@ -175,7 +176,22 @@ const StockManagement = () => {
   });
 
   const handleAddVehicle = () => {
-    addVehicleMutation.mutate(formData);
+    if (!formData.marca || !formData.model || !formData.an || !formData.pret || !formData.km) {
+      toast({
+        title: "Eroare",
+        description: "Completează toate câmpurile obligatorii",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Include images in the form data
+    const vehicleDataWithImages = {
+      ...formData,
+      images: images
+    };
+    
+    addVehicleMutation.mutate(vehicleDataWithImages);
   };
 
   const handleEditVehicle = (vehicle: StockVehicle) => {
@@ -200,7 +216,12 @@ const StockManagement = () => {
 
   const handleUpdateVehicle = () => {
     if (editingVehicle) {
-      updateVehicleMutation.mutate({ id: editingVehicle.id, data: formData });
+      // Include images in the update data
+      const updateDataWithImages = {
+        ...formData,
+        images: images
+      };
+      updateVehicleMutation.mutate({ id: editingVehicle.id, data: updateDataWithImages });
     }
   };
 
@@ -396,6 +417,19 @@ const StockManagement = () => {
                 onChange={(e) => setFormData({ ...formData, descriere: e.target.value })}
                 placeholder="Descrierea vehiculului..."
                 rows={3}
+              />
+            </div>
+            
+            {/* Image Upload */}
+            <div className="space-y-2">
+              <Label>Fotografii Vehicul</Label>
+              <UploadGallery
+                onImagesChange={(imageUrls) => {
+                  // Store image URLs for later upload
+                  setImages(imageUrls as any);
+                }}
+                minImages={1}
+                maxImages={10}
               />
             </div>
             
@@ -706,6 +740,19 @@ const StockManagement = () => {
               onChange={(e) => setFormData({ ...formData, descriere: e.target.value })}
               placeholder="Descrierea vehiculului..."
               rows={3}
+            />
+          </div>
+          
+          {/* Image Upload for Edit */}
+          <div className="space-y-2">
+            <Label>Fotografii Vehicul</Label>
+            <UploadGallery
+              onImagesChange={(imageUrls) => {
+                // Store image URLs for later update
+                setImages(imageUrls as any);
+              }}
+              minImages={1}
+              maxImages={10}
             />
           </div>
           
