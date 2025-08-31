@@ -88,6 +88,7 @@ export interface StockVehicle {
   descriere?: string;
   status: string;
   openlane_url?: string;
+  badges?: VehicleBadge[];
   created_at: string;
   updated_at: string;
 }

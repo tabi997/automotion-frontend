@@ -53,7 +53,7 @@ const transformStockToVehicle = (stockVehicle: StockVehicle): Vehicle => ({
   status: stockVehicle.status as 'active' | 'inactive' | 'sold',
   dateAdded: stockVehicle.created_at,
   updatedAt: stockVehicle.updated_at,
-  badges: [], // No badges in stock vehicle
+  badges: stockVehicle.badges || [], // Include badges from stock vehicle
   images: stockVehicle.images || [],
   mainImage: stockVehicle.images?.[0] || '',
   horsePower: 0, // Placeholder - not in stock table
@@ -64,6 +64,44 @@ const transformStockToVehicle = (stockVehicle: StockVehicle): Vehicle => ({
   financing: undefined, // No financing info in stock table
   openlane_url: stockVehicle.openlane_url || '', // Add openlane_url to transformed vehicle
 });
+
+// Helper function to translate badge text to Romanian
+function translateBadgeText(badge: VehicleBadge) {
+  const translations: Record<string, { text: string; icon: string; className: string; glow: string }> = {
+    hot: {
+      text: 'În trend',
+      icon: '🔥',
+      className: 'bg-gradient-to-r from-red-500 to-red-600 text-white border-red-400',
+      glow: '0 4px 12px rgba(239, 68, 68, 0.4), 0 2px 4px rgba(0,0,0,0.1)'
+    },
+    demand: {
+      text: 'Căutat',
+      icon: '⭐',
+      className: 'bg-gradient-to-r from-orange-500 to-orange-600 text-white border-orange-400',
+      glow: '0 4px 12px rgba(249, 115, 22, 0.4), 0 2px 4px rgba(0,0,0,0.1)'
+    },
+    reserved: {
+      text: 'Rezervat',
+      icon: '🚫',
+      className: 'bg-gradient-to-r from-blue-500 to-blue-600 text-white border-blue-400',
+      glow: '0 4px 12px rgba(59, 130, 246, 0.4), 0 2px 4px rgba(0,0,0,0.1)'
+    },
+    new: {
+      text: 'Nou',
+      icon: '🆕',
+      className: 'bg-gradient-to-r from-green-500 to-green-600 text-white border-green-400',
+      glow: '0 4px 12px rgba(34, 197, 94, 0.4), 0 2px 4px rgba(0,0,0,0.1)'
+    },
+    discount: {
+      text: 'Ofertă',
+      icon: '💰',
+      className: 'bg-gradient-to-r from-purple-500 to-purple-600 text-white border-purple-400',
+      glow: '0 4px 12px rgba(147, 51, 234, 0.4), 0 2px 4px rgba(0,0,0,0.1)'
+    }
+  };
+  
+  return translations[badge.id] || translations.hot;
+}
 
 const Stock = () => {
   const [vehicles, setVehicles] = useState<PaginatedVehicles | null>(null);
@@ -156,28 +194,24 @@ const Stock = () => {
           />
         </Link>
         
-        {/* Badges */}
+        {/* Badges on Image - Updated with Romanian text and better styling */}
         <div className="absolute top-4 left-4 flex flex-wrap gap-2">
-          {vehicle.badges.map((badge) => (
-            <Badge key={badge.id} variant={badge.type} size="sm">
-              {badge.text}
-            </Badge>
-          ))}
-          {/* OpenLane Badge */}
-          {vehicle.openlane_url && (
-            <Badge variant="info" size="sm" className="bg-blue-600 hover:bg-blue-700">
-              <a 
-                href={vehicle.openlane_url} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-white"
-                onClick={(e) => e.stopPropagation()}
+          {vehicle.badges.map((badge) => {
+            const badgeConfig = translateBadgeText(badge);
+            return (
+              <div 
+                key={badge.id} 
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold tracking-wide shadow-lg border backdrop-blur-sm bg-opacity-95 ${badgeConfig.className}`}
+                style={{
+                  textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                  boxShadow: badgeConfig.glow
+                }}
               >
-                <span>OL</span>
-                <ArrowLeft className="h-3 w-3 rotate-180" />
-              </a>
-            </Badge>
-          )}
+                <span className="text-sm">{badgeConfig.icon}</span>
+                <span className="font-bold tracking-wide">{badgeConfig.text}</span>
+              </div>
+            );
+          })}
         </div>
         
         {/* Actions */}
@@ -246,6 +280,26 @@ const Stock = () => {
           <Button variant="outline" size="sm">
             <Phone className="h-4 w-4" />
           </Button>
+          {/* OpenLane Button */}
+          {vehicle.openlane_url && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600 hover:border-blue-700"
+              asChild
+            >
+              <a 
+                href={vehicle.openlane_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center gap-1"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <span>OL</span>
+                <ArrowLeft className="h-3 w-3 rotate-180" />
+              </a>
+            </Button>
+          )}
         </div>
         
         {/* Financing Info */}

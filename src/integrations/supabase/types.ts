@@ -32,6 +32,7 @@ export type Database = {
           descriere: string | null
           status: string
           openlane_url: string | null
+          badges: Json | null
           created_at: string
           updated_at: string
         }
@@ -52,6 +53,7 @@ export type Database = {
           descriere?: string | null
           status?: string
           openlane_url?: string | null
+          badges?: Json | null
           created_at?: string
           updated_at?: string
         }
@@ -72,6 +74,7 @@ export type Database = {
           descriere?: string | null
           status?: string
           openlane_url?: string | null
+          badges?: Json | null
           created_at?: string
           updated_at?: string
         }
