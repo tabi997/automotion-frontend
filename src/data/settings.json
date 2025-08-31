@@ -30,40 +30,40 @@
   },
   "usps": [
     {
-      "id": "verified",
+      "id": "custom-order",
       "title": {
-        "ro": "Vehicule Verificate",
-        "en": "Verified Vehicles"
+        "ro": "Comandă Personalizată",
+        "en": "Custom Orders"
       },
       "description": {
-        "ro": "Fiecare mașină din stoc este verificată tehnic și are istoricul complet transparent.",
-        "en": "Every car in stock is technically verified with complete transparent history."
+        "ro": "Configurează exact mașina dorită - marcă, model, culoare, dotări. Găsim și aducem vehiculul perfect pentru tine.",
+        "en": "Configure exactly the car you want - brand, model, color, features. We find and bring the perfect vehicle for you."
       },
       "icon": "shield-check",
       "color": "success"
     },
     {
-      "id": "financing",
+      "id": "verified-import",
       "title": {
-        "ro": "Finanțare Rapidă",
-        "en": "Fast Financing"
+        "ro": "Import Verificat",
+        "en": "Verified Import"
       },
       "description": {
-        "ro": "Aprobare în 24h cu cele mai bune condiții de pe piață și rate flexibile.",
-        "en": "24h approval with the best market conditions and flexible rates."
+        "ro": "Toate vehiculele sunt importate legal, cu documente complete și verificare tehnică înainte de livrare.",
+        "en": "All vehicles are legally imported with complete documentation and technical verification before delivery."
       },
       "icon": "credit-card",
       "color": "accent"
     },
     {
-      "id": "delivery",
+      "id": "financing-delivery",
       "title": {
-        "ro": "Livrare Națională",
-        "en": "National Delivery"
+        "ro": "Finanțare + Livrare",
+        "en": "Financing + Delivery"
       },
       "description": {
-        "ro": "Livrăm gratuit în toată țara cu toate documentele pregătite.",
-        "en": "Free delivery nationwide with all documents prepared."
+        "ro": "Aprobare finanțare în 24h și livrare gratuită în toată țara cu toate actele pregătite.",
+        "en": "24h financing approval and free nationwide delivery with all documents prepared."
       },
       "icon": "truck",
       "color": "primary"
@@ -71,15 +71,15 @@
   ],
   "process": [
     {
-      "id": "search",
+      "id": "configure",
       "step": 1,
       "title": {
-        "ro": "Caută & Alege",
-        "en": "Search & Choose"
+        "ro": "Configurează Mașina",
+        "en": "Configure Your Car"
       },
       "description": {
-        "ro": "Explorează stocul nostru sau configurează mașina ideală pentru tine.",
-        "en": "Explore our stock or configure your ideal car."
+        "ro": "Specifică exact ce vrei: marcă, model, an, culoare, dotări. Sau alege din stocul nostru.",
+        "en": "Specify exactly what you want: brand, model, year, color, features. Or choose from our stock."
       },
       "icon": "search"
     },
@@ -91,8 +91,8 @@
         "en": "Smart Finance"
       },
       "description": {
-        "ro": "Calculează rata optimă și obține aprobarea în timp record.",
-        "en": "Calculate optimal rate and get record-time approval."
+        "ro": "Calculează rata optimă și obține aprobarea în timp record cu cele mai bune condiții.",
+        "en": "Calculate optimal rate and get record-time approval with the best conditions."
       },
       "icon": "calculator"
     },
@@ -100,12 +100,12 @@
       "id": "deliver",
       "step": 3,
       "title": {
-        "ro": "Primește Cheia",
-        "en": "Get the Key"
+        "ro": "Primește Mașina",
+        "en": "Get Your Car"
       },
       "description": {
-        "ro": "Ridicarea sau livrarea se face rapid cu toate actele gata.",
-        "en": "Pickup or delivery done quickly with all papers ready."
+        "ro": "Livrăm la adresa ta sau ridică din showroom cu toate actele și verificările gata.",
+        "en": "We deliver to your address or pickup from showroom with all papers and checks ready."
       },
       "icon": "key"
     }
