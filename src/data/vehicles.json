@@ -1,0 +1,203 @@
+{
+  "vehicles": [
+    {
+      "id": "1",
+      "brand": "BMW",
+      "model": "X5",
+      "year": 2023,
+      "price": 85000,
+      "originalPrice": 95000,
+      "mileage": 15000,
+      "fuelType": "hibrid",
+      "transmission": "automata",
+      "bodyType": "suv",
+      "engineCapacity": 3000,
+      "horsePower": 394,
+      "color": "Negru Safir",
+      "images": [
+        "/demo/bmw-x5-1.jpg",
+        "/demo/bmw-x5-2.jpg",
+        "/demo/bmw-x5-3.jpg"
+      ],
+      "mainImage": "/demo/bmw-x5-1.jpg",
+      "badges": [
+        { "id": "1", "text": "Primul proprietar", "type": "success", "icon": "user" },
+        { "id": "2", "text": "Istoricul serviciului", "type": "info", "icon": "wrench" }
+      ],
+      "condition": "second-hand",
+      "features": ["Piele", "Navigație", "Parkare automată", "Sistem audio premium"],
+      "description": "BMW X5 în stare impecabilă, primul proprietar, service la zi. Echipări premium incluse.",
+      "location": "București",
+      "dateAdded": "2024-08-25",
+      "isPromoted": true,
+      "financing": {
+        "available": true,
+        "monthlyPayment": 1250,
+        "downPayment": 17000
+      }
+    },
+    {
+      "id": "2",
+      "brand": "Mercedes-Benz",
+      "model": "AMG GT",
+      "year": 2024,
+      "price": 165000,
+      "mileage": 2500,
+      "fuelType": "benzina",
+      "transmission": "automata",
+      "bodyType": "coupe",
+      "engineCapacity": 4000,
+      "horsePower": 630,
+      "color": "Roșu Designo",
+      "images": [
+        "/demo/mercedes-amg-1.jpg",
+        "/demo/mercedes-amg-2.jpg"
+      ],
+      "mainImage": "/demo/mercedes-amg-1.jpg",
+      "badges": [
+        { "id": "1", "text": "Nou", "type": "success", "icon": "star" },
+        { "id": "2", "text": "Urgent", "type": "urgent", "icon": "zap" }
+      ],
+      "condition": "nou",
+      "features": ["Performance Pack", "Carbon fiber", "Sistem de evacuare sport"],
+      "description": "Mercedes-AMG GT 63 S nou, configurație specială pentru performanță maximă.",
+      "location": "Cluj-Napoca",
+      "dateAdded": "2024-08-30",
+      "isUrgent": true,
+      "financing": {
+        "available": true,
+        "monthlyPayment": 2850,
+        "downPayment": 35000
+      }
+    },
+    {
+      "id": "3",
+      "brand": "Audi",
+      "model": "A4",
+      "year": 2022,
+      "price": 42000,
+      "mileage": 28000,
+      "fuelType": "motorina",
+      "transmission": "automata",
+      "bodyType": "berlina",
+      "engineCapacity": 2000,
+      "horsePower": 190,
+      "color": "Alb Ibis",
+      "images": [
+        "/demo/audi-a4-1.jpg",
+        "/demo/audi-a4-2.jpg"
+      ],
+      "mainImage": "/demo/audi-a4-1.jpg",
+      "badges": [
+        { "id": "1", "text": "Fără accident", "type": "success", "icon": "shield" },
+        { "id": "2", "text": "Service la zi", "type": "info", "icon": "check" }
+      ],
+      "condition": "second-hand",
+      "features": ["MMI Navigation", "Quattro", "LED Matrix"],
+      "description": "Audi A4 în stare excelentă, fără accidente, service complet la zi.",
+      "location": "Timișoara",
+      "dateAdded": "2024-08-28",
+      "financing": {
+        "available": true,
+        "monthlyPayment": 750,
+        "downPayment": 8500
+      }
+    },
+    {
+      "id": "4",
+      "brand": "Porsche",
+      "model": "911",
+      "year": 2023,
+      "price": 125000,
+      "mileage": 8500,
+      "fuelType": "benzina",
+      "transmission": "automata",
+      "bodyType": "coupe",
+      "engineCapacity": 3000,
+      "horsePower": 450,
+      "color": "Albastru Gentian",
+      "images": [
+        "/demo/porsche-911-1.jpg"
+      ],
+      "mainImage": "/demo/porsche-911-1.jpg",
+      "badges": [
+        { "id": "1", "text": "Sport Chrono", "type": "info", "icon": "clock" },
+        { "id": "2", "text": "Primul proprietar", "type": "success", "icon": "user" }
+      ],
+      "condition": "second-hand",
+      "features": ["Sport Chrono", "PCCB", "Porsche Communication Management"],
+      "description": "Porsche 911 Carrera S cu pachet Sport Chrono, primul proprietar.",
+      "location": "București",
+      "dateAdded": "2024-08-26",
+      "financing": {
+        "available": true,
+        "monthlyPayment": 2200,
+        "downPayment": 25000
+      }
+    },
+    {
+      "id": "5",
+      "brand": "Tesla",
+      "model": "Model S",
+      "year": 2023,
+      "price": 95000,
+      "mileage": 12000,
+      "fuelType": "electric",
+      "transmission": "automata",
+      "bodyType": "berlina",
+      "engineCapacity": 0,
+      "horsePower": 670,
+      "color": "Negru Solid",
+      "images": [
+        "/demo/tesla-model-s-1.jpg"
+      ],
+      "mainImage": "/demo/tesla-model-s-1.jpg",
+      "badges": [
+        { "id": "1", "text": "Electric", "type": "success", "icon": "zap" },
+        { "id": "2", "text": "Autopilot", "type": "info", "icon": "cpu" }
+      ],
+      "condition": "second-hand",
+      "features": ["Autopilot", "Premium Sound", "Supra-încărcare gratuită"],
+      "description": "Tesla Model S Plaid cu autopilot complet, supra-încărcare inclusă.",
+      "location": "București",
+      "dateAdded": "2024-08-29",
+      "financing": {
+        "available": true,
+        "monthlyPayment": 1650,
+        "downPayment": 19000
+      }
+    },
+    {
+      "id": "6",
+      "brand": "Range Rover",
+      "model": "Evoque",
+      "year": 2022,
+      "price": 55000,
+      "mileage": 22000,
+      "fuelType": "hibrid",
+      "transmission": "automata",
+      "bodyType": "suv",
+      "engineCapacity": 2000,
+      "horsePower": 249,
+      "color": "Gri Corris",
+      "images": [
+        "/demo/range-rover-evoque-1.jpg"
+      ],
+      "mainImage": "/demo/range-rover-evoque-1.jpg",
+      "badges": [
+        { "id": "1", "text": "Hibrid", "type": "success", "icon": "leaf" },
+        { "id": "2", "text": "Premium", "type": "info", "icon": "crown" }
+      ],
+      "condition": "second-hand",
+      "features": ["Terrain Response", "Meridian Audio", "Adaptive Cruise Control"],
+      "description": "Range Rover Evoque hibrid cu toate opțiunile premium disponibile.",
+      "location": "Constanța",
+      "dateAdded": "2024-08-27",
+      "financing": {
+        "available": true,
+        "monthlyPayment": 950,
+        "downPayment": 11000
+      }
+    }
+  ]
+}
