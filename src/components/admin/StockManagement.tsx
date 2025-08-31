@@ -13,57 +13,59 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Edit, Trash2, Search, Filter, Eye, Car } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Vehicle } from "@/types/vehicle";
+import { StockVehicle } from "@/types/vehicle";
 
 interface VehicleFormData {
-  brand: string;
+  marca: string;
   model: string;
-  year: number;
-  price: number;
-  mileage: number;
-  fuelType: string;
-  transmission: string;
-  bodyType: string;
-  engineCapacity: number;
-  horsePower: number;
-  color: string;
-  description: string;
-  location: string;
-  condition: string;
+  an: number;
+  pret: number;
+  km: number;
+  combustibil: string;
+  transmisie: string;
+  caroserie: string;
+  culoare: string;
+  vin: string;
+  negociabil: boolean;
+  descriere: string;
+  status: string;
 }
 
 const StockManagement = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
+  const [editingVehicle, setEditingVehicle] = useState<StockVehicle | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterType, setFilterType] = useState("all");
+  const [filterType, setFilterType] = useState<string>("all");
   const queryClient = useQueryClient();
 
   // Form state
   const [formData, setFormData] = useState<VehicleFormData>({
-    brand: "",
+    marca: "",
     model: "",
-    year: new Date().getFullYear(),
-    price: 0,
-    mileage: 0,
-    fuelType: "benzina",
-    transmission: "automata",
-    bodyType: "berlina",
-    engineCapacity: 0,
-    horsePower: 0,
-    color: "",
-    description: "",
-    location: "",
-    condition: "second-hand"
+    an: new Date().getFullYear(),
+    pret: 0,
+    km: 0,
+    combustibil: "benzina",
+    transmisie: "automata",
+    caroserie: "berlina",
+    culoare: "",
+    vin: "",
+    negociabil: false,
+    descriere: "",
+    status: "active"
   });
+
+  // Add image upload functionality
+  const [images, setImages] = useState<File[]>([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
 
   // Fetch vehicles
   const { data: vehicles, isLoading } = useQuery({
     queryKey: ["admin-vehicles"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('vehicles')
+        .from('stock')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -76,17 +78,10 @@ const StockManagement = () => {
   const addVehicleMutation = useMutation({
     mutationFn: async (data: VehicleFormData) => {
       const { error } = await supabase
-        .from('vehicles')
+        .from('stock')
         .insert([{
           ...data,
-          images: [],
-          mainImage: "",
-          badges: [],
-          features: [],
-          dateAdded: new Date().toISOString(),
-          isUrgent: false,
-          isPromoted: false,
-          financing: { available: true }
+          images: []
         }]);
 
       if (error) throw error;
@@ -96,20 +91,19 @@ const StockManagement = () => {
       queryClient.invalidateQueries({ queryKey: ["admin-stats"] });
       setIsAddDialogOpen(false);
       setFormData({
-        brand: "",
+        marca: "",
         model: "",
-        year: new Date().getFullYear(),
-        price: 0,
-        mileage: 0,
-        fuelType: "benzina",
-        transmission: "automata",
-        bodyType: "berlina",
-        engineCapacity: 0,
-        horsePower: 0,
-        color: "",
-        description: "",
-        location: "",
-        condition: "second-hand"
+        an: new Date().getFullYear(),
+        pret: 0,
+        km: 0,
+        combustibil: "benzina",
+        transmisie: "automata",
+        caroserie: "berlina",
+        culoare: "",
+        vin: "",
+        negociabil: false,
+        descriere: "",
+        status: "active"
       });
       toast({
         title: "Succes",
@@ -129,7 +123,7 @@ const StockManagement = () => {
   const updateVehicleMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<VehicleFormData> }) => {
       const { error } = await supabase
-        .from('vehicles')
+        .from('stock')
         .update(data)
         .eq('id', id);
 
@@ -157,7 +151,7 @@ const StockManagement = () => {
   const deleteVehicleMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from('vehicles')
+        .from('stock')
         .delete()
         .eq('id', id);
 
@@ -184,23 +178,22 @@ const StockManagement = () => {
     addVehicleMutation.mutate(formData);
   };
 
-  const handleEditVehicle = (vehicle: Vehicle) => {
+  const handleEditVehicle = (vehicle: StockVehicle) => {
     setEditingVehicle(vehicle);
     setFormData({
-      brand: vehicle.brand,
+      marca: vehicle.marca,
       model: vehicle.model,
-      year: vehicle.year,
-      price: vehicle.price,
-      mileage: vehicle.mileage,
-      fuelType: vehicle.fuelType,
-      transmission: vehicle.transmission,
-      bodyType: vehicle.bodyType,
-      engineCapacity: vehicle.engineCapacity,
-      horsePower: vehicle.horsePower,
-      color: vehicle.color,
-      description: vehicle.description,
-      location: vehicle.location,
-      condition: vehicle.condition
+      an: vehicle.an,
+      pret: vehicle.pret,
+      km: vehicle.km,
+      combustibil: vehicle.combustibil,
+      transmisie: vehicle.transmisie,
+      caroserie: vehicle.caroserie,
+      culoare: vehicle.culoare || "",
+      vin: vehicle.vin || "",
+      negociabil: vehicle.negociabil || false,
+      descriere: vehicle.descriere || "",
+      status: vehicle.status
     });
     setIsEditDialogOpen(true);
   };
@@ -216,9 +209,9 @@ const StockManagement = () => {
   };
 
   const filteredVehicles = vehicles?.filter(vehicle => {
-    const matchesSearch = vehicle.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = vehicle.marca.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          vehicle.model.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterType === "all" || vehicle.condition === filterType;
+    const matchesFilter = filterType === "all" || vehicle.status === filterType;
     return matchesSearch && matchesFilter;
   }) || [];
 
@@ -253,11 +246,11 @@ const StockManagement = () => {
             
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="brand">Marcă *</Label>
+                <Label htmlFor="marca">Marcă *</Label>
                 <Input
-                  id="brand"
-                  value={formData.brand}
-                  onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                  id="marca"
+                  value={formData.marca}
+                  onChange={(e) => setFormData({ ...formData, marca: e.target.value })}
                   placeholder="BMW"
                 />
               </div>
@@ -273,42 +266,42 @@ const StockManagement = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="year">An *</Label>
+                <Label htmlFor="an">An *</Label>
                 <Input
-                  id="year"
+                  id="an"
                   type="number"
-                  value={formData.year}
-                  onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
+                  value={formData.an}
+                  onChange={(e) => setFormData({ ...formData, an: parseInt(e.target.value) })}
                   min="1900"
                   max={new Date().getFullYear() + 1}
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="price">Preț (€) *</Label>
+                <Label htmlFor="pret">Preț (€) *</Label>
                 <Input
-                  id="price"
+                  id="pret"
                   type="number"
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: parseInt(e.target.value) })}
+                  value={formData.pret}
+                  onChange={(e) => setFormData({ ...formData, pret: parseInt(e.target.value) })}
                   min="0"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="mileage">Kilometri *</Label>
+                <Label htmlFor="km">Kilometri *</Label>
                 <Input
-                  id="mileage"
+                  id="km"
                   type="number"
-                  value={formData.mileage}
-                  onChange={(e) => setFormData({ ...formData, mileage: parseInt(e.target.value) })}
+                  value={formData.km}
+                  onChange={(e) => setFormData({ ...formData, km: parseInt(e.target.value) })}
                   min="0"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="fuelType">Combustibil *</Label>
-                <Select value={formData.fuelType} onValueChange={(value) => setFormData({ ...formData, fuelType: value })}>
+                <Label htmlFor="combustibil">Combustibil *</Label>
+                <Select value={formData.combustibil} onValueChange={(value) => setFormData({ ...formData, combustibil: value })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -321,8 +314,8 @@ const StockManagement = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="transmission">Transmisie *</Label>
-                <Select value={formData.transmission} onValueChange={(value) => setFormData({ ...formData, transmission: value })}>
+                <Label htmlFor="transmisie">Transmisie *</Label>
+                <Select value={formData.transmisie} onValueChange={(value) => setFormData({ ...formData, transmisie: value })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -335,8 +328,8 @@ const StockManagement = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="bodyType">Tip Caroserie *</Label>
-                <Select value={formData.bodyType} onValueChange={(value) => setFormData({ ...formData, bodyType: value })}>
+                <Label htmlFor="caroserie">Tip Caroserie *</Label>
+                <Select value={formData.caroserie} onValueChange={(value) => setFormData({ ...formData, caroserie: value })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -349,68 +342,58 @@ const StockManagement = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="engineCapacity">Capacitate Motor (cc)</Label>
+                <Label htmlFor="culoare">Culoare</Label>
                 <Input
-                  id="engineCapacity"
-                  type="number"
-                  value={formData.engineCapacity}
-                  onChange={(e) => setFormData({ ...formData, engineCapacity: parseInt(e.target.value) })}
-                  min="0"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="horsePower">Cai Putere</Label>
-                <Input
-                  id="horsePower"
-                  type="number"
-                  value={formData.horsePower}
-                  onChange={(e) => setFormData({ ...formData, horsePower: parseInt(e.target.value) })}
-                  min="0"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="color">Culoare</Label>
-                <Input
-                  id="color"
-                  value={formData.color}
-                  onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                  id="culoare"
+                  value={formData.culoare}
+                  onChange={(e) => setFormData({ ...formData, culoare: e.target.value })}
                   placeholder="Negru Safir"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="condition">Stare *</Label>
-                <Select value={formData.condition} onValueChange={(value) => setFormData({ ...formData, condition: value })}>
+                <Label htmlFor="vin">Vin</Label>
+                <Input
+                  id="vin"
+                  value={formData.vin}
+                  onChange={(e) => setFormData({ ...formData, vin: e.target.value })}
+                  placeholder="WBA3A9C50EP000000"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="negociabil">Negociabil</Label>
+                <Select value={formData.negociabil ? "true" : "false"} onValueChange={(value) => setFormData({ ...formData, negociabil: value === "true" })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {conditions.map(condition => (
-                      <SelectItem key={condition} value={condition}>{condition}</SelectItem>
-                    ))}
+                    <SelectItem value="true">Da</SelectItem>
+                    <SelectItem value="false">Nu</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="location">Locație</Label>
-                <Input
-                  id="location"
-                  value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  placeholder="București"
-                />
+                <Label htmlFor="status">Status *</Label>
+                <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value as 'active' | 'inactive' })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Activ</SelectItem>
+                    <SelectItem value="inactive">Inactiv</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="description">Descriere</Label>
+              <Label htmlFor="descriere">Descriere</Label>
               <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                id="descriere"
+                value={formData.descriere}
+                onChange={(e) => setFormData({ ...formData, descriere: e.target.value })}
                 placeholder="Descrierea vehiculului..."
                 rows={3}
               />
@@ -454,9 +437,9 @@ const StockManagement = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Toate</SelectItem>
-                <SelectItem value="nou">Nou</SelectItem>
-                <SelectItem value="second-hand">Second Hand</SelectItem>
-                <SelectItem value="demo">Demo</SelectItem>
+                <SelectItem value="active">Activ</SelectItem>
+                <SelectItem value="inactive">Inactiv</SelectItem>
+                <SelectItem value="sold">Vândute</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -496,25 +479,25 @@ const StockManagement = () => {
                             <Car className="h-6 w-6 text-gray-500" />
                           </div>
                           <div>
-                            <div className="font-medium">{vehicle.brand} {vehicle.model}</div>
+                            <div className="font-medium">{vehicle.marca} {vehicle.model}</div>
                             <div className="text-sm text-gray-500">
-                              {vehicle.year} • {vehicle.mileage.toLocaleString()} km
+                              {vehicle.an} • {vehicle.km.toLocaleString()} km
                             </div>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="font-medium">€{vehicle.price.toLocaleString()}</div>
+                        <div className="font-medium">€{vehicle.pret.toLocaleString()}</div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={vehicle.condition === 'nou' ? 'default' : 'secondary'}>
-                          {vehicle.condition === 'nou' ? 'Nou' : 
-                           vehicle.condition === 'second-hand' ? 'Second Hand' : 'Demo'}
+                        <Badge variant={vehicle.status === 'active' ? 'default' : 'secondary'}>
+                          {vehicle.status === 'active' ? 'Activ' : 
+                           vehicle.status === 'inactive' ? 'Inactiv' : 'Vândut'}
                         </Badge>
                       </TableCell>
-                      <TableCell>{vehicle.location}</TableCell>
+                      <TableCell>{/* Locație is not in StockVehicle, so it's empty */}</TableCell>
                       <TableCell>
-                        {new Date(vehicle.dateAdded).toLocaleDateString('ro-RO')}
+                        {new Date(vehicle.created_at).toLocaleDateString('ro-RO')}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
@@ -573,11 +556,11 @@ const StockManagement = () => {
           
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-brand">Marcă *</Label>
+              <Label htmlFor="edit-marca">Marcă *</Label>
               <Input
-                id="edit-brand"
-                value={formData.brand}
-                onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                id="edit-marca"
+                value={formData.marca}
+                onChange={(e) => setFormData({ ...formData, marca: e.target.value })}
                 placeholder="BMW"
               />
             </div>
@@ -593,42 +576,42 @@ const StockManagement = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="edit-year">An *</Label>
+              <Label htmlFor="edit-an">An *</Label>
               <Input
-                id="edit-year"
+                id="edit-an"
                 type="number"
-                value={formData.year}
-                onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
+                value={formData.an}
+                onChange={(e) => setFormData({ ...formData, an: parseInt(e.target.value) })}
                 min="1900"
                 max={new Date().getFullYear() + 1}
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="edit-price">Preț (€) *</Label>
+              <Label htmlFor="edit-pret">Preț (€) *</Label>
               <Input
-                id="edit-price"
+                id="edit-pret"
                 type="number"
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: parseInt(e.target.value) })}
+                value={formData.pret}
+                onChange={(e) => setFormData({ ...formData, pret: parseInt(e.target.value) })}
                 min="0"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="edit-mileage">Kilometri *</Label>
+              <Label htmlFor="edit-km">Kilometri *</Label>
               <Input
-                id="edit-mileage"
+                id="edit-km"
                 type="number"
-                value={formData.mileage}
-                onChange={(e) => setFormData({ ...formData, mileage: parseInt(e.target.value) })}
+                value={formData.km}
+                onChange={(e) => setFormData({ ...formData, km: parseInt(e.target.value) })}
                 min="0"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="edit-fuelType">Combustibil *</Label>
-              <Select value={formData.fuelType} onValueChange={(value) => setFormData({ ...formData, fuelType: value })}>
+              <Label htmlFor="edit-combustibil">Combustibil *</Label>
+              <Select value={formData.combustibil} onValueChange={(value) => setFormData({ ...formData, combustibil: value })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -641,8 +624,8 @@ const StockManagement = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="edit-transmission">Transmisie *</Label>
-              <Select value={formData.transmission} onValueChange={(value) => setFormData({ ...formData, transmission: value })}>
+              <Label htmlFor="edit-transmisie">Transmisie *</Label>
+              <Select value={formData.transmisie} onValueChange={(value) => setFormData({ ...formData, transmisie: value })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -655,8 +638,8 @@ const StockManagement = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="edit-bodyType">Tip Caroserie *</Label>
-              <Select value={formData.bodyType} onValueChange={(value) => setFormData({ ...formData, bodyType: value })}>
+              <Label htmlFor="edit-caroserie">Tip Caroserie *</Label>
+              <Select value={formData.caroserie} onValueChange={(value) => setFormData({ ...formData, caroserie: value })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -669,68 +652,58 @@ const StockManagement = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="edit-engineCapacity">Capacitate Motor (cc)</Label>
+              <Label htmlFor="edit-culoare">Culoare</Label>
               <Input
-                id="edit-engineCapacity"
-                type="number"
-                value={formData.engineCapacity}
-                onChange={(e) => setFormData({ ...formData, engineCapacity: parseInt(e.target.value) })}
-                min="0"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="edit-horsePower">Cai Putere</Label>
-              <Input
-                id="edit-horsePower"
-                type="number"
-                value={formData.horsePower}
-                onChange={(e) => setFormData({ ...formData, horsePower: parseInt(e.target.value) })}
-                min="0"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="edit-color">Culoare</Label>
-              <Input
-                id="edit-color"
-                value={formData.color}
-                onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                id="edit-culoare"
+                value={formData.culoare}
+                onChange={(e) => setFormData({ ...formData, culoare: e.target.value })}
                 placeholder="Negru Safir"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="edit-condition">Stare *</Label>
-              <Select value={formData.condition} onValueChange={(value) => setFormData({ ...formData, condition: value })}>
+              <Label htmlFor="edit-vin">Vin</Label>
+              <Input
+                id="edit-vin"
+                value={formData.vin}
+                onChange={(e) => setFormData({ ...formData, vin: e.target.value })}
+                placeholder="WBA3A9C50EP000000"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="edit-negociabil">Negociabil</Label>
+              <Select value={formData.negociabil ? "true" : "false"} onValueChange={(value) => setFormData({ ...formData, negociabil: value === "true" })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {conditions.map(condition => (
-                    <SelectItem key={condition} value={condition}>{condition}</SelectItem>
-                  ))}
+                  <SelectItem value="true">Da</SelectItem>
+                  <SelectItem value="false">Nu</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="edit-location">Locație</Label>
-              <Input
-                id="edit-location"
-                value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                placeholder="București"
-              />
+              <Label htmlFor="edit-status">Status *</Label>
+              <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value as 'active' | 'inactive' })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Activ</SelectItem>
+                  <SelectItem value="inactive">Inactiv</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="edit-description">Descriere</Label>
+            <Label htmlFor="edit-descriere">Descriere</Label>
             <Textarea
-              id="edit-description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              id="edit-descriere"
+              value={formData.descriere}
+              onChange={(e) => setFormData({ ...formData, descriere: e.target.value })}
               placeholder="Descrierea vehiculului..."
               rows={3}
             />
