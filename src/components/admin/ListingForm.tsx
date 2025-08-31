@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { useToast } from "@/hooks/use-toast";
 import { createListing, updateListing } from "@/lib/admin";
 import type { Database } from "@/integrations/supabase/types";
+import { carBrands } from "@/data/carBrands";
 
 type StockRow = Database["public"]["Tables"]["stock"]["Row"];
 type StockInsert = Database["public"]["Tables"]["stock"]["Insert"];
@@ -47,6 +48,7 @@ const caroserieOptions = ["Sedan", "Hatchback", "Break", "SUV", "Coupe", "Cabrio
 
 export default function ListingForm({ open, onOpenChange, listing, onSuccess }: ListingFormProps) {
   const [loading, setLoading] = useState(false);
+  const [selectedBrand, setSelectedBrand] = useState(listing?.marca || "");
   const { toast } = useToast();
   const isEditing = !!listing;
 
@@ -69,6 +71,19 @@ export default function ListingForm({ open, onOpenChange, listing, onSuccess }: 
     },
   });
 
+  // Get models for selected brand
+  const brandModels = carBrands.find(b => b.brand === selectedBrand)?.models ?? [];
+
+  // Update selectedBrand when form opens with existing data
+  React.useEffect(() => {
+    if (listing?.marca) {
+      setSelectedBrand(listing.marca);
+    } else if (!listing) {
+      // Reset when creating new listing
+      setSelectedBrand("");
+    }
+  }, [listing?.marca, listing]);
+
   const onSubmit = async (data: ListingFormData) => {
     setLoading(true);
     try {
@@ -88,6 +103,7 @@ export default function ListingForm({ open, onOpenChange, listing, onSuccess }: 
       onSuccess();
       onOpenChange(false);
       form.reset();
+      setSelectedBrand("");
     } catch (error) {
       toast({
         title: "Eroare",
@@ -118,11 +134,24 @@ export default function ListingForm({ open, onOpenChange, listing, onSuccess }: 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="marca">Marca *</Label>
-              <Input
-                id="marca"
-                {...form.register("marca")}
-                placeholder="ex: BMW"
-              />
+              <Select 
+                value={form.watch("marca")} 
+                onValueChange={(value) => {
+                  form.setValue("marca", value);
+                  form.setValue("model", ""); // Reset model when brand changes
+                  setSelectedBrand(value);
+                }}
+                name="marca"
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selectează marca" />
+                </SelectTrigger>
+                <SelectContent>
+                  {carBrands.map(({ brand }) => (
+                    <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               {form.formState.errors.marca && (
                 <p className="text-sm text-red-600">{form.formState.errors.marca.message}</p>
               )}
@@ -130,11 +159,21 @@ export default function ListingForm({ open, onOpenChange, listing, onSuccess }: 
 
             <div className="space-y-2">
               <Label htmlFor="model">Model *</Label>
-              <Input
-                id="model"
-                {...form.register("model")}
-                placeholder="ex: X5"
-              />
+              <Select 
+                value={form.watch("model")} 
+                onValueChange={(value) => form.setValue("model", value)}
+                disabled={!selectedBrand}
+                name="model"
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={selectedBrand ? "Selectează modelul" : "Selectează mai întâi marca"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {brandModels.map((model) => (
+                    <SelectItem key={model} value={model}>{model}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               {form.formState.errors.model && (
                 <p className="text-sm text-red-600">{form.formState.errors.model.message}</p>
               )}

@@ -6,6 +6,7 @@ interface ActionResponse {
   success: boolean;
   error?: string;
   data?: unknown;
+  message?: string;
 }
 
 /**
@@ -334,5 +335,163 @@ export async function getAdminStats(): Promise<ActionResponse> {
   } catch (error) {
     console.error('Error fetching stats:', error);
     return { success: false, error: 'Eroare la încărcarea statisticilor.' };
+  }
+}
+
+/**
+ * Delete old leads based on age criteria
+ */
+export async function deleteOldLeads(options: {
+  table: string;
+  daysOld: number;
+  onlyProcessed?: boolean;
+}): Promise<ActionResponse> {
+  try {
+    const { table, daysOld, onlyProcessed = false } = options;
+    
+    // Calculate the cutoff date
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - daysOld);
+    
+    // Build the query
+    let query = supabase
+      .from(table as any)
+      .delete()
+      .lt('created_at', cutoffDate.toISOString());
+    
+    // If only processed leads should be deleted
+    if (onlyProcessed) {
+      query = query.eq('status', 'processed');
+    }
+    
+    const { error, count } = await query;
+
+    if (error) {
+      console.error('Error deleting old leads:', error);
+      return { success: false, error: 'Eroare la ștergerea lead-urilor vechi.' };
+    }
+
+    return { 
+      success: true, 
+      data: { deletedCount: count || 0 },
+      message: `${count || 0} lead-uri vechi au fost șterse cu succes.`
+    };
+  } catch (error) {
+    console.error('Error deleting old leads:', error);
+    return { success: false, error: 'Eroare la ștergerea lead-urilor vechi.' };
+  }
+}
+
+/**
+ * Delete old leads from all tables
+ */
+export async function deleteOldLeadsFromAllTables(options: {
+  daysOld: number;
+  onlyProcessed?: boolean;
+}): Promise<ActionResponse> {
+  try {
+    const { daysOld, onlyProcessed = false } = options;
+    
+    const tables = ['lead_sell', 'lead_finance', 'contact_messages'];
+    const results = await Promise.all(
+      tables.map(table => deleteOldLeads({ table, daysOld, onlyProcessed }))
+    );
+    
+    const totalDeleted = results.reduce((sum, result) => {
+      if (result.success && result.data?.deletedCount) {
+        return sum + (result.data.deletedCount as number);
+      }
+      return sum;
+    }, 0);
+    
+    const hasErrors = results.some(result => !result.success);
+    
+    if (hasErrors) {
+      return { 
+        success: false, 
+        error: 'Unele lead-uri nu au putut fi șterse. Verificați log-urile pentru detalii.',
+        data: { totalDeleted, results }
+      };
+    }
+    
+    return { 
+      success: true, 
+      data: { totalDeleted },
+      message: `${totalDeleted} lead-uri vechi au fost șterse cu succes din toate tabelele.`
+    };
+  } catch (error) {
+    console.error('Error deleting old leads from all tables:', error);
+    return { success: false, error: 'Eroare la ștergerea lead-urilor vechi din toate tabelele.' };
+  }
+}
+
+/**
+ * Get lead statistics for cleanup
+ */
+export async function getLeadCleanupStats(): Promise<ActionResponse> {
+  try {
+    const [sellLeads, financeLeads, contactMessages] = await Promise.all([
+      supabase
+        .from('lead_sell')
+        .select('created_at, status')
+        .order('created_at', { ascending: true }),
+      supabase
+        .from('lead_finance')
+        .select('created_at, status')
+        .order('created_at', { ascending: true }),
+      supabase
+        .from('contact_messages')
+        .select('created_at, status')
+        .order('created_at', { ascending: true })
+    ]);
+
+    if (sellLeads.error || financeLeads.error || contactMessages.error) {
+      console.error('Error fetching cleanup stats:', { 
+        sellLeads: sellLeads.error, 
+        financeLeads: financeLeads.error, 
+        contactMessages: contactMessages.error 
+      });
+      return { success: false, error: 'Eroare la încărcarea statisticilor de cleanup.' };
+    }
+
+    const now = new Date();
+    const getOldLeadsCount = (leads: any[], daysOld: number, onlyProcessed: boolean = false) => {
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - daysOld);
+      
+      return leads.filter(lead => {
+        const isOld = new Date(lead.created_at) < cutoffDate;
+        return onlyProcessed ? (isOld && lead.status === 'processed') : isOld;
+      }).length;
+    };
+
+    const stats = {
+      sellLeads: {
+        total: sellLeads.data?.length || 0,
+        old30Days: getOldLeadsCount(sellLeads.data || [], 30),
+        old90Days: getOldLeadsCount(sellLeads.data || [], 90),
+        old30DaysProcessed: getOldLeadsCount(sellLeads.data || [], 30, true),
+        old90DaysProcessed: getOldLeadsCount(sellLeads.data || [], 90, true),
+      },
+      financeLeads: {
+        total: financeLeads.data?.length || 0,
+        old30Days: getOldLeadsCount(financeLeads.data || [], 30),
+        old90Days: getOldLeadsCount(financeLeads.data || [], 90),
+        old30DaysProcessed: getOldLeadsCount(financeLeads.data || [], 30, true),
+        old90DaysProcessed: getOldLeadsCount(financeLeads.data || [], 90, true),
+      },
+      contactMessages: {
+        total: contactMessages.data?.length || 0,
+        old30Days: getOldLeadsCount(contactMessages.data || [], 30),
+        old90Days: getOldLeadsCount(contactMessages.data || [], 90),
+        old30DaysProcessed: getOldLeadsCount(contactMessages.data || [], 30, true),
+        old90DaysProcessed: getOldLeadsCount(contactMessages.data || [], 90, true),
+      }
+    };
+
+    return { success: true, data: stats };
+  } catch (error) {
+    console.error('Error fetching cleanup stats:', error);
+    return { success: false, error: 'Eroare la încărcarea statisticilor de cleanup.' };
   }
 }

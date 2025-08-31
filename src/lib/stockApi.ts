@@ -2,12 +2,65 @@ import { supabase } from '@/integrations/supabase/client';
 import { StockVehicle } from '@/types/vehicle';
 
 export class StockAPI {
-  static async getVehicles(): Promise<StockVehicle[]> {
-    const { data, error } = await supabase
+  static async getVehicles(filters: {
+    brand?: string;
+    model?: string;
+    bodyType?: string;
+    fuelType?: string;
+    priceMin?: number;
+    priceMax?: number;
+    yearMin?: number;
+    yearMax?: number;
+    mileageMin?: number;
+    mileageMax?: number;
+  } = {}): Promise<StockVehicle[]> {
+    let query = supabase
       .from('stock')
       .select('*')
-      .eq('status', 'active')
-      .order('created_at', { ascending: false });
+      .eq('status', 'active');
+
+    // Apply filters
+    if (filters.brand) {
+      query = query.eq('marca', filters.brand);
+    }
+    
+    if (filters.model) {
+      query = query.eq('model', filters.model);
+    }
+    
+    if (filters.bodyType) {
+      query = query.eq('caroserie', filters.bodyType);
+    }
+    
+    if (filters.fuelType) {
+      query = query.eq('combustibil', filters.fuelType);
+    }
+    
+    if (filters.priceMin) {
+      query = query.gte('pret', filters.priceMin);
+    }
+    
+    if (filters.priceMax) {
+      query = query.lte('pret', filters.priceMax);
+    }
+    
+    if (filters.yearMin) {
+      query = query.gte('an', filters.yearMin);
+    }
+    
+    if (filters.yearMax) {
+      query = query.lte('an', filters.yearMax);
+    }
+    
+    if (filters.mileageMin) {
+      query = query.gte('km', filters.mileageMin);
+    }
+    
+    if (filters.mileageMax) {
+      query = query.lte('km', filters.mileageMax);
+    }
+
+    const { data, error } = await query.order('created_at', { ascending: false });
 
     if (error) throw error;
     return data || [];

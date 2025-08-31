@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { StockVehicle } from "@/types/vehicle";
 import { AdminUploadGallery } from "@/components/admin/AdminUploadGallery";
 import { env } from "@/lib/env";
+import { carBrands } from "../../data/carBrands";
 
 interface VehicleFormData {
   marca: string;
@@ -290,24 +291,43 @@ const StockManagement = () => {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="marca">Marcă *</Label>
-                <Input
-                  id="marca"
-                  name="marca"
+                {/* Debug info */}
+                <div className="text-xs text-gray-500 mb-2">
+                  Debug: carBrands length = {carBrands?.length || 'undefined'}
+                </div>
+                <Select
                   value={formData.marca}
-                  onChange={(e) => setFormData({ ...formData, marca: e.target.value })}
-                  placeholder="BMW"
-                />
+                  onValueChange={(value) => {
+                    setFormData({ ...formData, marca: value, model: "" }); // Reset model when brand changes
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selectează marca" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {carBrands?.map(({ brand }) => (
+                      <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+                    )) || []}
+                  </SelectContent>
+                </Select>
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="model">Model *</Label>
-                <Input
-                  id="model"
-                  name="model"
+                <Select
                   value={formData.model}
-                  onChange={(e) => setFormData({ ...formData, model: e.target.value })}
-                  placeholder="X5"
-                />
+                  onValueChange={(value) => setFormData({ ...formData, model: value })}
+                  disabled={!formData.marca}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={formData.marca ? "Selectează modelul" : "Selectează mai întâi marca"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {carBrands.find(b => b.brand === formData.marca)?.models.map((model) => (
+                      <SelectItem key={model} value={model}>{model}</SelectItem>
+                    )) || []}
+                  </SelectContent>
+                </Select>
               </div>
               
               <div className="space-y-2">
@@ -663,24 +683,39 @@ const StockManagement = () => {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="edit-marca">Marcă *</Label>
-              <Input
-                id="edit-marca"
-                name="edit-marca"
+              <Select
                 value={formData.marca}
-                onChange={(e) => setFormData({ ...formData, marca: e.target.value })}
-                placeholder="BMW"
-              />
+                onValueChange={(value) => {
+                  setFormData({ ...formData, marca: value, model: "" }); // Reset model when brand changes
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selectează marca" />
+                </SelectTrigger>
+                <SelectContent>
+                  {carBrands.map(({ brand }) => (
+                    <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             
             <div className="space-y-2">
               <Label htmlFor="edit-model">Model *</Label>
-              <Input
-                id="edit-model"
-                name="edit-model"
+              <Select
                 value={formData.model}
-                onChange={(e) => setFormData({ ...formData, model: e.target.value })}
-                placeholder="X5"
-              />
+                onValueChange={(value) => setFormData({ ...formData, model: value })}
+                disabled={!formData.marca}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={formData.marca ? "Selectează modelul" : "Selectează mai întâi marca"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {carBrands.find(b => b.brand === formData.marca)?.models.map((model) => (
+                    <SelectItem key={model} value={model}>{model}</SelectItem>
+                  )) || []}
+                </SelectContent>
+              </Select>
             </div>
             
             <div className="space-y-2">

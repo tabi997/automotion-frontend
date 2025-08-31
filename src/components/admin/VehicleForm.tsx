@@ -17,6 +17,7 @@ import { AdminUploadGallery } from "./AdminUploadGallery";
 import { StockVehicle } from "@/types/vehicle";
 import { createListing, updateListing } from "@/lib/admin";
 import { Car, Image, FileText } from "lucide-react";
+import { carBrands } from "@/data/carBrands";
 
 // Schema de validare care se potrivește exact cu baza de date
 const vehicleSchema = z.object({
@@ -80,6 +81,7 @@ const caroserieOptions = [
 export default function VehicleForm({ open, onOpenChange, vehicle, onSuccess }: VehicleFormProps) {
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<string[]>([]);
+  const [selectedBrand, setSelectedBrand] = useState(vehicle?.marca || "");
   const { toast } = useToast();
   const isEditing = !!vehicle;
 
@@ -123,6 +125,9 @@ export default function VehicleForm({ open, onOpenChange, vehicle, onSuccess }: 
         openlane_url: vehicle.openlane_url || "",
       });
       setImages(vehicle.images || []);
+      setSelectedBrand(vehicle.marca);
+    } else {
+      setSelectedBrand("");
     }
   }, [vehicle, form]);
 
@@ -239,11 +244,23 @@ export default function VehicleForm({ open, onOpenChange, vehicle, onSuccess }: 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="marca">Marcă *</Label>
-                      <Input
-                        id="marca"
-                        {...form.register("marca")}
-                        placeholder="ex: BMW"
-                      />
+                      <Select
+                        value={form.watch("marca")}
+                        onValueChange={(value) => {
+                          form.setValue("marca", value);
+                          form.setValue("model", ""); // Reset model when brand changes
+                          setSelectedBrand(value);
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selectează marca" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-[200px]">
+                          {carBrands.map(({ brand }) => (
+                            <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       {form.formState.errors.marca && (
                         <p className="text-sm text-red-600">{form.formState.errors.marca.message}</p>
                       )}
@@ -251,11 +268,20 @@ export default function VehicleForm({ open, onOpenChange, vehicle, onSuccess }: 
 
                     <div className="space-y-2">
                       <Label htmlFor="model">Model *</Label>
-                      <Input
-                        id="model"
-                        {...form.register("model")}
-                        placeholder="ex: X5"
-                      />
+                      <Select
+                        value={form.watch("model")}
+                        onValueChange={(value) => form.setValue("model", value)}
+                        disabled={!selectedBrand}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder={selectedBrand ? "Selectează modelul" : "Selectează mai întâi marca"} />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-[200px]">
+                          {carBrands.find(b => b.brand === selectedBrand)?.models.map((model) => (
+                            <SelectItem key={model} value={model}>{model}</SelectItem>
+                          )) || []}
+                        </SelectContent>
+                      </Select>
                       {form.formState.errors.model && (
                         <p className="text-sm text-red-600">{form.formState.errors.model.message}</p>
                       )}
