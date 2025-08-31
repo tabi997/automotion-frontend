@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,8 @@ import { Plus, Edit, Trash2, Search, Filter, Eye, Car } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { StockVehicle } from "@/types/vehicle";
-import { UploadGallery } from "@/components/forms/UploadGallery";
+import { AdminUploadGallery } from "@/components/admin/AdminUploadGallery";
+import { env } from "@/lib/env";
 
 interface VehicleFormData {
   marca: string;
@@ -39,6 +40,15 @@ const StockManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
   const queryClient = useQueryClient();
+
+  // Debug environment variables
+  useEffect(() => {
+    console.log('🔍 StockManagement Debug:');
+    console.log('• VITE_ENABLE_UPLOAD:', env.VITE_ENABLE_UPLOAD);
+    console.log('• VITE_BYPASS_ADMIN_FOR_UPLOAD:', env.VITE_BYPASS_ADMIN_FOR_UPLOAD);
+    console.log('• VITE_STORAGE_BUCKET:', env.VITE_STORAGE_BUCKET);
+    console.log('• AdminUploadGallery imported:', !!AdminUploadGallery);
+  }, []);
 
   // Form state
   const [formData, setFormData] = useState<VehicleFormData>({
@@ -423,7 +433,7 @@ const StockManagement = () => {
             {/* Image Upload */}
             <div className="space-y-2">
               <Label>Fotografii Vehicul</Label>
-              <UploadGallery
+              <AdminUploadGallery
                 onImagesChange={(imageUrls) => {
                   // Store image URLs for later upload
                   setImages(imageUrls as any);
@@ -746,7 +756,7 @@ const StockManagement = () => {
           {/* Image Upload for Edit */}
           <div className="space-y-2">
             <Label>Fotografii Vehicul</Label>
-            <UploadGallery
+            <AdminUploadGallery
               onImagesChange={(imageUrls) => {
                 // Store image URLs for later update
                 setImages(imageUrls as any);
