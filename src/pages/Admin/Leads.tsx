@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getSellLeads, getFinanceLeads, getContactLeads, setLeadStatus } from "@/lib/admin";
+import { getSellLeads, getFinanceLeads, getContactLeads, getOrderLeads, setLeadStatus } from "@/lib/admin";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -25,7 +25,8 @@ import {
   Loader2,
   Users,
   TrendingUp,
-  MessageSquare
+  MessageSquare,
+  Car
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { Database } from "@/integrations/supabase/types";
@@ -33,6 +34,7 @@ import type { Database } from "@/integrations/supabase/types";
 type LeadSellRow = Database["public"]["Tables"]["lead_sell"]["Row"];
 type LeadFinanceRow = Database["public"]["Tables"]["lead_finance"]["Row"];
 type ContactMessageRow = Database["public"]["Tables"]["contact_messages"]["Row"];
+type LeadOrderRow = Database["public"]["Tables"]["lead_order"]["Row"];
 
 export default function Leads() {
   const { toast } = useToast();
@@ -53,8 +55,13 @@ export default function Leads() {
     queryFn: getContactLeads,
   });
 
+  const { data: orderLeads, isLoading: orderLoading, error: orderError } = useQuery({
+    queryKey: ["order-leads"],
+    queryFn: getOrderLeads,
+  });
+
   const handleStatusChange = async (
-    table: "lead_sell" | "lead_finance" | "contact_messages",
+    table: "lead_sell" | "lead_finance" | "contact_messages" | "lead_order",
     id: string,
     currentStatus: string
   ) => {
@@ -72,6 +79,8 @@ export default function Leads() {
         queryClient.invalidateQueries({ queryKey: ["sell-leads"] });
       } else if (table === "lead_finance") {
         queryClient.invalidateQueries({ queryKey: ["finance-leads"] });
+      } else if (table === "lead_order") {
+        queryClient.invalidateQueries({ queryKey: ["order-leads"] });
       } else {
         queryClient.invalidateQueries({ queryKey: ["contact-leads"] });
       }
@@ -114,7 +123,7 @@ export default function Leads() {
       </div>
 
       <Tabs defaultValue="sell" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="sell" className="flex items-center space-x-2">
             <Users className="h-4 w-4" />
             <span>Vânzare ({sellLeads?.length || 0})</span>
@@ -122,6 +131,10 @@ export default function Leads() {
           <TabsTrigger value="finance" className="flex items-center space-x-2">
             <TrendingUp className="h-4 w-4" />
             <span>Finanțare ({financeLeads?.length || 0})</span>
+          </TabsTrigger>
+          <TabsTrigger value="order" className="flex items-center space-x-2">
+            <Car className="h-4 w-4" />
+            <span>Comandă ({orderLeads?.length || 0})</span>
           </TabsTrigger>
           <TabsTrigger value="contact" className="flex items-center space-x-2">
             <MessageSquare className="h-4 w-4" />
@@ -282,6 +295,111 @@ export default function Leads() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleStatusChange("lead_finance", lead.id, lead.status)}
+                          >
+                            {lead.status === "new" ? (
+                              <>
+                                <CheckCircle className="mr-2 h-4 w-4" />
+                                Marchează procesat
+                              </>
+                            ) : (
+                              <>
+                                <Clock className="mr-2 h-4 w-4" />
+                                Marchează nou
+                              </>
+                            )}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Order Leads Tab */}
+        <TabsContent value="order" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Lead-uri Comandă</CardTitle>
+              <CardDescription>
+                Cereri de comandă mașini personalizate
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {orderLoading ? (
+                <div className="flex items-center justify-center h-32">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                </div>
+              ) : orderError ? (
+                <div className="text-center text-red-600 py-4">
+                  Eroare la încărcarea lead-urilor: {orderError.message}
+                </div>
+              ) : orderLeads?.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  Nu există lead-uri de comandă
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Contact</TableHead>
+                      <TableHead>Preferințe Mașină</TableHead>
+                      <TableHead>Preț</TableHead>
+                      <TableHead>Urgent</TableHead>
+                      <TableHead>Data</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Acțiuni</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {orderLeads?.map((lead) => (
+                      <TableRow key={lead.id}>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">{lead.nume}</div>
+                            <div className="text-sm text-gray-500">{lead.email}</div>
+                            <div className="text-sm text-gray-500">{lead.telefon}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">
+                              {lead.marca} {lead.model ? `- ${lead.model}` : ''}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {lead.an_min && lead.an_max ? `${lead.an_min}-${lead.an_max}` : 
+                               lead.an_min ? `≥ ${lead.an_min}` : 
+                               lead.an_max ? `≤ ${lead.an_max}` : 'Orice an'}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {lead.caroserie && lead.combustibil && lead.transmisie ? 
+                                `${lead.caroserie} • ${lead.combustibil} • ${lead.transmisie}` : 
+                                [lead.caroserie, lead.combustibil, lead.transmisie].filter(Boolean).join(' • ') || 'Nespecificat'}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {lead.pret_min && lead.pret_max ? 
+                            `${lead.pret_min.toLocaleString()}-${lead.pret_max.toLocaleString()} €` :
+                            lead.pret_min ? `≥ ${lead.pret_min.toLocaleString()} €` :
+                            lead.pret_max ? `≤ ${lead.pret_max.toLocaleString()} €` : 'Nespecificat'}
+                        </TableCell>
+                        <TableCell>
+                          {lead.urgent ? (
+                            <Badge variant="destructive">Urgent</Badge>
+                          ) : (
+                            <Badge variant="outline">Normal</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>{formatDate(lead.created_at)}</TableCell>
+                        <TableCell>{getStatusBadge(lead.status)}</TableCell>
+                        <TableCell>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleStatusChange("lead_order", lead.id, lead.status)}
                           >
                             {lead.status === "new" ? (
                               <>
