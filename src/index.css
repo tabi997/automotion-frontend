@@ -1,96 +1,144 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Premium AutoOrder Design System */
 
 @layer base {
   :root {
+    /* Premium Automotive Color Palette */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
+    --foreground: 224 11% 12%;
+    
+    /* Primary - Deep Automotive Blue */
+    --primary: 224 67% 15%;
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 224 67% 25%;
+    --primary-glow: 224 67% 35%;
+    
+    /* Secondary - Sophisticated Accent */
+    --secondary: 220 15% 96%;
+    --secondary-foreground: 224 11% 12%;
+    --secondary-dark: 220 15% 90%;
+    
+    /* Automotive Orange (inspired by reference images) */
+    --accent: 18 95% 55%;
+    --accent-foreground: 0 0% 100%;
+    --accent-light: 18 95% 65%;
+    --accent-glow: 18 95% 75%;
+    
+    /* Premium Red */
+    --automotive-red: 0 84% 55%;
+    --automotive-red-dark: 0 84% 45%;
+    
+    /* Neutral Palette */
+    --muted: 220 15% 96%;
+    --muted-foreground: 224 11% 45%;
+    --muted-dark: 224 11% 25%;
+    
+    /* Card & Surface */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
+    --card-foreground: 224 11% 12%;
+    --card-shadow: 0 0% 0%;
+    
+    /* Interactive Elements */
+    --border: 220 15% 90%;
+    --input: 220 15% 96%;
+    --ring: 224 67% 15%;
+    
+    /* Status Colors */
+    --success: 142 76% 36%;
+    --warning: 43 89% 58%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Popover */
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
-
+    --popover-foreground: 224 11% 12%;
+    
+    /* Sidebar (for future use) */
     --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-foreground: 224 11% 25%;
+    --sidebar-primary: 224 67% 15%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 15% 96%;
+    --sidebar-accent-foreground: 224 11% 12%;
+    --sidebar-border: 220 15% 90%;
+    --sidebar-ring: 224 67% 35%;
+    
+    /* Design System Values */
+    --radius: 0.75rem;
+    --radius-lg: 1rem;
+    --radius-xl: 1.5rem;
+    
+    /* Premium Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-light)));
+    --gradient-accent: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--accent-light)));
+    --gradient-automotive: linear-gradient(135deg, hsl(var(--automotive-red)), hsl(var(--accent)));
+    --gradient-hero: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-light)) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(var(--card)) 0%, hsl(var(--secondary)) 100%);
+    
+    /* Premium Shadows */
+    --shadow-subtle: 0 2px 8px -2px hsl(var(--card-shadow) / 0.1);
+    --shadow-medium: 0 8px 25px -5px hsl(var(--card-shadow) / 0.15);
+    --shadow-large: 0 20px 40px -12px hsl(var(--card-shadow) / 0.25);
+    --shadow-glow: 0 0 40px hsl(var(--primary) / 0.15);
+    --shadow-accent: 0 8px 25px -5px hsl(var(--accent) / 0.25);
+    
+    /* Animation Values */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --duration-fast: 0.15s;
+    --duration-normal: 0.3s;
+    --duration-slow: 0.5s;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --background: 224 11% 5%;
+    --foreground: 0 0% 98%;
+    
+    --primary: 224 67% 25%;
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 224 67% 35%;
+    --primary-glow: 224 67% 45%;
+    
+    --secondary: 224 11% 10%;
+    --secondary-foreground: 0 0% 98%;
+    --secondary-dark: 224 11% 15%;
+    
+    --accent: 18 95% 65%;
+    --accent-foreground: 224 11% 5%;
+    --accent-light: 18 95% 75%;
+    --accent-glow: 18 95% 85%;
+    
+    --automotive-red: 0 84% 65%;
+    --automotive-red-dark: 0 84% 55%;
+    
+    --muted: 224 11% 10%;
+    --muted-foreground: 220 15% 65%;
+    --muted-dark: 220 15% 75%;
+    
+    --card: 224 11% 8%;
+    --card-foreground: 0 0% 98%;
+    --card-shadow: 0 0% 100%;
+    
+    --border: 224 11% 15%;
+    --input: 224 11% 10%;
+    --ring: 224 67% 35%;
+    
+    --popover: 224 11% 8%;
+    --popover-foreground: 0 0% 98%;
+    
+    --sidebar-background: 224 11% 8%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 224 67% 35%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 224 11% 12%;
+    --sidebar-accent-foreground: 0 0% 90%;
+    --sidebar-border: 224 11% 15%;
+    --sidebar-ring: 224 67% 45%;
   }
 }
 
@@ -100,6 +148,198 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+  
+  /* Remove focus outline for mouse users but keep for keyboard users */
+  .js-focus-visible :focus:not(.focus-visible) {
+    outline: none;
+  }
+}
+
+@layer components {
+  /* Premium Component Styles */
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+  
+  .gradient-accent {
+    background: var(--gradient-accent);
+  }
+  
+  .gradient-automotive {
+    background: var(--gradient-automotive);
+  }
+  
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+  
+  .gradient-card {
+    background: var(--gradient-card);
+  }
+  
+  .shadow-subtle {
+    box-shadow: var(--shadow-subtle);
+  }
+  
+  .shadow-medium {
+    box-shadow: var(--shadow-medium);
+  }
+  
+  .shadow-large {
+    box-shadow: var(--shadow-large);
+  }
+  
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+  
+  .shadow-accent {
+    box-shadow: var(--shadow-accent);
+  }
+  
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+  
+  .transition-bounce {
+    transition: var(--transition-bounce);
+  }
+  
+  /* Premium Interactive Elements */
+  .automotive-card {
+    @apply bg-card border border-border rounded-xl shadow-medium transition-smooth;
+  }
+  
+  .automotive-card:hover {
+    @apply shadow-large translate-y-[-2px];
+  }
+  
+  .hero-text {
+    @apply text-4xl md:text-6xl font-bold tracking-tight;
+    background: linear-gradient(135deg, hsl(var(--foreground)), hsl(var(--muted-foreground)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .automotive-gradient-text {
+    background: var(--gradient-automotive);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* Glass morphism effect */
+  .glass {
+    @apply backdrop-blur-md bg-white/10 border border-white/20;
+  }
+  
+  /* Container patterns */
+  .container-padding {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+  
+  .section-padding {
+    @apply py-16 lg:py-24;
+  }
+}
+
+@layer utilities {
+  /* Premium Animation Keyframes */
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes slide-in-right {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 20px hsl(var(--accent) / 0.3);
+    }
+    50% {
+      box-shadow: 0 0 40px hsl(var(--accent) / 0.6);
+    }
+  }
+  
+  @keyframes automotive-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  .animate-fade-in-up {
+    animation: fade-in-up 0.6s ease-out;
+  }
+  
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out;
+  }
+  
+  .animate-slide-in-right {
+    animation: slide-in-right 0.5s ease-out;
+  }
+  
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+  
+  .animate-automotive-spin {
+    animation: automotive-spin 2s linear infinite;
+  }
+  
+  /* Stagger animations */
+  .stagger-1 { animation-delay: 0.1s; }
+  .stagger-2 { animation-delay: 0.2s; }
+  .stagger-3 { animation-delay: 0.3s; }
+  .stagger-4 { animation-delay: 0.4s; }
+  .stagger-5 { animation-delay: 0.5s; }
+  
+  /* Hover effects */
+  .hover-lift {
+    @apply transition-smooth;
+  }
+  
+  .hover-lift:hover {
+    @apply transform -translate-y-1 shadow-large;
+  }
+  
+  /* Text utilities */
+  .text-gradient-automotive {
+    background: var(--gradient-automotive);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* Responsive utilities */
+  .container-auto {
+    @apply mx-auto max-w-7xl container-padding;
   }
 }
