@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      stock: {
+        Row: {
+          id: string
+          marca: string
+          model: string
+          an: number
+          km: number
+          pret: number
+          combustibil: string
+          transmisie: string
+          caroserie: string
+          culoare: string | null
+          vin: string | null
+          negociabil: boolean | null
+          images: string[] | null
+          descriere: string | null
+          status: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          marca: string
+          model: string
+          an: number
+          km: number
+          pret: number
+          combustibil: string
+          transmisie: string
+          caroserie: string
+          culoare?: string | null
+          vin?: string | null
+          negociabil?: boolean | null
+          images?: string[] | null
+          descriere?: string | null
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          marca?: string
+          model?: string
+          an?: number
+          km?: number
+          pret?: number
+          combustibil?: string
+          transmisie?: string
+          caroserie?: string
+          culoare?: string | null
+          vin?: string | null
+          negociabil?: boolean | null
+          images?: string[] | null
+          descriere?: string | null
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contact_messages: {
         Row: {
           created_at: string
@@ -24,6 +84,7 @@ export type Database = {
           nume: string
           subiect: string
           telefon: string | null
+          status: string
         }
         Insert: {
           created_at?: string
@@ -34,6 +95,7 @@ export type Database = {
           nume: string
           subiect: string
           telefon?: string | null
+          status?: string
         }
         Update: {
           created_at?: string
@@ -44,6 +106,7 @@ export type Database = {
           nume?: string
           subiect?: string
           telefon?: string | null
+          status?: string
         }
         Relationships: []
       }
@@ -63,6 +126,7 @@ export type Database = {
           telefon: string
           tip_contract: string | null
           venit_lunar: number | null
+          status: string
         }
         Insert: {
           avans?: number
@@ -79,6 +143,7 @@ export type Database = {
           telefon: string
           tip_contract?: string | null
           venit_lunar?: number | null
+          status?: string
         }
         Update: {
           avans?: number
@@ -95,6 +160,7 @@ export type Database = {
           telefon?: string
           tip_contract?: string | null
           venit_lunar?: number | null
+          status?: string
         }
         Relationships: []
       }
@@ -122,6 +188,7 @@ export type Database = {
           telefon: string
           transmisie: string
           vin: string | null
+          status: string
         }
         Insert: {
           an: number
@@ -146,6 +213,7 @@ export type Database = {
           telefon: string
           transmisie: string
           vin?: string | null
+          status?: string
         }
         Update: {
           an?: number
@@ -170,6 +238,7 @@ export type Database = {
           telefon?: string
           transmisie?: string
           vin?: string | null
+          status?: string
         }
         Relationships: []
       }

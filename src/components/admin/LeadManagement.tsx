@@ -69,7 +69,7 @@ interface ContactMessage {
 const LeadManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [selectedLead, setSelectedLead] = useState<any>(null);
+  const [selectedLead, setSelectedLead] = useState<unknown>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const queryClient = useQueryClient();
 
@@ -146,7 +146,7 @@ const LeadManagement = () => {
     markProcessedMutation.mutate({ table, id });
   };
 
-  const handleViewLead = (lead: any, type: string) => {
+  const handleViewLead = (lead: unknown, type: string) => {
     setSelectedLead({ ...lead, type });
     setIsViewDialogOpen(true);
   };

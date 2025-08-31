@@ -9,7 +9,12 @@ import VendeMasina from "./pages/VendeMasina";
 import Finantare from "./pages/Finantare";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
-import Admin from "./pages/Admin";
+import Login from "./pages/Auth/Login";
+import AdminLayout from "./pages/Admin/AdminLayout";
+import Dashboard from "./pages/Admin/Dashboard";
+import AdminStock from "./pages/Admin/Stock";
+import AdminLeads from "./pages/Admin/Leads";
+import AuthGate from "./components/auth/AuthGate";
 
 const queryClient = new QueryClient();
 
@@ -25,7 +30,19 @@ const App = () => (
           <Route path="/buyback" element={<VendeMasina />} />
           <Route path="/finantare" element={<Finantare />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/admin" element={<Admin />} />
+          <Route path="/login" element={<Login />} />
+          
+          {/* Admin Routes - Protected by AuthGate */}
+          <Route path="/admin" element={
+            <AuthGate>
+              <AdminLayout />
+            </AuthGate>
+          }>
+            <Route index element={<Dashboard />} />
+            <Route path="stock" element={<AdminStock />} />
+            <Route path="leads" element={<AdminLeads />} />
+          </Route>
+          
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -5,7 +5,7 @@ import { SellCarInput, FinanceInput, ContactInput } from "./validation";
 interface ActionResponse {
   success: boolean;
   error?: string;
-  data?: any;
+  data?: unknown;
 }
 
 /**
@@ -36,7 +36,8 @@ export async function submitSellLead(data: SellCarInput): Promise<ActionResponse
         email: data.email,
         preferinta_contact: data.preferinta_contact,
         interval_orar: data.interval_orar,
-        gdpr: data.gdpr
+        gdpr: data.gdpr,
+        status: 'new'
       }]);
 
     if (error) {
@@ -71,7 +72,8 @@ export async function submitFinanceLead(data: FinanceInput): Promise<ActionRespo
         tip_contract: data.tip_contract,
         istoric_creditare: data.istoric_creditare,
         link_stoc: data.link_stoc,
-        mesaj: data.mesaj
+        mesaj: data.mesaj,
+        status: 'new'
       }]);
 
     if (error) {
@@ -100,7 +102,8 @@ export async function submitContactMessage(data: ContactInput): Promise<ActionRe
         telefon: data.telefon,
         subiect: data.subiect,
         mesaj: data.mesaj,
-        gdpr: data.gdpr
+        gdpr: data.gdpr,
+        status: 'new'
       }]);
 
     if (error) {
@@ -178,7 +181,7 @@ export async function getAdminVehicles(): Promise<ActionResponse> {
 /**
  * Add new vehicle
  */
-export async function addVehicle(vehicleData: any): Promise<ActionResponse> {
+export async function addVehicle(vehicleData: unknown): Promise<ActionResponse> {
   try {
     const { error } = await supabase
       .from('vehicles')
@@ -199,7 +202,7 @@ export async function addVehicle(vehicleData: any): Promise<ActionResponse> {
 /**
  * Update vehicle
  */
-export async function updateVehicle(id: string, vehicleData: any): Promise<ActionResponse> {
+export async function updateVehicle(id: string, vehicleData: unknown): Promise<ActionResponse> {
   try {
     const { error } = await supabase
       .from('vehicles')
