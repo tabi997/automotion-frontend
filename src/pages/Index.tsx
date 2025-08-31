@@ -21,7 +21,8 @@ import {
   Car,
   Zap,
   Crown,
-  CheckCircle
+  CheckCircle,
+  Eye
 } from 'lucide-react';
 import {
   Carousel,
@@ -42,13 +43,64 @@ import settingsData from '@/data/settings.json';
 import testimonialsData from '@/data/testimonials.json';
 import brandsData from '@/data/brands.json';
 
+// Import real data API and types
+import { StockAPI } from '@/lib/stockApi';
+import { StockVehicle, Vehicle } from '@/types/vehicle';
+
+const transformStockToVehicle = (stockVehicle: StockVehicle): Vehicle => ({
+  id: stockVehicle.id,
+  brand: stockVehicle.marca,
+  model: stockVehicle.model,
+  year: stockVehicle.an,
+  mileage: stockVehicle.km,
+  price: stockVehicle.pret,
+  fuelType: stockVehicle.combustibil as 'benzina' | 'motorina' | 'hibrid' | 'electric' | 'gpl',
+  transmission: stockVehicle.transmisie as 'manuala' | 'automata' | 'cvt',
+  bodyType: stockVehicle.caroserie as 'berlina' | 'break' | 'suv' | 'coupe' | 'cabriolet' | 'hatchback' | 'monovolum',
+  color: stockVehicle.culoare || '',
+  vin: stockVehicle.vin,
+  negotiable: stockVehicle.negociabil,
+  description: stockVehicle.descriere || '',
+  status: stockVehicle.status as 'active' | 'inactive' | 'sold',
+  dateAdded: stockVehicle.created_at,
+  updatedAt: stockVehicle.updated_at,
+  badges: [], // No badges in stock vehicle
+  images: stockVehicle.images || [],
+  mainImage: stockVehicle.images?.[0] || '',
+  horsePower: 0, // Placeholder - not in stock table
+  engineCapacity: 0, // Placeholder - not in stock table
+  location: 'Romania', // Placeholder - not in stock table
+  condition: 'second-hand' as const, // Default value
+  features: [], // No features in stock table
+  financing: undefined, // No financing info in stock table
+});
+
 const Index = () => {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setIsVisible(true);
+    loadVehicles();
   }, []);
+
+  const loadVehicles = async () => {
+    try {
+      const stockVehicles = await StockAPI.getVehicles();
+      // Transform StockVehicle to Vehicle for compatibility
+      const transformedVehicles = stockVehicles.map(transformStockToVehicle);
+      // Take only the first 6 vehicles for the carousel
+      setVehicles(transformedVehicles.slice(0, 6));
+    } catch (error) {
+      console.error('Error loading vehicles:', error);
+      // Fallback to empty array if API fails
+      setVehicles([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -59,6 +111,19 @@ const Index = () => {
 
     return () => clearInterval(timer);
   }, []);
+
+  const getVehicleImage = (vehicle: Vehicle) => {
+    // Verifică dacă vehiculul are imagini reale
+    if (vehicle.images && vehicle.images.length > 0 && vehicle.images[0]) {
+      return vehicle.images[0];
+    }
+    
+    // Fallback la imagini mock doar dacă nu există imagini reale
+    if (vehicle.brand === 'BMW') return bmwImage;
+    if (vehicle.brand === 'Mercedes-Benz') return mercedesImage;
+    if (vehicle.brand === 'Audi') return audiImage;
+    return bmwImage; // fallback
+  };
 
   const heroSection = (
     <Section 
@@ -199,9 +264,16 @@ const Index = () => {
   const featuredCarsSection = (
     <Section background="muted">
       <div className="text-center mb-16">
-        <h2 className="text-3xl md:text-4xl font-bold mb-4">Mașini Premium Disponibile</h2>
+        <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          {loading ? 'Se încarcă...' : vehicles.length > 0 ? 'Mașini Premium din Stocul Nostru' : 'Stocul Nostru'}
+        </h2>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          O selecție din stocul nostru de vehicule verificate și certificate
+          {loading 
+            ? 'Se încarcă vehiculele din stocul nostru...' 
+            : vehicles.length > 0 
+              ? 'O selecție din stocul nostru de vehicule verificate și certificate' 
+              : 'În acest moment nu avem vehicule în stoc'
+          }
         </p>
       </div>
       
@@ -214,96 +286,88 @@ const Index = () => {
           className="w-full max-w-6xl mx-auto"
         >
           <CarouselContent className="-ml-2 md:-ml-4">
-            {[
-              { 
-                image: bmwImage, 
-                brand: 'BMW', 
-                model: 'X5', 
-                year: 2023, 
-                price: 85000,
-                badges: [
-                  { text: 'Primul proprietar', variant: 'success' as const },
-                  { text: 'Service complet', variant: 'info' as const }
-                ]
-              },
-              { 
-                image: mercedesImage, 
-                brand: 'Mercedes-Benz', 
-                model: 'AMG GT', 
-                year: 2024, 
-                price: 165000,
-                badges: [
-                  { text: 'Nou', variant: 'success' as const },
-                  { text: 'Urgent', variant: 'urgent' as const }
-                ]
-              },
-              { 
-                image: audiImage, 
-                brand: 'Audi', 
-                model: 'A4', 
-                year: 2022, 
-                price: 42000,
-                badges: [
-                  { text: 'Fără accident', variant: 'success' as const },
-                  { text: 'Verificat', variant: 'info' as const }
-                ]
-              },
-              { 
-                image: bmwImage, 
-                brand: 'BMW', 
-                model: 'X3', 
-                year: 2023, 
-                price: 68000,
-                badges: [
-                  { text: 'Service complet', variant: 'info' as const },
-                  { text: 'Garanție', variant: 'success' as const }
-                ]
-              }
-            ].map((car, index) => (
-              <CarouselItem key={index} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
-                <div className="automotive-card overflow-hidden hover-lift">
-                  <div className="relative">
-                    <Link to="/stoc" className="block">
-                      <img 
-                        src={car.image}
-                        alt={`${car.brand} ${car.model}`}
-                        className="w-full h-48 object-cover cursor-pointer"
-                      />
-                    </Link>
-                    <div className="absolute top-4 left-4 flex flex-wrap gap-2">
-                      {car.badges.map((badge, badgeIndex) => (
-                        <Badge key={badgeIndex} variant={badge.variant} size="sm">
-                          {badge.text}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div className="p-6">
-                    <Link to="/stoc" className="block hover:text-primary transition-colors">
-                      <h3 className="text-xl font-semibold mb-2 cursor-pointer">
-                        {car.brand} {car.model}
-                      </h3>
-                    </Link>
-                    <p className="text-muted-foreground mb-4">An: {car.year}</p>
-                    
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="text-2xl font-bold text-primary">
-                          €{car.price.toLocaleString()}
-                        </span>
-                      </div>
-                      
-                      <Button variant="outline" size="sm" asChild>
-                        <Link to="/stoc">
-                          Detalii
-                        </Link>
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </CarouselItem>
-            ))}
+                         {loading ? (
+               // Loading skeleton
+               [...Array(3)].map((_, index) => (
+                 <CarouselItem key={`loading-${index}`} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
+                   <div className="automotive-card overflow-hidden animate-pulse">
+                     <div className="h-48 bg-muted" />
+                     <div className="p-6 space-y-3">
+                       <div className="h-4 bg-muted rounded w-3/4" />
+                       <div className="h-3 bg-muted rounded w-1/2" />
+                       <div className="h-8 bg-muted rounded w-full" />
+                     </div>
+                   </div>
+                 </CarouselItem>
+               ))
+             ) : vehicles.length === 0 ? (
+               // Empty state
+               <CarouselItem className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
+                 <div className="automotive-card p-8 text-center">
+                   <Car className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                   <h3 className="text-lg font-semibold mb-2">Nu sunt mașini disponibile</h3>
+                   <p className="text-muted-foreground mb-4">
+                     În acest moment nu avem vehicule în stoc.
+                   </p>
+                   <Button variant="outline" size="sm" asChild>
+                     <Link to="/stoc">Vezi stocul</Link>
+                   </Button>
+                 </div>
+               </CarouselItem>
+             ) : (
+               vehicles.map((vehicle, index) => (
+                 <CarouselItem key={vehicle.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
+                   <div className="automotive-card overflow-hidden hover-lift">
+                     <div className="relative">
+                       <Link to={`/vehicul/${vehicle.id}`} className="block">
+                         <img 
+                           src={getVehicleImage(vehicle)}
+                           alt={`${vehicle.brand} ${vehicle.model}`}
+                           className="w-full h-48 object-cover cursor-pointer group-hover:scale-105 transition-smooth"
+                         />
+                       </Link>
+                       <div className="absolute top-4 left-4 flex flex-wrap gap-2">
+                         {/* Dynamic badges based on vehicle data */}
+                         {vehicle.year >= new Date().getFullYear() - 1 && (
+                           <Badge variant="success" size="sm">Nou</Badge>
+                         )}
+                         {vehicle.mileage < 50000 && (
+                           <Badge variant="info" size="sm">Kilometraj mic</Badge>
+                         )}
+                         {vehicle.negotiable && (
+                           <Badge variant="warning" size="sm">Negociabil</Badge>
+                         )}
+                       </div>
+                     </div>
+                     
+                     <div className="p-6">
+                       <Link to={`/vehicul/${vehicle.id}`} className="block hover:text-primary transition-colors">
+                         <h3 className="text-xl font-semibold mb-2 cursor-pointer">
+                           {vehicle.brand} {vehicle.model}
+                         </h3>
+                       </Link>
+                       <p className="text-muted-foreground mb-2">An: {vehicle.year}</p>
+                       <p className="text-muted-foreground mb-4">{vehicle.mileage.toLocaleString()} km</p>
+                       
+                       <div className="flex items-center justify-between">
+                         <div>
+                           <span className="text-2xl font-bold text-primary">
+                             €{vehicle.price.toLocaleString()}
+                           </span>
+                         </div>
+                         
+                         <Button variant="outline" size="sm" asChild>
+                           <Link to={`/vehicul/${vehicle.id}`} aria-label={`Vezi detalii pentru ${vehicle.brand} ${vehicle.model}`}>
+                             <Eye className="h-4 w-4 mr-2" />
+                             Detalii
+                           </Link>
+                         </Button>
+                       </div>
+                     </div>
+                   </div>
+                 </CarouselItem>
+               ))
+             )}
           </CarouselContent>
           <CarouselPrevious className="left-4" />
           <CarouselNext className="right-4" />
@@ -311,9 +375,14 @@ const Index = () => {
       </div>
       
       <div className="text-center">
-        <Button variant="premium" size="lg" asChild>
+        <Button 
+          variant="premium" 
+          size="lg" 
+          asChild
+          disabled={loading || vehicles.length === 0}
+        >
           <Link to="/stoc">
-            Vezi Tot Stocul
+            {loading ? 'Se încarcă...' : 'Vezi Tot Stocul'}
             <ArrowRight className="ml-2 h-5 w-5" />
           </Link>
         </Button>
