@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, Save, Edit, X } from "lucide-react";
+import { Plus, Trash2, Save, Edit, X, Download, Upload, RefreshCw, Database, Globe, Mail, Shield } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -42,6 +42,8 @@ const SettingsManagement = () => {
   const [newOption, setNewOption] = useState({ value: "", label: "", category: "brands" });
   const [newText, setNewText] = useState({ key: "", value: "", description: "", category: "forms" });
   const [newSetting, setNewSetting] = useState({ key: "", value: "", description: "", category: "site" });
+  const [isExporting, setIsExporting] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
   const queryClient = useQueryClient();
 
   // Fetch form options
@@ -341,6 +343,125 @@ const SettingsManagement = () => {
     return colors[category] || "bg-gray-100 text-gray-800";
   };
 
+  // Export settings function
+  const handleExportSettings = async () => {
+    setIsExporting(true);
+    try {
+      const exportData = {
+        formOptions: formOptions || [],
+        formTexts: formTexts || [],
+        siteSettings: siteSettings || [],
+        exportedAt: new Date().toISOString()
+      };
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `autoorder-settings-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Export reușit",
+        description: "Setările au fost exportate cu succes!",
+      });
+    } catch (error) {
+      toast({
+        title: "Eroare la export",
+        description: "A apărut o eroare la exportul setărilor.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  // Import settings function
+  const handleImportSettings = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    try {
+      const text = await file.text();
+      const importData = JSON.parse(text);
+
+      // Validate import data structure
+      if (!importData.formOptions || !importData.formTexts || !importData.siteSettings) {
+        throw new Error("Format invalid pentru fișierul de import");
+      }
+
+      // Clear existing data and insert new data
+      await Promise.all([
+        supabase.from('form_options').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+        supabase.from('form_texts').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+        supabase.from('site_settings').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+      ]);
+
+      await Promise.all([
+        supabase.from('form_options').insert(importData.formOptions),
+        supabase.from('form_texts').insert(importData.formTexts),
+        supabase.from('site_settings').insert(importData.siteSettings)
+      ]);
+
+      queryClient.invalidateQueries({ queryKey: ["admin-form-options"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-form-texts"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-site-settings"] });
+
+      toast({
+        title: "Import reușit",
+        description: "Setările au fost importate cu succes!",
+      });
+    } catch (error) {
+      toast({
+        title: "Eroare la import",
+        description: error instanceof Error ? error.message : "A apărut o eroare la importul setărilor.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsImporting(false);
+      event.target.value = '';
+    }
+  };
+
+  // Reset to defaults function
+  const handleResetToDefaults = async () => {
+    if (!confirm("Ești sigur că vrei să resetezi toate setările la valorile implicite? Această acțiune nu poate fi anulată.")) {
+      return;
+    }
+
+    try {
+      // Clear all data
+      await Promise.all([
+        supabase.from('form_options').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+        supabase.from('form_texts').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+        supabase.from('site_settings').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+      ]);
+
+      // Re-run the migration to insert defaults
+      const response = await fetch('/api/reset-settings', { method: 'POST' });
+      if (!response.ok) throw new Error('Failed to reset settings');
+
+      queryClient.invalidateQueries({ queryKey: ["admin-form-options"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-form-texts"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-site-settings"] });
+
+      toast({
+        title: "Reset reușit",
+        description: "Setările au fost resetate la valorile implicite!",
+      });
+    } catch (error) {
+      toast({
+        title: "Eroare la reset",
+        description: "A apărut o eroare la resetarea setărilor.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -351,10 +472,11 @@ const SettingsManagement = () => {
 
       {/* Settings Tabs */}
       <Tabs defaultValue="options" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="options">Opțiuni Formulare</TabsTrigger>
           <TabsTrigger value="texts">Texte Formulare</TabsTrigger>
           <TabsTrigger value="settings">Setări Site</TabsTrigger>
+          <TabsTrigger value="advanced">Configurare Avansată</TabsTrigger>
         </TabsList>
 
         {/* Form Options Tab */}
@@ -686,6 +808,217 @@ const SettingsManagement = () => {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Advanced Configuration Tab */}
+        <TabsContent value="advanced" className="mt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Backup & Restore */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Database className="h-5 w-5" />
+                  Backup & Restore
+                </CardTitle>
+                <CardDescription>
+                  Exportă și importă setările platformei
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-4 border rounded-lg bg-blue-50">
+                  <h4 className="font-semibold text-blue-900 mb-2">Export Setări</h4>
+                  <p className="text-sm text-blue-700 mb-3">
+                    Descarcă toate setările curente într-un fișier JSON pentru backup
+                  </p>
+                  <Button 
+                    onClick={handleExportSettings}
+                    disabled={isExporting}
+                    className="w-full"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    {isExporting ? "Se exportă..." : "Export Setări"}
+                  </Button>
+                </div>
+
+                <div className="p-4 border rounded-lg bg-green-50">
+                  <h4 className="font-semibold text-green-900 mb-2">Import Setări</h4>
+                  <p className="text-sm text-green-700 mb-3">
+                    Încarcă setări dintr-un fișier JSON (va suprascrie setările curente)
+                  </p>
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept=".json"
+                      onChange={handleImportSettings}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      disabled={isImporting}
+                    />
+                    <Button 
+                      variant="outline"
+                      className="w-full"
+                      disabled={isImporting}
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      {isImporting ? "Se importă..." : "Import Setări"}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* System Management */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  Gestionare Sistem
+                </CardTitle>
+                <CardDescription>
+                  Operațiuni avansate pentru sistem
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-4 border rounded-lg bg-orange-50">
+                  <h4 className="font-semibold text-orange-900 mb-2">Reset la Implicite</h4>
+                  <p className="text-sm text-orange-700 mb-3">
+                    Resetează toate setările la valorile implicite (atenție: această acțiune nu poate fi anulată)
+                  </p>
+                  <Button 
+                    variant="outline"
+                    onClick={handleResetToDefaults}
+                    className="w-full border-orange-300 text-orange-700 hover:bg-orange-100"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Reset la Implicite
+                  </Button>
+                </div>
+
+                <div className="p-4 border rounded-lg bg-gray-50">
+                  <h4 className="font-semibold text-gray-900 mb-2">Statistici Sistem</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span>Opțiuni formulare:</span>
+                      <Badge variant="secondary">{formOptions?.length || 0}</Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Texte formulare:</span>
+                      <Badge variant="secondary">{formTexts?.length || 0}</Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Setări site:</span>
+                      <Badge variant="secondary">{siteSettings?.length || 0}</Badge>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Quick Actions */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="h-5 w-5" />
+                  Acțiuni Rapide
+                </CardTitle>
+                <CardDescription>
+                  Operațiuni frecvente pentru setări
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => {
+                    queryClient.invalidateQueries({ queryKey: ["admin-form-options"] });
+                    queryClient.invalidateQueries({ queryKey: ["admin-form-texts"] });
+                    queryClient.invalidateQueries({ queryKey: ["admin-site-settings"] });
+                    toast({
+                      title: "Cache actualizat",
+                      description: "Toate datele au fost reîncărcate din baza de date.",
+                    });
+                  }}
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Reîncarcă Datele
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => {
+                    const settings = {
+                      formOptions: formOptions?.length || 0,
+                      formTexts: formTexts?.length || 0,
+                      siteSettings: siteSettings?.length || 0,
+                      lastUpdated: new Date().toLocaleString('ro-RO')
+                    };
+                    console.log('Current Settings State:', settings);
+                    toast({
+                      title: "Informații afișate",
+                      description: "Verifică consola pentru detalii despre setările curente.",
+                    });
+                  }}
+                >
+                  <Database className="h-4 w-4 mr-2" />
+                  Afișează Informații Debug
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Notifications & Alerts */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Mail className="h-5 w-5" />
+                  Notificări & Alerte
+                </CardTitle>
+                <CardDescription>
+                  Configurare notificări pentru sistem
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-4 border rounded-lg bg-purple-50">
+                  <h4 className="font-semibold text-purple-900 mb-2">Notificări Email</h4>
+                  <p className="text-sm text-purple-700 mb-3">
+                    Configurează notificările email pentru lead-uri noi și evenimente importante
+                  </p>
+                  <Button 
+                    variant="outline"
+                    className="w-full border-purple-300 text-purple-700 hover:bg-purple-100"
+                    onClick={() => {
+                      toast({
+                        title: "Funcționalitate în dezvoltare",
+                        description: "Configurarea notificărilor email va fi disponibilă în curând.",
+                      });
+                    }}
+                  >
+                    <Mail className="h-4 w-4 mr-2" />
+                    Configurează Email-uri
+                  </Button>
+                </div>
+
+                <div className="p-4 border rounded-lg bg-indigo-50">
+                  <h4 className="font-semibold text-indigo-900 mb-2">Alerte Sistem</h4>
+                  <p className="text-sm text-indigo-700 mb-3">
+                    Setează alertele pentru evenimente critice din sistem
+                  </p>
+                  <Button 
+                    variant="outline"
+                    className="w-full border-indigo-300 text-indigo-700 hover:bg-indigo-100"
+                    onClick={() => {
+                      toast({
+                        title: "Funcționalitate în dezvoltare",
+                        description: "Configurarea alertelor sistem va fi disponibilă în curând.",
+                      });
+                    }}
+                  >
+                    <Shield className="h-4 w-4 mr-2" />
+                    Configurează Alerte
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
 

@@ -10,7 +10,8 @@ import {
   LogOut, 
   Menu,
   X,
-  BarChart3
+  BarChart3,
+  Settings
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -18,6 +19,7 @@ const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Anunțuri", href: "/admin/stock", icon: Car },
   { name: "Lead-uri", href: "/admin/leads", icon: Users },
+  { name: "Setări", href: "/admin/settings", icon: Settings },
   { name: "Test Upload", href: "/admin/test-upload", icon: BarChart3 },
 ];
 
@@ -114,11 +116,14 @@ export default function AdminLayout() {
                 <Button
                   key={item.name}
                   variant={isActive ? "secondary" : "ghost"}
-                  className="w-full justify-start"
+                  className={`w-full justify-start ${isActive ? 'bg-blue-100 text-blue-900 border-blue-200' : ''}`}
                   onClick={() => navigate(item.href)}
                 >
                   <item.icon className="mr-3 h-5 w-5" />
                   {item.name}
+                  {isActive && (
+                    <div className="ml-auto w-2 h-2 bg-blue-600 rounded-full"></div>
+                  )}
                 </Button>
               );
             })}
