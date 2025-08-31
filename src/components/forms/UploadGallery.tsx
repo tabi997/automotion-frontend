@@ -111,7 +111,7 @@ export function UploadGallery({
   }
 
   // Check if Supabase is properly configured
-  if (!(env.VITE_SUPABASE_URL && env.VITE_SUPABASE_ANON_KEY)) {
+  if (!(env.VITE_SUPABASE_URL && env.VITE_SUPABASE_PUBLISHABLE_KEY)) {
     return (
       <Alert>
         <AlertCircle className="h-4 w-4" />

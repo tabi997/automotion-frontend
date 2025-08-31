@@ -96,7 +96,7 @@ export function TestUpload() {
           <CardTitle>Test Upload Component</CardTitle>
           <CardDescription>
             This component tests the upload button visibility and Supabase storage integration.
-            Environment: {(env.VITE_SUPABASE_URL && env.VITE_SUPABASE_ANON_KEY) ? '✅ Valid Supabase' : '❌ Invalid Supabase'}
+            Environment: {(env.VITE_SUPABASE_URL && env.VITE_SUPABASE_PUBLISHABLE_KEY) ? '✅ Valid Supabase' : '❌ Invalid Supabase'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

@@ -5,7 +5,7 @@ import { env } from '@/lib/env';
 // Server-side Supabase client (for server actions, API routes, etc.)
 export const supabaseServer = createClient<Database>(
   env.VITE_SUPABASE_URL || process.env.VITE_SUPABASE_URL || '',
-  env.VITE_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '',
+  env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY || '',
   {
     auth: {
       autoRefreshToken: false,

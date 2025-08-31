@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 const envSchema = z.object({
   VITE_SUPABASE_URL: z.string().url().optional(),
-  VITE_SUPABASE_ANON_KEY: z.string().min(1).optional(),
+  VITE_SUPABASE_PUBLISHABLE_KEY: z.string().min(1).optional(),
   VITE_ENABLE_UPLOAD: z.string().transform(val => val === 'true').default('true'),
   VITE_BYPASS_ADMIN_FOR_UPLOAD: z.string().transform(val => val === 'true').default('false'),
   VITE_STORAGE_BUCKET: z.string().default('images'),
@@ -18,8 +18,8 @@ export function validateEnv() {
     missingVars.push('VITE_SUPABASE_URL');
   }
   
-  if (!env.VITE_SUPABASE_ANON_KEY) {
-    missingVars.push('VITE_SUPABASE_ANON_KEY');
+  if (!env.VITE_SUPABASE_PUBLISHABLE_KEY) {
+    missingVars.push('VITE_SUPABASE_PUBLISHABLE_KEY');
   }
   
   if (missingVars.length > 0) {
@@ -35,7 +35,7 @@ export function validateEnv() {
     isUploadEnabled: env.VITE_ENABLE_UPLOAD,
     bypassAdminCheck: env.VITE_BYPASS_ADMIN_FOR_UPLOAD,
     storageBucket: env.VITE_STORAGE_BUCKET,
-    hasValidSupabase: !!(env.VITE_SUPABASE_URL && env.VITE_SUPABASE_ANON_KEY),
+    hasValidSupabase: !!(env.VITE_SUPABASE_URL && env.VITE_SUPABASE_PUBLISHABLE_KEY),
   };
 }
 

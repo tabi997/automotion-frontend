@@ -7,7 +7,7 @@ Create a `.env` file in your project root with the following variables:
 ```bash
 # Supabase Configuration
 VITE_SUPABASE_URL=your_supabase_url_here
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key_here
 
 # Upload Configuration
 VITE_ENABLE_UPLOAD=true
