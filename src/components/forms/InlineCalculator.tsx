@@ -37,7 +37,9 @@ export function InlineCalculator({ onCalculate, defaultValues }: InlineCalculato
       const loanAmount = pret - avans;
       const calculatedResult = calculateMonthlyPayment(loanAmount, dobanda, perioada);
       setResult(calculatedResult);
-      onCalculate?.(calculatedResult);
+      if (onCalculate) {
+        onCalculate(calculatedResult);
+      }
     }
   }, [pret, avans, perioada, dobanda, onCalculate]);
 
