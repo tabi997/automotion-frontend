@@ -132,6 +132,16 @@ export function calculateMonthlyPayment(
   totalAmount: number;
   dae: number;
 } {
+  // Validate inputs to prevent errors
+  if (principal <= 0 || annualRate <= 0 || termMonths <= 0) {
+    return {
+      monthlyPayment: 0,
+      totalInterest: 0,
+      totalAmount: 0,
+      dae: 0
+    };
+  }
+  
   const monthlyRate = annualRate / 100 / 12;
   const numPayments = termMonths;
   

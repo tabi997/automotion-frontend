@@ -26,12 +26,41 @@ import {
   Eye
 } from 'lucide-react';
 import { MockAPI } from '@/lib/mockApi';
-import { Vehicle, VehicleFilters, VehicleSort, PaginatedVehicles } from '@/types/vehicle';
+import { Vehicle, VehicleFilters, VehicleSort, PaginatedVehicles, StockVehicle } from '@/types/vehicle';
+import { StockAPI } from '@/lib/stockApi';
 
 // Import images
 import bmwImage from '@/assets/bmw-x5.jpg';
 import mercedesImage from '@/assets/mercedes-amg.jpg';
 import audiImage from '@/assets/audi-a4.jpg';
+
+const transformStockToVehicle = (stockVehicle: StockVehicle): Vehicle => ({
+  id: stockVehicle.id,
+  brand: stockVehicle.marca,
+  model: stockVehicle.model,
+  year: stockVehicle.an,
+  mileage: stockVehicle.km,
+  price: stockVehicle.pret,
+  fuelType: stockVehicle.combustibil as any,
+  transmission: stockVehicle.transmisie as any,
+  bodyType: stockVehicle.caroserie as any,
+  color: stockVehicle.culoare || '',
+  vin: stockVehicle.vin,
+  negotiable: stockVehicle.negociabil,
+  description: stockVehicle.descriere || '',
+  status: stockVehicle.status as 'active' | 'inactive' | 'sold',
+  dateAdded: stockVehicle.created_at,
+  updatedAt: stockVehicle.updated_at,
+  badges: [], // No badges in stock vehicle
+  images: stockVehicle.images || [],
+  mainImage: stockVehicle.images?.[0] || '',
+  horsePower: 0, // Placeholder - not in stock table
+  engineCapacity: 0, // Placeholder - not in stock table
+  location: 'Romania', // Placeholder - not in stock table
+  condition: 'second-hand' as const, // Default value
+  features: [], // No features in stock table
+  financing: undefined, // No financing info in stock table
+});
 
 const Stock = () => {
   const [vehicles, setVehicles] = useState<PaginatedVehicles | null>(null);
@@ -49,8 +78,16 @@ const Stock = () => {
   const loadVehicles = async () => {
     setLoading(true);
     try {
-      const result = await MockAPI.getVehicles(filters, sort, currentPage, 12);
-      setVehicles(result);
+      const vehicles = await StockAPI.getVehicles();
+      // Transform StockVehicle to Vehicle for compatibility
+      const transformedVehicles = vehicles.map(transformStockToVehicle);
+      setVehicles({
+        vehicles: transformedVehicles,
+        total: transformedVehicles.length,
+        page: 1,
+        limit: transformedVehicles.length,
+        totalPages: 1
+      });
     } catch (error) {
       console.error('Error loading vehicles:', error);
     } finally {
@@ -76,6 +113,14 @@ const Stock = () => {
   };
 
   const getVehicleImage = (vehicle: Vehicle) => {
+    // Verifică dacă vehiculul are imagini reale
+    if (vehicle.images && vehicle.images.length > 0 && vehicle.images[0]) {
+      console.log('🔍 Stock: Using real image for', vehicle.brand, vehicle.model, ':', vehicle.images[0]);
+      return vehicle.images[0];
+    }
+    
+    // Fallback la imagini mock doar dacă nu există imagini reale
+    console.log('🔍 Stock: Using mock image for', vehicle.brand, vehicle.model);
     if (vehicle.brand === 'BMW') return bmwImage;
     if (vehicle.brand === 'Mercedes-Benz') return mercedesImage;
     if (vehicle.brand === 'Audi') return audiImage;

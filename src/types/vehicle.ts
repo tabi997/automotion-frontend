@@ -12,6 +12,8 @@ export interface Vehicle {
   engineCapacity: number;
   horsePower: number;
   color: string;
+  vin?: string;
+  negotiable?: boolean;
   images: string[];
   mainImage: string;
   badges: VehicleBadge[];
@@ -20,6 +22,8 @@ export interface Vehicle {
   description: string;
   location: string;
   dateAdded: string;
+  status?: 'active' | 'inactive' | 'sold';
+  updatedAt?: string;
   isUrgent?: boolean;
   isPromoted?: boolean;
   financing?: {
@@ -63,4 +67,25 @@ export interface PaginatedVehicles {
   page: number;
   limit: number;
   totalPages: number;
+}
+
+// New type matching the database structure
+export interface StockVehicle {
+  id: string;
+  marca: string;
+  model: string;
+  an: number;
+  km: number;
+  pret: number;
+  combustibil: string;
+  transmisie: string;
+  caroserie: string;
+  culoare?: string;
+  vin?: string;
+  negociabil?: boolean;
+  images?: string[];
+  descriere?: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
 }

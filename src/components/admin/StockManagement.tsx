@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,57 +13,70 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Edit, Trash2, Search, Filter, Eye, Car } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Vehicle } from "@/types/vehicle";
+import { StockVehicle } from "@/types/vehicle";
+import { AdminUploadGallery } from "@/components/admin/AdminUploadGallery";
+import { env } from "@/lib/env";
 
 interface VehicleFormData {
-  brand: string;
+  marca: string;
   model: string;
-  year: number;
-  price: number;
-  mileage: number;
-  fuelType: string;
-  transmission: string;
-  bodyType: string;
-  engineCapacity: number;
-  horsePower: number;
-  color: string;
-  description: string;
-  location: string;
-  condition: string;
+  an: number;
+  pret: number;
+  km: number;
+  combustibil: string;
+  transmisie: string;
+  caroserie: string;
+  culoare: string;
+  vin: string;
+  negociabil: boolean;
+  descriere: string;
+  status: string;
 }
 
 const StockManagement = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
+  const [editingVehicle, setEditingVehicle] = useState<StockVehicle | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterType, setFilterType] = useState("all");
+  const [filterType, setFilterType] = useState<string>("all");
   const queryClient = useQueryClient();
+
+  // Debug environment variables
+  useEffect(() => {
+    console.log('🔍 StockManagement Debug:');
+    console.log('• VITE_ENABLE_UPLOAD:', env.VITE_ENABLE_UPLOAD);
+    console.log('• VITE_BYPASS_ADMIN_FOR_UPLOAD:', env.VITE_BYPASS_ADMIN_FOR_UPLOAD);
+    console.log('• VITE_STORAGE_BUCKET:', env.VITE_STORAGE_BUCKET);
+    console.log('• AdminUploadGallery imported:', !!AdminUploadGallery);
+  }, []);
 
   // Form state
   const [formData, setFormData] = useState<VehicleFormData>({
-    brand: "",
+    marca: "",
     model: "",
-    year: new Date().getFullYear(),
-    price: 0,
-    mileage: 0,
-    fuelType: "benzina",
-    transmission: "automata",
-    bodyType: "berlina",
-    engineCapacity: 0,
-    horsePower: 0,
-    color: "",
-    description: "",
-    location: "",
-    condition: "second-hand"
+    an: new Date().getFullYear(),
+    pret: 0,
+    km: 0,
+    combustibil: "benzina",
+    transmisie: "automata",
+    caroserie: "berlina",
+    culoare: "",
+    vin: "",
+    negociabil: false,
+    descriere: "",
+    status: "active"
   });
+
+  // Add image upload functionality
+  const [images, setImages] = useState<File[]>([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
 
   // Fetch vehicles
   const { data: vehicles, isLoading } = useQuery({
     queryKey: ["admin-vehicles"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('vehicles')
+        .from('stock')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -76,17 +89,10 @@ const StockManagement = () => {
   const addVehicleMutation = useMutation({
     mutationFn: async (data: VehicleFormData) => {
       const { error } = await supabase
-        .from('vehicles')
+        .from('stock')
         .insert([{
           ...data,
-          images: [],
-          mainImage: "",
-          badges: [],
-          features: [],
-          dateAdded: new Date().toISOString(),
-          isUrgent: false,
-          isPromoted: false,
-          financing: { available: true }
+          images: []
         }]);
 
       if (error) throw error;
@@ -96,20 +102,19 @@ const StockManagement = () => {
       queryClient.invalidateQueries({ queryKey: ["admin-stats"] });
       setIsAddDialogOpen(false);
       setFormData({
-        brand: "",
+        marca: "",
         model: "",
-        year: new Date().getFullYear(),
-        price: 0,
-        mileage: 0,
-        fuelType: "benzina",
-        transmission: "automata",
-        bodyType: "berlina",
-        engineCapacity: 0,
-        horsePower: 0,
-        color: "",
-        description: "",
-        location: "",
-        condition: "second-hand"
+        an: new Date().getFullYear(),
+        pret: 0,
+        km: 0,
+        combustibil: "benzina",
+        transmisie: "automata",
+        caroserie: "berlina",
+        culoare: "",
+        vin: "",
+        negociabil: false,
+        descriere: "",
+        status: "active"
       });
       toast({
         title: "Succes",
@@ -129,7 +134,7 @@ const StockManagement = () => {
   const updateVehicleMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<VehicleFormData> }) => {
       const { error } = await supabase
-        .from('vehicles')
+        .from('stock')
         .update(data)
         .eq('id', id);
 
@@ -157,7 +162,7 @@ const StockManagement = () => {
   const deleteVehicleMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from('vehicles')
+        .from('stock')
         .delete()
         .eq('id', id);
 
@@ -181,33 +186,52 @@ const StockManagement = () => {
   });
 
   const handleAddVehicle = () => {
-    addVehicleMutation.mutate(formData);
+    if (!formData.marca || !formData.model || !formData.an || !formData.pret || !formData.km) {
+      toast({
+        title: "Eroare",
+        description: "Completează toate câmpurile obligatorii",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Include images in the form data
+    const vehicleDataWithImages = {
+      ...formData,
+      images: images
+    };
+    
+    addVehicleMutation.mutate(vehicleDataWithImages);
   };
 
-  const handleEditVehicle = (vehicle: Vehicle) => {
+  const handleEditVehicle = (vehicle: StockVehicle) => {
     setEditingVehicle(vehicle);
     setFormData({
-      brand: vehicle.brand,
+      marca: vehicle.marca,
       model: vehicle.model,
-      year: vehicle.year,
-      price: vehicle.price,
-      mileage: vehicle.mileage,
-      fuelType: vehicle.fuelType,
-      transmission: vehicle.transmission,
-      bodyType: vehicle.bodyType,
-      engineCapacity: vehicle.engineCapacity,
-      horsePower: vehicle.horsePower,
-      color: vehicle.color,
-      description: vehicle.description,
-      location: vehicle.location,
-      condition: vehicle.condition
+      an: vehicle.an,
+      pret: vehicle.pret,
+      km: vehicle.km,
+      combustibil: vehicle.combustibil,
+      transmisie: vehicle.transmisie,
+      caroserie: vehicle.caroserie,
+      culoare: vehicle.culoare || "",
+      vin: vehicle.vin || "",
+      negociabil: vehicle.negociabil || false,
+      descriere: vehicle.descriere || "",
+      status: vehicle.status
     });
     setIsEditDialogOpen(true);
   };
 
   const handleUpdateVehicle = () => {
     if (editingVehicle) {
-      updateVehicleMutation.mutate({ id: editingVehicle.id, data: formData });
+      // Include images in the update data
+      const updateDataWithImages = {
+        ...formData,
+        images: images
+      };
+      updateVehicleMutation.mutate({ id: editingVehicle.id, data: updateDataWithImages });
     }
   };
 
@@ -216,9 +240,9 @@ const StockManagement = () => {
   };
 
   const filteredVehicles = vehicles?.filter(vehicle => {
-    const matchesSearch = vehicle.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = vehicle.marca.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          vehicle.model.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterType === "all" || vehicle.condition === filterType;
+    const matchesFilter = filterType === "all" || vehicle.status === filterType;
     return matchesSearch && matchesFilter;
   }) || [];
 
@@ -230,19 +254,22 @@ const StockManagement = () => {
   return (
     <div className="space-y-6">
       {/* Header Actions */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Gestionare Stoc Vehicule</h2>
-          <p className="text-gray-600">Administrează vehiculele din stocul platformei</p>
-        </div>
+                <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900" id="page-title">Gestionare Stoc Vehicule</h2>
+              <p className="text-gray-600" id="page-description">Administrează vehiculele din stocul platformei</p>
+            </div>
         
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              Adaugă Vehicul
-            </Button>
-          </DialogTrigger>
+                    <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button 
+                  className="flex items-center gap-2"
+                  aria-describedby="page-description"
+                >
+                  <Plus className="h-4 w-4" />
+                  Adaugă Vehicul
+                </Button>
+              </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Adaugă Vehicul Nou</DialogTitle>
@@ -253,11 +280,12 @@ const StockManagement = () => {
             
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="brand">Marcă *</Label>
+                <Label htmlFor="marca">Marcă *</Label>
                 <Input
-                  id="brand"
-                  value={formData.brand}
-                  onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                  id="marca"
+                  name="marca"
+                  value={formData.marca}
+                  onChange={(e) => setFormData({ ...formData, marca: e.target.value })}
                   placeholder="BMW"
                 />
               </div>
@@ -266,6 +294,7 @@ const StockManagement = () => {
                 <Label htmlFor="model">Model *</Label>
                 <Input
                   id="model"
+                  name="model"
                   value={formData.model}
                   onChange={(e) => setFormData({ ...formData, model: e.target.value })}
                   placeholder="X5"
@@ -273,43 +302,46 @@ const StockManagement = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="year">An *</Label>
+                <Label htmlFor="an">An *</Label>
                 <Input
-                  id="year"
+                  id="an"
+                  name="an"
                   type="number"
-                  value={formData.year}
-                  onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
+                  value={formData.an}
+                  onChange={(e) => setFormData({ ...formData, an: parseInt(e.target.value) })}
                   min="1900"
                   max={new Date().getFullYear() + 1}
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="price">Preț (€) *</Label>
+                <Label htmlFor="pret">Preț (€) *</Label>
                 <Input
-                  id="price"
+                  id="pret"
+                  name="pret"
                   type="number"
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: parseInt(e.target.value) })}
+                  value={formData.pret}
+                  onChange={(e) => setFormData({ ...formData, pret: parseInt(e.target.value) })}
                   min="0"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="mileage">Kilometri *</Label>
+                <Label htmlFor="km">Kilometri *</Label>
                 <Input
-                  id="mileage"
+                  id="km"
+                  name="km"
                   type="number"
-                  value={formData.mileage}
-                  onChange={(e) => setFormData({ ...formData, mileage: parseInt(e.target.value) })}
+                  value={formData.km}
+                  onChange={(e) => setFormData({ ...formData, km: parseInt(e.target.value) })}
                   min="0"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="fuelType">Combustibil *</Label>
-                <Select value={formData.fuelType} onValueChange={(value) => setFormData({ ...formData, fuelType: value })}>
-                  <SelectTrigger>
+                <Label htmlFor="combustibil">Combustibil *</Label>
+                <Select value={formData.combustibil} onValueChange={(value) => setFormData({ ...formData, combustibil: value })}>
+                  <SelectTrigger id="combustibil" name="combustibil">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -321,9 +353,9 @@ const StockManagement = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="transmission">Transmisie *</Label>
-                <Select value={formData.transmission} onValueChange={(value) => setFormData({ ...formData, transmission: value })}>
-                  <SelectTrigger>
+                <Label htmlFor="transmisie">Transmisie *</Label>
+                <Select value={formData.transmisie} onValueChange={(value) => setFormData({ ...formData, transmisie: value })}>
+                  <SelectTrigger id="transmisie" name="transmisie">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -335,9 +367,9 @@ const StockManagement = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="bodyType">Tip Caroserie *</Label>
-                <Select value={formData.bodyType} onValueChange={(value) => setFormData({ ...formData, bodyType: value })}>
-                  <SelectTrigger>
+                <Label htmlFor="caroserie">Tip Caroserie *</Label>
+                <Select value={formData.caroserie} onValueChange={(value) => setFormData({ ...formData, caroserie: value })}>
+                  <SelectTrigger id="caroserie" name="caroserie">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -349,83 +381,103 @@ const StockManagement = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="engineCapacity">Capacitate Motor (cc)</Label>
+                <Label htmlFor="culoare">Culoare</Label>
                 <Input
-                  id="engineCapacity"
-                  type="number"
-                  value={formData.engineCapacity}
-                  onChange={(e) => setFormData({ ...formData, engineCapacity: parseInt(e.target.value) })}
-                  min="0"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="horsePower">Cai Putere</Label>
-                <Input
-                  id="horsePower"
-                  type="number"
-                  value={formData.horsePower}
-                  onChange={(e) => setFormData({ ...formData, horsePower: parseInt(e.target.value) })}
-                  min="0"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="color">Culoare</Label>
-                <Input
-                  id="color"
-                  value={formData.color}
-                  onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                  id="culoare"
+                  name="culoare"
+                  value={formData.culoare}
+                  onChange={(e) => setFormData({ ...formData, culoare: e.target.value })}
                   placeholder="Negru Safir"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="condition">Stare *</Label>
-                <Select value={formData.condition} onValueChange={(value) => setFormData({ ...formData, condition: value })}>
-                  <SelectTrigger>
+                <Label htmlFor="vin">Vin</Label>
+                <Input
+                  id="vin"
+                  name="vin"
+                  value={formData.vin}
+                  onChange={(e) => setFormData({ ...formData, vin: e.target.value })}
+                  placeholder="WBA3A9C50EP000000"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="negociabil">Negociabil</Label>
+                <Select value={formData.negociabil ? "true" : "false"} onValueChange={(value) => setFormData({ ...formData, negociabil: value === "true" })}>
+                  <SelectTrigger id="negociabil" name="negociabil">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {conditions.map(condition => (
-                      <SelectItem key={condition} value={condition}>{condition}</SelectItem>
-                    ))}
+                    <SelectItem value="true">Da</SelectItem>
+                    <SelectItem value="false">Nu</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="location">Locație</Label>
-                <Input
-                  id="location"
-                  value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  placeholder="București"
-                />
+                <Label htmlFor="status">Status *</Label>
+                <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value as 'active' | 'inactive' })}>
+                  <SelectTrigger id="status" name="status">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Activ</SelectItem>
+                    <SelectItem value="inactive">Inactiv</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="description">Descriere</Label>
+              <Label htmlFor="descriere">Descriere</Label>
               <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                id="descriere"
+                name="descriere"
+                value={formData.descriere}
+                onChange={(e) => setFormData({ ...formData, descriere: e.target.value })}
                 placeholder="Descrierea vehiculului..."
                 rows={3}
               />
             </div>
             
+            {/* Image Upload */}
+            <div className="space-y-2">
+              <Label htmlFor="vehicle-images">Fotografii Vehicul</Label>
+              <div id="vehicle-images" aria-describedby="vehicle-images-help">
+                <AdminUploadGallery
+                  onImagesChange={(imageUrls) => {
+                    // Store image URLs for later upload
+                    setImages(imageUrls as unknown as File[]);
+                  }}
+                  minImages={1}
+                  maxImages={10}
+                />
+              </div>
+              <p id="vehicle-images-help" className="text-sm text-gray-500">
+                Adaugă între 1 și 10 fotografii ale vehiculului
+              </p>
+            </div>
+            
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+              <Button 
+                variant="outline" 
+                onClick={() => setIsAddDialogOpen(false)}
+                aria-describedby="cancel-help"
+              >
                 Anulează
               </Button>
               <Button 
                 onClick={handleAddVehicle}
                 disabled={addVehicleMutation.isPending}
+                aria-describedby="add-help"
               >
                 {addVehicleMutation.isPending ? "Se adaugă..." : "Adaugă Vehicul"}
               </Button>
+            </div>
+            <div className="sr-only">
+              <p id="cancel-help">Anulează adăugarea vehiculului și închide dialogul</p>
+              <p id="add-help">Adaugă vehiculul în stoc cu informațiile completate</p>
             </div>
           </DialogContent>
         </Dialog>
@@ -439,26 +491,34 @@ const StockManagement = () => {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
+                  id="search-vehicles"
+                  name="search-vehicles"
                   placeholder="Caută după marcă sau model..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
+                  aria-describedby="search-help"
                 />
               </div>
+              <p id="search-help" className="sr-only">Caută vehicule după marcă sau model</p>
             </div>
             
-            <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger className="w-full sm:w-48">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Filtrează după stare" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Toate</SelectItem>
-                <SelectItem value="nou">Nou</SelectItem>
-                <SelectItem value="second-hand">Second Hand</SelectItem>
-                <SelectItem value="demo">Demo</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="space-y-2">
+              <Label htmlFor="filter-status" className="sr-only">Filtrează după stare</Label>
+              <Select value={filterType} onValueChange={setFilterType}>
+                <SelectTrigger id="filter-status" name="filter-status" className="w-full sm:w-48" aria-describedby="filter-help">
+                  <Filter className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Filtrează după stare" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Toate</SelectItem>
+                  <SelectItem value="active">Activ</SelectItem>
+                  <SelectItem value="inactive">Inactiv</SelectItem>
+                  <SelectItem value="sold">Vândute</SelectItem>
+                </SelectContent>
+              </Select>
+              <p id="filter-help" className="sr-only">Selectează starea vehiculelor pentru a filtra lista</p>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -476,15 +536,15 @@ const StockManagement = () => {
             <div className="text-center py-8">Se încarcă...</div>
           ) : (
             <div className="overflow-x-auto">
-              <Table>
+              <Table role="table" aria-label="Lista vehiculelor din stoc">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Vehicul</TableHead>
-                    <TableHead>Preț</TableHead>
-                    <TableHead>Stare</TableHead>
-                    <TableHead>Locație</TableHead>
-                    <TableHead>Data Adăugării</TableHead>
-                    <TableHead>Acțiuni</TableHead>
+                    <TableHead scope="col">Vehicul</TableHead>
+                    <TableHead scope="col">Preț</TableHead>
+                    <TableHead scope="col">Stare</TableHead>
+                    <TableHead scope="col">Locație</TableHead>
+                    <TableHead scope="col">Data Adăugării</TableHead>
+                    <TableHead scope="col">Acțiuni</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -496,25 +556,25 @@ const StockManagement = () => {
                             <Car className="h-6 w-6 text-gray-500" />
                           </div>
                           <div>
-                            <div className="font-medium">{vehicle.brand} {vehicle.model}</div>
+                            <div className="font-medium">{vehicle.marca} {vehicle.model}</div>
                             <div className="text-sm text-gray-500">
-                              {vehicle.year} • {vehicle.mileage.toLocaleString()} km
+                              {vehicle.an} • {vehicle.km.toLocaleString()} km
                             </div>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="font-medium">€{vehicle.price.toLocaleString()}</div>
+                        <div className="font-medium">€{vehicle.pret.toLocaleString()}</div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={vehicle.condition === 'nou' ? 'default' : 'secondary'}>
-                          {vehicle.condition === 'nou' ? 'Nou' : 
-                           vehicle.condition === 'second-hand' ? 'Second Hand' : 'Demo'}
+                        <Badge variant={vehicle.status === 'active' ? 'default' : 'secondary'}>
+                          {vehicle.status === 'active' ? 'Activ' : 
+                           vehicle.status === 'inactive' ? 'Inactiv' : 'Vândut'}
                         </Badge>
                       </TableCell>
-                      <TableCell>{vehicle.location}</TableCell>
+                      <TableCell>{/* Locație is not in StockVehicle, so it's empty */}</TableCell>
                       <TableCell>
-                        {new Date(vehicle.dateAdded).toLocaleDateString('ro-RO')}
+                        {new Date(vehicle.created_at).toLocaleDateString('ro-RO')}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
@@ -522,16 +582,21 @@ const StockManagement = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => handleEditVehicle(vehicle)}
+                            aria-label={`Editează vehiculul ${vehicle.marca} ${vehicle.model}`}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
                           
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="outline" size="sm">
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </AlertDialogTrigger>
+                                                      <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  aria-label={`Șterge vehiculul ${vehicle.marca} ${vehicle.model}`}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
                                 <AlertDialogTitle>Ești sigur?</AlertDialogTitle>
@@ -573,11 +638,12 @@ const StockManagement = () => {
           
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-brand">Marcă *</Label>
+              <Label htmlFor="edit-marca">Marcă *</Label>
               <Input
-                id="edit-brand"
-                value={formData.brand}
-                onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                id="edit-marca"
+                name="edit-marca"
+                value={formData.marca}
+                onChange={(e) => setFormData({ ...formData, marca: e.target.value })}
                 placeholder="BMW"
               />
             </div>
@@ -586,6 +652,7 @@ const StockManagement = () => {
               <Label htmlFor="edit-model">Model *</Label>
               <Input
                 id="edit-model"
+                name="edit-model"
                 value={formData.model}
                 onChange={(e) => setFormData({ ...formData, model: e.target.value })}
                 placeholder="X5"
@@ -593,43 +660,46 @@ const StockManagement = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="edit-year">An *</Label>
+              <Label htmlFor="edit-an">An *</Label>
               <Input
-                id="edit-year"
+                id="edit-an"
+                name="edit-an"
                 type="number"
-                value={formData.year}
-                onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
+                value={formData.an}
+                onChange={(e) => setFormData({ ...formData, an: parseInt(e.target.value) })}
                 min="1900"
                 max={new Date().getFullYear() + 1}
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="edit-price">Preț (€) *</Label>
+              <Label htmlFor="edit-pret">Preț (€) *</Label>
               <Input
-                id="edit-price"
+                id="edit-pret"
+                name="edit-pret"
                 type="number"
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: parseInt(e.target.value) })}
+                value={formData.pret}
+                onChange={(e) => setFormData({ ...formData, pret: parseInt(e.target.value) })}
                 min="0"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="edit-mileage">Kilometri *</Label>
+              <Label htmlFor="edit-km">Kilometri *</Label>
               <Input
-                id="edit-mileage"
+                id="edit-km"
+                name="edit-km"
                 type="number"
-                value={formData.mileage}
-                onChange={(e) => setFormData({ ...formData, mileage: parseInt(e.target.value) })}
+                value={formData.km}
+                onChange={(e) => setFormData({ ...formData, km: parseInt(e.target.value) })}
                 min="0"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="edit-fuelType">Combustibil *</Label>
-              <Select value={formData.fuelType} onValueChange={(value) => setFormData({ ...formData, fuelType: value })}>
-                <SelectTrigger>
+              <Label htmlFor="edit-combustibil">Combustibil *</Label>
+              <Select value={formData.combustibil} onValueChange={(value) => setFormData({ ...formData, combustibil: value })}>
+                <SelectTrigger id="edit-combustibil" name="edit-combustibil">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -641,9 +711,9 @@ const StockManagement = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="edit-transmission">Transmisie *</Label>
-              <Select value={formData.transmission} onValueChange={(value) => setFormData({ ...formData, transmission: value })}>
-                <SelectTrigger>
+              <Label htmlFor="edit-transmisie">Transmisie *</Label>
+              <Select value={formData.transmisie} onValueChange={(value) => setFormData({ ...formData, transmisie: value })}>
+                <SelectTrigger id="edit-transmisie" name="edit-transmisie">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -655,9 +725,9 @@ const StockManagement = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="edit-bodyType">Tip Caroserie *</Label>
-              <Select value={formData.bodyType} onValueChange={(value) => setFormData({ ...formData, bodyType: value })}>
-                <SelectTrigger>
+              <Label htmlFor="edit-caroserie">Tip Caroserie *</Label>
+              <Select value={formData.caroserie} onValueChange={(value) => setFormData({ ...formData, caroserie: value })}>
+                <SelectTrigger id="edit-caroserie" name="edit-caroserie">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -669,83 +739,103 @@ const StockManagement = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="edit-engineCapacity">Capacitate Motor (cc)</Label>
+              <Label htmlFor="edit-culoare">Culoare</Label>
               <Input
-                id="edit-engineCapacity"
-                type="number"
-                value={formData.engineCapacity}
-                onChange={(e) => setFormData({ ...formData, engineCapacity: parseInt(e.target.value) })}
-                min="0"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="edit-horsePower">Cai Putere</Label>
-              <Input
-                id="edit-horsePower"
-                type="number"
-                value={formData.horsePower}
-                onChange={(e) => setFormData({ ...formData, horsePower: parseInt(e.target.value) })}
-                min="0"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="edit-color">Culoare</Label>
-              <Input
-                id="edit-color"
-                value={formData.color}
-                onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                id="edit-culoare"
+                name="edit-culoare"
+                value={formData.culoare}
+                onChange={(e) => setFormData({ ...formData, culoare: e.target.value })}
                 placeholder="Negru Safir"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="edit-condition">Stare *</Label>
-              <Select value={formData.condition} onValueChange={(value) => setFormData({ ...formData, condition: value })}>
-                <SelectTrigger>
+              <Label htmlFor="edit-vin">Vin</Label>
+              <Input
+                id="edit-vin"
+                name="edit-vin"
+                value={formData.vin}
+                onChange={(e) => setFormData({ ...formData, vin: e.target.value })}
+                placeholder="WBA3A9C50EP000000"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="edit-negociabil">Negociabil</Label>
+              <Select value={formData.negociabil ? "true" : "false"} onValueChange={(value) => setFormData({ ...formData, negociabil: value === "true" })}>
+                <SelectTrigger id="edit-negociabil" name="edit-negociabil">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {conditions.map(condition => (
-                    <SelectItem key={condition} value={condition}>{condition}</SelectItem>
-                  ))}
+                  <SelectItem value="true">Da</SelectItem>
+                  <SelectItem value="false">Nu</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="edit-location">Locație</Label>
-              <Input
-                id="edit-location"
-                value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                placeholder="București"
-              />
+              <Label htmlFor="edit-status">Status *</Label>
+              <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value as 'active' | 'inactive' })}>
+                <SelectTrigger id="edit-status" name="edit-status">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Activ</SelectItem>
+                  <SelectItem value="inactive">Inactiv</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="edit-description">Descriere</Label>
-            <Textarea
-              id="edit-description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Descrierea vehiculului..."
-              rows={3}
-            />
+            <Label htmlFor="edit-descriere">Descriere</Label>
+                          <Textarea
+                id="edit-descriere"
+                name="edit-descriere"
+                value={formData.descriere}
+                onChange={(e) => setFormData({ ...formData, descriere: e.target.value })}
+                placeholder="Descrierea vehiculului..."
+                rows={3}
+              />
+          </div>
+          
+          {/* Image Upload for Edit */}
+          <div className="space-y-2">
+            <Label htmlFor="edit-vehicle-images">Fotografii Vehicul</Label>
+            <div id="edit-vehicle-images" aria-describedby="edit-vehicle-images-help">
+              <AdminUploadGallery
+                onImagesChange={(imageUrls) => {
+                  // Store image URLs for later update
+                  setImages(imageUrls as unknown as File[]);
+                }}
+                minImages={1}
+                maxImages={10}
+              />
+            </div>
+            <p id="edit-vehicle-images-help" className="text-sm text-gray-500">
+              Adaugă între 1 și 10 fotografii ale vehiculului
+            </p>
           </div>
           
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsEditDialogOpen(false)}
+              aria-describedby="edit-cancel-help"
+            >
               Anulează
             </Button>
             <Button 
               onClick={handleUpdateVehicle}
               disabled={updateVehicleMutation.isPending}
+              aria-describedby="edit-update-help"
             >
               {updateVehicleMutation.isPending ? "Se actualizează..." : "Actualizează"}
             </Button>
+          </div>
+          <div className="sr-only">
+            <p id="edit-cancel-help">Anulează editarea vehiculului și închide dialogul</p>
+            <p id="edit-update-help">Actualizează vehiculul cu informațiile modificate</p>
           </div>
         </DialogContent>
       </Dialog>

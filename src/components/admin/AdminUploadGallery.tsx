@@ -1,31 +1,29 @@
 import { useState, useCallback } from "react";
-import { Upload, X, Image, AlertCircle, CheckCircle } from "lucide-react";
+import { Upload, X, AlertCircle, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { STORAGE_CONFIG, STORAGE_PATHS, validateFile } from "@/lib/storage";
 import { env } from "@/lib/env";
-import { useAdmin } from "@/hooks/use-admin";
 
-interface UploadGalleryProps {
-  onImagesChange: (imageIds: string[]) => void;
+interface AdminUploadGalleryProps {
+  onImagesChange: (imageUrls: string[]) => void;
   maxImages?: number;
   minImages?: number;
   className?: string;
 }
 
-export function UploadGallery({ 
+export function AdminUploadGallery({ 
   onImagesChange, 
   maxImages = 10, 
-  minImages = 3,
+  minImages = 1,
   className 
-}: UploadGalleryProps) {
+}: AdminUploadGalleryProps) {
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const { isAdmin, loading: adminLoading, error: adminError } = useAdmin();
 
   const uploadToSupabase = useCallback(async (files: FileList) => {
     setIsUploading(true);
@@ -33,6 +31,10 @@ export function UploadGallery({
     setSuccess(null);
 
     try {
+      console.log('🔍 AdminUploadGallery: Starting upload...');
+      console.log('🔍 AdminUploadGallery: Target bucket:', env.VITE_STORAGE_BUCKET);
+      console.log('🔍 AdminUploadGallery: STORAGE_CONFIG.bucket:', STORAGE_CONFIG.bucket);
+      
       const fileArray = Array.from(files);
       const uploadedUrls: string[] = [];
 
@@ -47,6 +49,9 @@ export function UploadGallery({
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
         const filePath = `${STORAGE_PATHS.vehicles}/${fileName}`;
+        
+        console.log('🔍 AdminUploadGallery: Uploading to path:', filePath);
+        console.log('🔍 AdminUploadGallery: Using bucket:', STORAGE_CONFIG.bucket);
 
         // Upload to Supabase Storage
         const { data, error: uploadError } = await supabase.storage
@@ -54,6 +59,7 @@ export function UploadGallery({
           .upload(filePath, file);
 
         if (uploadError) {
+          console.error('🔍 AdminUploadGallery: Upload error:', uploadError);
           throw new Error(`Upload failed: ${uploadError.message}`);
         }
 
@@ -72,7 +78,7 @@ export function UploadGallery({
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Upload failed';
       setError(errorMessage);
-      console.error('Upload error:', err);
+      console.error('AdminUploadGallery error:', err);
     } finally {
       setIsUploading(false);
     }
@@ -122,51 +128,24 @@ export function UploadGallery({
     );
   }
 
-  // Check admin status
-  if (adminLoading) {
-    return (
-      <Alert>
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          Verificare status admin...
-        </AlertDescription>
-      </Alert>
-    );
-  }
-
-  if (adminError) {
-    return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          Eroare la verificarea statusului admin: {adminError}
-        </AlertDescription>
-      </Alert>
-    );
-  }
-
-  if (!isAdmin && !env.VITE_BYPASS_ADMIN_FOR_UPLOAD) {
-    return (
-      <Alert>
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          Accesul la upload este restricționat doar pentru administratori.
-        </AlertDescription>
-      </Alert>
-    );
-  }
-
   return (
     <div className={cn("space-y-4", className)}>
       {/* Upload Button */}
       <div className="relative">
+        <label htmlFor="file-upload" className="sr-only">
+          Selectează fișiere pentru încărcare
+        </label>
         <input
+          id="file-upload"
+          name="file-upload"
           type="file"
           multiple
           accept="image/*"
           onChange={handleFileSelect}
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
           disabled={isUploading || uploadedImages.length >= maxImages}
+          aria-describedby="upload-help"
+          aria-label="Selectează fișiere pentru încărcare"
         />
         <Button
           type="button"
@@ -177,6 +156,7 @@ export function UploadGallery({
             uploadedImages.length >= maxImages && "opacity-50 cursor-not-allowed"
           )}
           disabled={isUploading || uploadedImages.length >= maxImages}
+          aria-describedby="upload-help"
         >
           <div className="flex flex-col items-center space-y-2">
             <Upload className="h-8 w-8 text-primary-foreground" />
@@ -190,6 +170,9 @@ export function UploadGallery({
             </div>
           </div>
         </Button>
+        <p id="upload-help" className="sr-only">
+          Selectează una sau mai multe imagini pentru a le încărca. Acceptă formatele: JPG, PNG, GIF, WebP.
+        </p>
       </div>
 
       {/* Status Messages */}
@@ -225,6 +208,7 @@ export function UploadGallery({
                 size="icon"
                 className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
                 onClick={() => removeImage(index)}
+                aria-label={`Șterge imaginea ${index + 1}`}
               >
                 <X className="h-3 w-3" />
               </Button>
