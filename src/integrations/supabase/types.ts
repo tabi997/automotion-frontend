@@ -14,7 +14,165 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      contact_messages: {
+        Row: {
+          created_at: string
+          email: string
+          gdpr: boolean
+          id: string
+          mesaj: string
+          nume: string
+          subiect: string
+          telefon: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          gdpr?: boolean
+          id?: string
+          mesaj: string
+          nume: string
+          subiect: string
+          telefon?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          gdpr?: boolean
+          id?: string
+          mesaj?: string
+          nume?: string
+          subiect?: string
+          telefon?: string | null
+        }
+        Relationships: []
+      }
+      lead_finance: {
+        Row: {
+          avans: number
+          created_at: string
+          dobanda: number
+          email: string
+          id: string
+          istoric_creditare: string | null
+          link_stoc: string | null
+          mesaj: string | null
+          nume: string
+          perioada: number
+          pret: number
+          telefon: string
+          tip_contract: string | null
+          venit_lunar: number | null
+        }
+        Insert: {
+          avans?: number
+          created_at?: string
+          dobanda: number
+          email: string
+          id?: string
+          istoric_creditare?: string | null
+          link_stoc?: string | null
+          mesaj?: string | null
+          nume: string
+          perioada: number
+          pret: number
+          telefon: string
+          tip_contract?: string | null
+          venit_lunar?: number | null
+        }
+        Update: {
+          avans?: number
+          created_at?: string
+          dobanda?: number
+          email?: string
+          id?: string
+          istoric_creditare?: string | null
+          link_stoc?: string | null
+          mesaj?: string | null
+          nume?: string
+          perioada?: number
+          pret?: number
+          telefon?: string
+          tip_contract?: string | null
+          venit_lunar?: number | null
+        }
+        Relationships: []
+      }
+      lead_sell: {
+        Row: {
+          an: number
+          caroserie: string
+          combustibil: string
+          created_at: string
+          culoare: string | null
+          email: string
+          gdpr: boolean
+          id: string
+          images: string[] | null
+          interval_orar: string | null
+          judet: string
+          km: number
+          marca: string
+          model: string
+          negociabil: boolean | null
+          nume: string
+          oras: string
+          preferinta_contact: string | null
+          pret: number | null
+          telefon: string
+          transmisie: string
+          vin: string | null
+        }
+        Insert: {
+          an: number
+          caroserie: string
+          combustibil: string
+          created_at?: string
+          culoare?: string | null
+          email: string
+          gdpr?: boolean
+          id?: string
+          images?: string[] | null
+          interval_orar?: string | null
+          judet: string
+          km: number
+          marca: string
+          model: string
+          negociabil?: boolean | null
+          nume: string
+          oras: string
+          preferinta_contact?: string | null
+          pret?: number | null
+          telefon: string
+          transmisie: string
+          vin?: string | null
+        }
+        Update: {
+          an?: number
+          caroserie?: string
+          combustibil?: string
+          created_at?: string
+          culoare?: string | null
+          email?: string
+          gdpr?: boolean
+          id?: string
+          images?: string[] | null
+          interval_orar?: string | null
+          judet?: string
+          km?: number
+          marca?: string
+          model?: string
+          negociabil?: boolean | null
+          nume?: string
+          oras?: string
+          preferinta_contact?: string | null
+          pret?: number | null
+          telefon?: string
+          transmisie?: string
+          vin?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
