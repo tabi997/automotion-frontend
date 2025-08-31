@@ -258,7 +258,7 @@ const LeadManagement = () => {
       </Card>
 
       {/* Cleanup Section */}
-      <Card>
+      <Card data-testid="cleanup-section">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Trash2 className="h-5 w-5 text-red-600" />
