@@ -23,6 +23,13 @@ import {
   Crown,
   CheckCircle
 } from 'lucide-react';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 // Import images
 import heroCarImage from '@/assets/hero-car.jpg';
@@ -196,81 +203,103 @@ const Index = () => {
         </p>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-        {[
-          { 
-            image: bmwImage, 
-            brand: 'BMW', 
-            model: 'X5', 
-            year: 2023, 
-            price: 85000,
-            badges: [
-              { text: 'Primul proprietar', variant: 'success' as const },
-              { text: 'Service complet', variant: 'info' as const }
-            ]
-          },
-          { 
-            image: mercedesImage, 
-            brand: 'Mercedes-Benz', 
-            model: 'AMG GT', 
-            year: 2024, 
-            price: 165000,
-            badges: [
-              { text: 'Nou', variant: 'success' as const },
-              { text: 'Urgent', variant: 'urgent' as const }
-            ]
-          },
-          { 
-            image: audiImage, 
-            brand: 'Audi', 
-            model: 'A4', 
-            year: 2022, 
-            price: 42000,
-            badges: [
-              { text: 'Fără accident', variant: 'success' as const },
-              { text: 'Verificat', variant: 'info' as const }
-            ]
-          }
-        ].map((car, index) => (
-          <div 
-            key={index}
-            className={`automotive-card overflow-hidden hover-lift animate-fade-in-up stagger-${index + 1}`}
-          >
-            <div className="relative">
-              <img 
-                src={car.image}
-                alt={`${car.brand} ${car.model}`}
-                className="w-full h-48 object-cover"
-              />
-              <div className="absolute top-4 left-4 flex flex-wrap gap-2">
-                {car.badges.map((badge, badgeIndex) => (
-                  <Badge key={badgeIndex} variant={badge.variant} size="sm">
-                    {badge.text}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-            
-            <div className="p-6">
-              <h3 className="text-xl font-semibold mb-2">
-                {car.brand} {car.model}
-              </h3>
-              <p className="text-muted-foreground mb-4">An: {car.year}</p>
-              
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="text-2xl font-bold text-primary">
-                    €{car.price.toLocaleString()}
-                  </span>
+      <div className="relative mb-12">
+        <Carousel
+          opts={{
+            align: "start",
+            loop: true,
+          }}
+          className="w-full max-w-6xl mx-auto"
+        >
+          <CarouselContent className="-ml-2 md:-ml-4">
+            {[
+              { 
+                image: bmwImage, 
+                brand: 'BMW', 
+                model: 'X5', 
+                year: 2023, 
+                price: 85000,
+                badges: [
+                  { text: 'Primul proprietar', variant: 'success' as const },
+                  { text: 'Service complet', variant: 'info' as const }
+                ]
+              },
+              { 
+                image: mercedesImage, 
+                brand: 'Mercedes-Benz', 
+                model: 'AMG GT', 
+                year: 2024, 
+                price: 165000,
+                badges: [
+                  { text: 'Nou', variant: 'success' as const },
+                  { text: 'Urgent', variant: 'urgent' as const }
+                ]
+              },
+              { 
+                image: audiImage, 
+                brand: 'Audi', 
+                model: 'A4', 
+                year: 2022, 
+                price: 42000,
+                badges: [
+                  { text: 'Fără accident', variant: 'success' as const },
+                  { text: 'Verificat', variant: 'info' as const }
+                ]
+              },
+              { 
+                image: bmwImage, 
+                brand: 'BMW', 
+                model: 'X3', 
+                year: 2023, 
+                price: 68000,
+                badges: [
+                  { text: 'Service complet', variant: 'info' as const },
+                  { text: 'Garanție', variant: 'success' as const }
+                ]
+              }
+            ].map((car, index) => (
+              <CarouselItem key={index} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
+                <div className="automotive-card overflow-hidden hover-lift">
+                  <div className="relative">
+                    <img 
+                      src={car.image}
+                      alt={`${car.brand} ${car.model}`}
+                      className="w-full h-48 object-cover"
+                    />
+                    <div className="absolute top-4 left-4 flex flex-wrap gap-2">
+                      {car.badges.map((badge, badgeIndex) => (
+                        <Badge key={badgeIndex} variant={badge.variant} size="sm">
+                          {badge.text}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="p-6">
+                    <h3 className="text-xl font-semibold mb-2">
+                      {car.brand} {car.model}
+                    </h3>
+                    <p className="text-muted-foreground mb-4">An: {car.year}</p>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-2xl font-bold text-primary">
+                          €{car.price.toLocaleString()}
+                        </span>
+                      </div>
+                      
+                      <Button variant="outline" size="sm">
+                        Detalii
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-                
-                <Button variant="outline" size="sm">
-                  Detalii
-                </Button>
-              </div>
-            </div>
-          </div>
-        ))}
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious className="left-4" />
+          <CarouselNext className="right-4" />
+        </Carousel>
       </div>
       
       <div className="text-center">
