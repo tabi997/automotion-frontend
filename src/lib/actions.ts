@@ -31,7 +31,7 @@ export async function submitSellLead(data: SellCarInput): Promise<ActionResponse
         negociabil: data.negociabil,
         judet: data.judet,
         oras: data.oras,
-        images: data.images,
+        images: data.images || [],
         nume: data.nume,
         telefon: data.telefon,
         email: data.email,
