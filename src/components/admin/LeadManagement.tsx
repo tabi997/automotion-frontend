@@ -7,9 +7,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Search, Eye, CheckCircle, Clock, Filter } from "lucide-react";
+import { Search, Eye, CheckCircle, Clock, Filter, Trash2, AlertTriangle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { deleteOldLeadsFromAllTables, getLeadCleanupStats } from "@/lib/actions";
 
 interface LeadSell {
   id: string;
@@ -32,7 +33,7 @@ interface LeadSell {
   preferinta_contact: string;
   interval_orar: string;
   gdpr: boolean;
-  processed: boolean;
+  status: string;
   created_at: string;
 }
 
@@ -50,7 +51,7 @@ interface LeadFinance {
   istoric_creditare: string;
   link_stoc: string;
   mesaj: string;
-  processed: boolean;
+  status: string;
   created_at: string;
 }
 
@@ -62,16 +63,42 @@ interface ContactMessage {
   subiect: string;
   mesaj: string;
   gdpr: boolean;
-  processed: boolean;
+  status: string;
   created_at: string;
+}
+
+interface SelectedLead {
+  id: string;
+  type: 'sell' | 'finance' | 'contact';
+  nume: string;
+  email: string;
+  telefon: string;
+  status: string;
+  created_at: string;
+  [key: string]: any;
 }
 
 const LeadManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [selectedLead, setSelectedLead] = useState<unknown>(null);
+  const [selectedLead, setSelectedLead] = useState<SelectedLead | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isCleanupDialogOpen, setIsCleanupDialogOpen] = useState(false);
+  const [cleanupOptions, setCleanupOptions] = useState({
+    daysOld: 90,
+    onlyProcessed: true
+  });
   const queryClient = useQueryClient();
+
+  // Fetch cleanup stats
+  const { data: cleanupStats, refetch: refetchCleanupStats } = useQuery({
+    queryKey: ["admin-cleanup-stats"],
+    queryFn: async () => {
+      const result = await getLeadCleanupStats();
+      if (!result.success) throw new Error(result.error);
+      return result.data;
+    }
+  });
 
   // Fetch sell leads
   const { data: sellLeads, isLoading: sellLeadsLoading } = useQuery({
@@ -119,8 +146,8 @@ const LeadManagement = () => {
   const markProcessedMutation = useMutation({
     mutationFn: async ({ table, id }: { table: string; id: string }) => {
       const { error } = await supabase
-        .from(table)
-        .update({ processed: true })
+        .from(table as any)
+        .update({ status: 'processed' })
         .eq('id', id);
 
       if (error) throw error;
@@ -146,7 +173,7 @@ const LeadManagement = () => {
     markProcessedMutation.mutate({ table, id });
   };
 
-  const handleViewLead = (lead: unknown, type: string) => {
+  const handleViewLead = (lead: any, type: 'sell' | 'finance' | 'contact') => {
     setSelectedLead({ ...lead, type });
     setIsViewDialogOpen(true);
   };
@@ -156,7 +183,7 @@ const LeadManagement = () => {
                          lead.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          lead.nume.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterStatus === "all" || 
-                         (filterStatus === "processed" ? lead.processed : !lead.processed);
+                         (filterStatus === "processed" ? lead.status === 'processed' : lead.status !== 'processed');
     return matchesSearch && matchesFilter;
   }) || [];
 
@@ -164,7 +191,7 @@ const LeadManagement = () => {
     const matchesSearch = lead.nume.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          lead.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterStatus === "all" || 
-                         (filterStatus === "processed" ? lead.processed : !lead.processed);
+                         (filterStatus === "processed" ? lead.status === 'processed' : lead.status !== 'processed');
     return matchesSearch && matchesFilter;
   }) || [];
 
@@ -173,13 +200,13 @@ const LeadManagement = () => {
                          message.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          message.subiect.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterStatus === "all" || 
-                         (filterStatus === "processed" ? message.processed : !message.processed);
+                         (filterStatus === "processed" ? message.status === 'processed' : message.status !== 'processed');
     return matchesSearch && matchesFilter;
   }) || [];
 
-  const getStatusBadge = (processed: boolean) => (
-    <Badge variant={processed ? "default" : "secondary"}>
-      {processed ? (
+  const getStatusBadge = (status: string) => (
+    <Badge variant={status === 'processed' ? "default" : "secondary"}>
+      {status === 'processed' ? (
         <>
           <CheckCircle className="h-3 w-3 mr-1" />
           Procesat
@@ -226,6 +253,168 @@ const LeadManagement = () => {
               <option value="pending">În așteptare</option>
               <option value="processed">Procesate</option>
             </select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Cleanup Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Trash2 className="h-5 w-5 text-red-600" />
+            Curățare Lead-uri Vechi
+          </CardTitle>
+          <CardDescription>
+            Șterge lead-urile vechi pentru a menține baza de date curată
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div className="text-center p-4 bg-gray-50 rounded-lg">
+              <div className="text-2xl font-bold text-blue-600">
+                {(cleanupStats as any)?.sellLeads?.total || 0}
+              </div>
+              <div className="text-sm text-gray-600">Lead-uri Vânzare</div>
+              <div className="text-xs text-gray-500">
+                {(cleanupStats as any)?.sellLeads?.old90Days || 0} mai vechi de 90 zile
+              </div>
+            </div>
+            <div className="text-center p-4 bg-gray-50 rounded-lg">
+              <div className="text-2xl font-bold text-green-600">
+                {(cleanupStats as any)?.financeLeads?.total || 0}
+              </div>
+              <div className="text-sm text-gray-600">Lead-uri Finanțare</div>
+              <div className="text-xs text-gray-500">
+                {(cleanupStats as any)?.financeLeads?.old90Days || 0} mai vechi de 90 zile
+              </div>
+            </div>
+            <div className="text-center p-4 bg-gray-50 rounded-lg">
+              <div className="text-2xl font-bold text-purple-600">
+                {(cleanupStats as any)?.contactMessages?.total || 0}
+              </div>
+              <div className="text-sm text-gray-600">Mesaje Contact</div>
+              <div className="text-xs text-gray-500">
+                {(cleanupStats as any)?.contactMessages?.old90Days || 0} mai vechi de 90 zile
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Button
+              variant="outline"
+              onClick={() => refetchCleanupStats()}
+              className="flex items-center gap-2"
+            >
+              <Filter className="h-4 w-4" />
+              Actualizează Statistici
+            </Button>
+            
+            <Dialog open={isCleanupDialogOpen} onOpenChange={setIsCleanupDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="destructive" className="flex items-center gap-2">
+                  <Trash2 className="h-4 w-4" />
+                  Șterge Lead-uri Vechi
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-red-600" />
+                    Confirmare Ștergere
+                  </DialogTitle>
+                  <DialogDescription>
+                    Această acțiune va șterge definitiv lead-urile vechi. Nu poate fi anulată.
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Vârsta minimă (zile)
+                    </label>
+                    <select
+                      value={cleanupOptions.daysOld}
+                      onChange={(e) => setCleanupOptions(prev => ({ ...prev, daysOld: Number(e.target.value) }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    >
+                      <option value={30}>30 zile</option>
+                      <option value={60}>60 zile</option>
+                      <option value={90}>90 zile</option>
+                      <option value={180}>180 zile</option>
+                      <option value={365}>1 an</option>
+                    </select>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="onlyProcessed"
+                      checked={cleanupOptions.onlyProcessed}
+                      onChange={(e) => setCleanupOptions(prev => ({ ...prev, onlyProcessed: e.target.checked }))}
+                      className="rounded"
+                    />
+                    <label htmlFor="onlyProcessed" className="text-sm">
+                      Șterge doar lead-urile procesate
+                    </label>
+                  </div>
+                  
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                    <div className="flex items-center gap-2 text-yellow-800">
+                      <AlertTriangle className="h-4 w-4" />
+                      <span className="font-medium">Atenție!</span>
+                    </div>
+                    <p className="text-sm text-yellow-700 mt-1">
+                      Această acțiune va șterge toate lead-urile mai vechi de {cleanupOptions.daysOld} zile
+                      {cleanupOptions.onlyProcessed ? ' care sunt marcate ca procesate' : ''}.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex justify-end gap-3 pt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsCleanupDialogOpen(false)}
+                  >
+                    Anulează
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={async () => {
+                      try {
+                        const result = await deleteOldLeadsFromAllTables(cleanupOptions);
+                        if (result.success) {
+                          toast({
+                            title: "Succes",
+                            description: result.message || `${(result.data as any)?.totalDeleted || 0} lead-uri au fost șterse.`,
+                          });
+                          // Refresh data
+                          queryClient.invalidateQueries({ queryKey: ["admin-sell-leads"] });
+                          queryClient.invalidateQueries({ queryKey: ["admin-finance-leads"] });
+                          queryClient.invalidateQueries({ queryKey: ["admin-contact-messages"] });
+                          queryClient.invalidateQueries({ queryKey: ["admin-cleanup-stats"] });
+                          refetchCleanupStats();
+                        } else {
+                          toast({
+                            title: "Eroare",
+                            description: result.error || "Eroare la ștergerea lead-urilor.",
+                            variant: "destructive",
+                          });
+                        }
+                      } catch (error) {
+                        toast({
+                          title: "Eroare",
+                          description: "Eroare neașteptată la ștergerea lead-urilor.",
+                          variant: "destructive",
+                        });
+                      }
+                      setIsCleanupDialogOpen(false);
+                    }}
+                  >
+                    Șterge Lead-uri
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </CardContent>
       </Card>
@@ -301,7 +490,7 @@ const LeadManagement = () => {
                             {new Date(lead.created_at).toLocaleDateString('ro-RO')}
                           </TableCell>
                           <TableCell>
-                            {getStatusBadge(lead.processed)}
+                            {getStatusBadge(lead.status)}
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
@@ -313,7 +502,7 @@ const LeadManagement = () => {
                                 <Eye className="h-4 w-4" />
                               </Button>
                               
-                              {!lead.processed && (
+                              {lead.status !== 'processed' && (
                                 <Button
                                   variant="outline"
                                   size="sm"
@@ -385,7 +574,7 @@ const LeadManagement = () => {
                             {new Date(lead.created_at).toLocaleDateString('ro-RO')}
                           </TableCell>
                           <TableCell>
-                            {getStatusBadge(lead.processed)}
+                            {getStatusBadge(lead.status)}
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
@@ -397,7 +586,7 @@ const LeadManagement = () => {
                                 <Eye className="h-4 w-4" />
                               </Button>
                               
-                              {!lead.processed && (
+                              {lead.status !== 'processed' && (
                                 <Button
                                   variant="outline"
                                   size="sm"
@@ -463,7 +652,7 @@ const LeadManagement = () => {
                             {new Date(message.created_at).toLocaleDateString('ro-RO')}
                           </TableCell>
                           <TableCell>
-                            {getStatusBadge(message.processed)}
+                            {getStatusBadge(message.status)}
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
@@ -475,7 +664,7 @@ const LeadManagement = () => {
                                 <Eye className="h-4 w-4" />
                               </Button>
                               
-                              {!message.processed && (
+                              {message.status !== 'processed' && (
                                 <Button
                                   variant="outline"
                                   size="sm"
@@ -609,30 +798,30 @@ const LeadManagement = () => {
                 </div>
               )}
               
-              <div className="pt-4 border-t">
-                <div className="flex justify-between items-center">
-                  <div className="text-sm text-gray-500">
-                    <strong>Status:</strong> {selectedLead.processed ? 'Procesat' : 'În așteptare'}
+                                <div className="pt-4 border-t">
+                    <div className="flex justify-between items-center">
+                      <div className="text-sm text-gray-500">
+                        <strong>Status:</strong> {selectedLead.status === 'processed' ? 'Procesat' : 'În așteptare'}
+                      </div>
+                      
+                      {selectedLead.status !== 'processed' && (
+                        <Button
+                          onClick={() => {
+                            handleMarkProcessed(
+                              selectedLead.type === 'sell' ? 'lead_sell' : 
+                              selectedLead.type === 'finance' ? 'lead_finance' : 'contact_messages',
+                              selectedLead.id
+                            );
+                            setIsViewDialogOpen(false);
+                          }}
+                          disabled={markProcessedMutation.isPending}
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Marchează ca Procesat
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                  
-                  {!selectedLead.processed && (
-                    <Button
-                      onClick={() => {
-                        handleMarkProcessed(
-                          selectedLead.type === 'sell' ? 'lead_sell' : 
-                          selectedLead.type === 'finance' ? 'lead_finance' : 'contact_messages',
-                          selectedLead.id
-                        );
-                        setIsViewDialogOpen(false);
-                      }}
-                      disabled={markProcessedMutation.isPending}
-                    >
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Marchează ca Procesat
-                    </Button>
-                  )}
-                </div>
-              </div>
             </div>
           )}
         </DialogContent>
