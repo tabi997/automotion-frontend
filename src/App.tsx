@@ -2,6 +2,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ScrollToTop } from "@/components/common/ScrollToTop";
+import { ScrollToTopButton } from "@/components/common/ScrollToTopButton";
 import Index from "./pages/Index";
 import Stock from "./pages/Stock";
 import VehicleDetail from "./pages/VehicleDetail";
@@ -30,6 +32,8 @@ const App = () => (
           v7_relativeSplatPath: true
         }}
       >
+        <ScrollToTop />
+        <ScrollToTopButton />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/stoc" element={<Stock />} />
