@@ -169,8 +169,41 @@ const LeadManagement = () => {
     }
   });
 
+  // Delete lead mutation
+  const deleteLeadMutation = useMutation({
+    mutationFn: async ({ table, id }: { table: string; id: string }) => {
+      const { error } = await supabase
+        .from(table as any)
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+    },
+    onSuccess: (_, { table }) => {
+      queryClient.invalidateQueries({ queryKey: [`admin-${table}`] });
+      queryClient.invalidateQueries({ queryKey: ["admin-stats"] });
+      toast({
+        title: "Succes",
+        description: "Lead-ul a fost șters cu succes!",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Eroare",
+        description: "Eroare la ștergerea lead-ului. Încearcă din nou.",
+        variant: "destructive",
+      });
+    }
+  });
+
   const handleMarkProcessed = (table: string, id: string) => {
     markProcessedMutation.mutate({ table, id });
+  };
+
+  const handleDeleteLead = (table: string, id: string, leadName: string) => {
+    if (confirm(`Ești sigur că vrei să ștergi lead-ul pentru ${leadName}? Această acțiune nu poate fi anulată.`)) {
+      deleteLeadMutation.mutate({ table, id });
+    }
   };
 
   const handleViewLead = (lead: any, type: 'sell' | 'finance' | 'contact') => {
@@ -512,6 +545,16 @@ const LeadManagement = () => {
                                   <CheckCircle className="h-4 w-4" />
                                 </Button>
                               )}
+
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDeleteLead('lead_sell', lead.id, lead.nume)}
+                                disabled={deleteLeadMutation.isPending}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
                             </div>
                           </TableCell>
                         </TableRow>
@@ -596,6 +639,16 @@ const LeadManagement = () => {
                                   <CheckCircle className="h-4 w-4" />
                                 </Button>
                               )}
+
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDeleteLead('lead_finance', lead.id, lead.nume)}
+                                disabled={deleteLeadMutation.isPending}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
                             </div>
                           </TableCell>
                         </TableRow>
@@ -674,6 +727,16 @@ const LeadManagement = () => {
                                   <CheckCircle className="h-4 w-4" />
                                 </Button>
                               )}
+
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDeleteLead('contact_messages', message.id, message.nume)}
+                                disabled={deleteLeadMutation.isPending}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
                             </div>
                           </TableCell>
                         </TableRow>

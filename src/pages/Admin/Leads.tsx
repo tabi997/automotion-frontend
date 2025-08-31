@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { getSellLeads, getFinanceLeads, getContactLeads, getOrderLeads, setLeadStatus } from "@/lib/admin";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,9 +26,11 @@ import {
   Users,
   TrendingUp,
   MessageSquare,
-  Car
+  Car,
+  Trash2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
 type LeadSellRow = Database["public"]["Tables"]["lead_sell"]["Row"];
@@ -91,6 +93,49 @@ export default function Leads() {
         description: error instanceof Error ? error.message : "A apărut o eroare neașteptată.",
         variant: "destructive",
       });
+    }
+  };
+
+  // Delete lead mutation
+  const deleteLeadMutation = useMutation({
+    mutationFn: async ({ table, id }: { table: string; id: string }) => {
+      const { error } = await supabase
+        .from(table as any)
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+    },
+    onSuccess: (_, { table }) => {
+      // Invalidate relevant queries
+      if (table === "lead_sell") {
+        queryClient.invalidateQueries({ queryKey: ["sell-leads"] });
+      } else if (table === "lead_finance") {
+        queryClient.invalidateQueries({ queryKey: ["finance-leads"] });
+      } else if (table === "lead_order") {
+        queryClient.invalidateQueries({ queryKey: ["order-leads"] });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["contact-leads"] });
+      }
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+      
+      toast({
+        title: "Succes",
+        description: "Lead-ul a fost șters cu succes!",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Eroare",
+        description: "Eroare la ștergerea lead-ului. Încearcă din nou.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleDeleteLead = (table: string, id: string, leadName: string) => {
+    if (confirm(`Ești sigur că vrei să ștergi lead-ul pentru ${leadName}? Această acțiune nu poate fi anulată.`)) {
+      deleteLeadMutation.mutate({ table, id });
     }
   };
 
@@ -205,23 +250,35 @@ export default function Leads() {
                         <TableCell>{formatDate(lead.created_at)}</TableCell>
                         <TableCell>{getStatusBadge(lead.status)}</TableCell>
                         <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleStatusChange("lead_sell", lead.id, lead.status)}
-                          >
-                            {lead.status === "new" ? (
-                              <>
-                                <CheckCircle className="mr-2 h-4 w-4" />
-                                Marchează procesat
-                              </>
-                            ) : (
-                              <>
-                                <Clock className="mr-2 h-4 w-4" />
-                                Marchează nou
-                              </>
-                            )}
-                          </Button>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleStatusChange("lead_sell", lead.id, lead.status)}
+                            >
+                              {lead.status === "new" ? (
+                                <>
+                                  <CheckCircle className="mr-2 h-4 w-4" />
+                                  Marchează procesat
+                                </>
+                              ) : (
+                                <>
+                                  <Clock className="mr-2 h-4 w-4" />
+                                  Marchează nou
+                                </>
+                              )}
+                            </Button>
+                            
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDeleteLead("lead_sell", lead.id, lead.nume)}
+                              disabled={deleteLeadMutation.isPending}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -291,23 +348,35 @@ export default function Leads() {
                         <TableCell>{formatDate(lead.created_at)}</TableCell>
                         <TableCell>{getStatusBadge(lead.status)}</TableCell>
                         <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleStatusChange("lead_finance", lead.id, lead.status)}
-                          >
-                            {lead.status === "new" ? (
-                              <>
-                                <CheckCircle className="mr-2 h-4 w-4" />
-                                Marchează procesat
-                              </>
-                            ) : (
-                              <>
-                                <Clock className="mr-2 h-4 w-4" />
-                                Marchează nou
-                              </>
-                            )}
-                          </Button>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleStatusChange("lead_finance", lead.id, lead.status)}
+                            >
+                              {lead.status === "new" ? (
+                                <>
+                                  <CheckCircle className="mr-2 h-4 w-4" />
+                                  Marchează procesat
+                                </>
+                              ) : (
+                                <>
+                                  <Clock className="mr-2 h-4 w-4" />
+                                  Marchează nou
+                                </>
+                              )}
+                            </Button>
+                            
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDeleteLead("lead_finance", lead.id, lead.nume)}
+                              disabled={deleteLeadMutation.isPending}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -396,23 +465,35 @@ export default function Leads() {
                         <TableCell>{formatDate(lead.created_at)}</TableCell>
                         <TableCell>{getStatusBadge(lead.status)}</TableCell>
                         <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleStatusChange("lead_order", lead.id, lead.status)}
-                          >
-                            {lead.status === "new" ? (
-                              <>
-                                <CheckCircle className="mr-2 h-4 w-4" />
-                                Marchează procesat
-                              </>
-                            ) : (
-                              <>
-                                <Clock className="mr-2 h-4 w-4" />
-                                Marchează nou
-                              </>
-                            )}
-                          </Button>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleStatusChange("lead_order", lead.id, lead.status)}
+                            >
+                              {lead.status === "new" ? (
+                                <>
+                                  <CheckCircle className="mr-2 h-4 w-4" />
+                                  Marchează procesat
+                                </>
+                              ) : (
+                                <>
+                                  <Clock className="mr-2 h-4 w-4" />
+                                  Marchează nou
+                                </>
+                              )}
+                            </Button>
+                            
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDeleteLead("lead_order", lead.id, lead.nume)}
+                              disabled={deleteLeadMutation.isPending}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -478,23 +559,35 @@ export default function Leads() {
                         <TableCell>{formatDate(message.created_at)}</TableCell>
                         <TableCell>{getStatusBadge(message.status)}</TableCell>
                         <TableCell>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleStatusChange("contact_messages", message.id, message.status)}
-                          >
-                            {message.status === "new" ? (
-                              <>
-                                <CheckCircle className="mr-2 h-4 w-4" />
-                                Marchează procesat
-                              </>
-                            ) : (
-                              <>
-                                <Clock className="mr-2 h-4 w-4" />
-                                Marchează nou
-                              </>
-                            )}
-                          </Button>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleStatusChange("contact_messages", message.id, message.status)}
+                            >
+                              {message.status === "new" ? (
+                                <>
+                                  <CheckCircle className="mr-2 h-4 w-4" />
+                                  Marchează procesat
+                                </>
+                              ) : (
+                                <>
+                                  <Clock className="mr-2 h-4 w-4" />
+                                  Marchează nou
+                                </>
+                              )}
+                            </Button>
+                            
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDeleteLead("contact_messages", message.id, message.nume)}
+                              disabled={deleteLeadMutation.isPending}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
