@@ -254,19 +254,22 @@ const StockManagement = () => {
   return (
     <div className="space-y-6">
       {/* Header Actions */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Gestionare Stoc Vehicule</h2>
-          <p className="text-gray-600">Administrează vehiculele din stocul platformei</p>
-        </div>
+                <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900" id="page-title">Gestionare Stoc Vehicule</h2>
+              <p className="text-gray-600" id="page-description">Administrează vehiculele din stocul platformei</p>
+            </div>
         
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              Adaugă Vehicul
-            </Button>
-          </DialogTrigger>
+                    <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button 
+                  className="flex items-center gap-2"
+                  aria-describedby="page-description"
+                >
+                  <Plus className="h-4 w-4" />
+                  Adaugă Vehicul
+                </Button>
+              </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Adaugă Vehicul Nou</DialogTitle>
@@ -280,6 +283,7 @@ const StockManagement = () => {
                 <Label htmlFor="marca">Marcă *</Label>
                 <Input
                   id="marca"
+                  name="marca"
                   value={formData.marca}
                   onChange={(e) => setFormData({ ...formData, marca: e.target.value })}
                   placeholder="BMW"
@@ -290,6 +294,7 @@ const StockManagement = () => {
                 <Label htmlFor="model">Model *</Label>
                 <Input
                   id="model"
+                  name="model"
                   value={formData.model}
                   onChange={(e) => setFormData({ ...formData, model: e.target.value })}
                   placeholder="X5"
@@ -300,6 +305,7 @@ const StockManagement = () => {
                 <Label htmlFor="an">An *</Label>
                 <Input
                   id="an"
+                  name="an"
                   type="number"
                   value={formData.an}
                   onChange={(e) => setFormData({ ...formData, an: parseInt(e.target.value) })}
@@ -312,6 +318,7 @@ const StockManagement = () => {
                 <Label htmlFor="pret">Preț (€) *</Label>
                 <Input
                   id="pret"
+                  name="pret"
                   type="number"
                   value={formData.pret}
                   onChange={(e) => setFormData({ ...formData, pret: parseInt(e.target.value) })}
@@ -323,6 +330,7 @@ const StockManagement = () => {
                 <Label htmlFor="km">Kilometri *</Label>
                 <Input
                   id="km"
+                  name="km"
                   type="number"
                   value={formData.km}
                   onChange={(e) => setFormData({ ...formData, km: parseInt(e.target.value) })}
@@ -333,7 +341,7 @@ const StockManagement = () => {
               <div className="space-y-2">
                 <Label htmlFor="combustibil">Combustibil *</Label>
                 <Select value={formData.combustibil} onValueChange={(value) => setFormData({ ...formData, combustibil: value })}>
-                  <SelectTrigger>
+                  <SelectTrigger id="combustibil" name="combustibil">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -347,7 +355,7 @@ const StockManagement = () => {
               <div className="space-y-2">
                 <Label htmlFor="transmisie">Transmisie *</Label>
                 <Select value={formData.transmisie} onValueChange={(value) => setFormData({ ...formData, transmisie: value })}>
-                  <SelectTrigger>
+                  <SelectTrigger id="transmisie" name="transmisie">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -361,7 +369,7 @@ const StockManagement = () => {
               <div className="space-y-2">
                 <Label htmlFor="caroserie">Tip Caroserie *</Label>
                 <Select value={formData.caroserie} onValueChange={(value) => setFormData({ ...formData, caroserie: value })}>
-                  <SelectTrigger>
+                  <SelectTrigger id="caroserie" name="caroserie">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -376,6 +384,7 @@ const StockManagement = () => {
                 <Label htmlFor="culoare">Culoare</Label>
                 <Input
                   id="culoare"
+                  name="culoare"
                   value={formData.culoare}
                   onChange={(e) => setFormData({ ...formData, culoare: e.target.value })}
                   placeholder="Negru Safir"
@@ -386,6 +395,7 @@ const StockManagement = () => {
                 <Label htmlFor="vin">Vin</Label>
                 <Input
                   id="vin"
+                  name="vin"
                   value={formData.vin}
                   onChange={(e) => setFormData({ ...formData, vin: e.target.value })}
                   placeholder="WBA3A9C50EP000000"
@@ -395,7 +405,7 @@ const StockManagement = () => {
               <div className="space-y-2">
                 <Label htmlFor="negociabil">Negociabil</Label>
                 <Select value={formData.negociabil ? "true" : "false"} onValueChange={(value) => setFormData({ ...formData, negociabil: value === "true" })}>
-                  <SelectTrigger>
+                  <SelectTrigger id="negociabil" name="negociabil">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -408,7 +418,7 @@ const StockManagement = () => {
               <div className="space-y-2">
                 <Label htmlFor="status">Status *</Label>
                 <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value as 'active' | 'inactive' })}>
-                  <SelectTrigger>
+                  <SelectTrigger id="status" name="status">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -423,6 +433,7 @@ const StockManagement = () => {
               <Label htmlFor="descriere">Descriere</Label>
               <Textarea
                 id="descriere"
+                name="descriere"
                 value={formData.descriere}
                 onChange={(e) => setFormData({ ...formData, descriere: e.target.value })}
                 placeholder="Descrierea vehiculului..."
@@ -432,27 +443,41 @@ const StockManagement = () => {
             
             {/* Image Upload */}
             <div className="space-y-2">
-              <Label>Fotografii Vehicul</Label>
-              <AdminUploadGallery
-                onImagesChange={(imageUrls) => {
-                  // Store image URLs for later upload
-                  setImages(imageUrls as any);
-                }}
-                minImages={1}
-                maxImages={10}
-              />
+              <Label htmlFor="vehicle-images">Fotografii Vehicul</Label>
+              <div id="vehicle-images" aria-describedby="vehicle-images-help">
+                <AdminUploadGallery
+                  onImagesChange={(imageUrls) => {
+                    // Store image URLs for later upload
+                    setImages(imageUrls as unknown as File[]);
+                  }}
+                  minImages={1}
+                  maxImages={10}
+                />
+              </div>
+              <p id="vehicle-images-help" className="text-sm text-gray-500">
+                Adaugă între 1 și 10 fotografii ale vehiculului
+              </p>
             </div>
             
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+              <Button 
+                variant="outline" 
+                onClick={() => setIsAddDialogOpen(false)}
+                aria-describedby="cancel-help"
+              >
                 Anulează
               </Button>
               <Button 
                 onClick={handleAddVehicle}
                 disabled={addVehicleMutation.isPending}
+                aria-describedby="add-help"
               >
                 {addVehicleMutation.isPending ? "Se adaugă..." : "Adaugă Vehicul"}
               </Button>
+            </div>
+            <div className="sr-only">
+              <p id="cancel-help">Anulează adăugarea vehiculului și închide dialogul</p>
+              <p id="add-help">Adaugă vehiculul în stoc cu informațiile completate</p>
             </div>
           </DialogContent>
         </Dialog>
@@ -466,26 +491,34 @@ const StockManagement = () => {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
+                  id="search-vehicles"
+                  name="search-vehicles"
                   placeholder="Caută după marcă sau model..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
+                  aria-describedby="search-help"
                 />
               </div>
+              <p id="search-help" className="sr-only">Caută vehicule după marcă sau model</p>
             </div>
             
-            <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger className="w-full sm:w-48">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Filtrează după stare" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Toate</SelectItem>
-                <SelectItem value="active">Activ</SelectItem>
-                <SelectItem value="inactive">Inactiv</SelectItem>
-                <SelectItem value="sold">Vândute</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="space-y-2">
+              <Label htmlFor="filter-status" className="sr-only">Filtrează după stare</Label>
+              <Select value={filterType} onValueChange={setFilterType}>
+                <SelectTrigger id="filter-status" name="filter-status" className="w-full sm:w-48" aria-describedby="filter-help">
+                  <Filter className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Filtrează după stare" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Toate</SelectItem>
+                  <SelectItem value="active">Activ</SelectItem>
+                  <SelectItem value="inactive">Inactiv</SelectItem>
+                  <SelectItem value="sold">Vândute</SelectItem>
+                </SelectContent>
+              </Select>
+              <p id="filter-help" className="sr-only">Selectează starea vehiculelor pentru a filtra lista</p>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -503,15 +536,15 @@ const StockManagement = () => {
             <div className="text-center py-8">Se încarcă...</div>
           ) : (
             <div className="overflow-x-auto">
-              <Table>
+              <Table role="table" aria-label="Lista vehiculelor din stoc">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Vehicul</TableHead>
-                    <TableHead>Preț</TableHead>
-                    <TableHead>Stare</TableHead>
-                    <TableHead>Locație</TableHead>
-                    <TableHead>Data Adăugării</TableHead>
-                    <TableHead>Acțiuni</TableHead>
+                    <TableHead scope="col">Vehicul</TableHead>
+                    <TableHead scope="col">Preț</TableHead>
+                    <TableHead scope="col">Stare</TableHead>
+                    <TableHead scope="col">Locație</TableHead>
+                    <TableHead scope="col">Data Adăugării</TableHead>
+                    <TableHead scope="col">Acțiuni</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -549,16 +582,21 @@ const StockManagement = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => handleEditVehicle(vehicle)}
+                            aria-label={`Editează vehiculul ${vehicle.marca} ${vehicle.model}`}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
                           
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="outline" size="sm">
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </AlertDialogTrigger>
+                                                      <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  aria-label={`Șterge vehiculul ${vehicle.marca} ${vehicle.model}`}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
                                 <AlertDialogTitle>Ești sigur?</AlertDialogTitle>
@@ -603,6 +641,7 @@ const StockManagement = () => {
               <Label htmlFor="edit-marca">Marcă *</Label>
               <Input
                 id="edit-marca"
+                name="edit-marca"
                 value={formData.marca}
                 onChange={(e) => setFormData({ ...formData, marca: e.target.value })}
                 placeholder="BMW"
@@ -613,6 +652,7 @@ const StockManagement = () => {
               <Label htmlFor="edit-model">Model *</Label>
               <Input
                 id="edit-model"
+                name="edit-model"
                 value={formData.model}
                 onChange={(e) => setFormData({ ...formData, model: e.target.value })}
                 placeholder="X5"
@@ -623,6 +663,7 @@ const StockManagement = () => {
               <Label htmlFor="edit-an">An *</Label>
               <Input
                 id="edit-an"
+                name="edit-an"
                 type="number"
                 value={formData.an}
                 onChange={(e) => setFormData({ ...formData, an: parseInt(e.target.value) })}
@@ -635,6 +676,7 @@ const StockManagement = () => {
               <Label htmlFor="edit-pret">Preț (€) *</Label>
               <Input
                 id="edit-pret"
+                name="edit-pret"
                 type="number"
                 value={formData.pret}
                 onChange={(e) => setFormData({ ...formData, pret: parseInt(e.target.value) })}
@@ -646,6 +688,7 @@ const StockManagement = () => {
               <Label htmlFor="edit-km">Kilometri *</Label>
               <Input
                 id="edit-km"
+                name="edit-km"
                 type="number"
                 value={formData.km}
                 onChange={(e) => setFormData({ ...formData, km: parseInt(e.target.value) })}
@@ -656,7 +699,7 @@ const StockManagement = () => {
             <div className="space-y-2">
               <Label htmlFor="edit-combustibil">Combustibil *</Label>
               <Select value={formData.combustibil} onValueChange={(value) => setFormData({ ...formData, combustibil: value })}>
-                <SelectTrigger>
+                <SelectTrigger id="edit-combustibil" name="edit-combustibil">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -670,7 +713,7 @@ const StockManagement = () => {
             <div className="space-y-2">
               <Label htmlFor="edit-transmisie">Transmisie *</Label>
               <Select value={formData.transmisie} onValueChange={(value) => setFormData({ ...formData, transmisie: value })}>
-                <SelectTrigger>
+                <SelectTrigger id="edit-transmisie" name="edit-transmisie">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -684,7 +727,7 @@ const StockManagement = () => {
             <div className="space-y-2">
               <Label htmlFor="edit-caroserie">Tip Caroserie *</Label>
               <Select value={formData.caroserie} onValueChange={(value) => setFormData({ ...formData, caroserie: value })}>
-                <SelectTrigger>
+                <SelectTrigger id="edit-caroserie" name="edit-caroserie">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -699,6 +742,7 @@ const StockManagement = () => {
               <Label htmlFor="edit-culoare">Culoare</Label>
               <Input
                 id="edit-culoare"
+                name="edit-culoare"
                 value={formData.culoare}
                 onChange={(e) => setFormData({ ...formData, culoare: e.target.value })}
                 placeholder="Negru Safir"
@@ -709,6 +753,7 @@ const StockManagement = () => {
               <Label htmlFor="edit-vin">Vin</Label>
               <Input
                 id="edit-vin"
+                name="edit-vin"
                 value={formData.vin}
                 onChange={(e) => setFormData({ ...formData, vin: e.target.value })}
                 placeholder="WBA3A9C50EP000000"
@@ -718,7 +763,7 @@ const StockManagement = () => {
             <div className="space-y-2">
               <Label htmlFor="edit-negociabil">Negociabil</Label>
               <Select value={formData.negociabil ? "true" : "false"} onValueChange={(value) => setFormData({ ...formData, negociabil: value === "true" })}>
-                <SelectTrigger>
+                <SelectTrigger id="edit-negociabil" name="edit-negociabil">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -731,7 +776,7 @@ const StockManagement = () => {
             <div className="space-y-2">
               <Label htmlFor="edit-status">Status *</Label>
               <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value as 'active' | 'inactive' })}>
-                <SelectTrigger>
+                <SelectTrigger id="edit-status" name="edit-status">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -744,38 +789,53 @@ const StockManagement = () => {
           
           <div className="space-y-2">
             <Label htmlFor="edit-descriere">Descriere</Label>
-            <Textarea
-              id="edit-descriere"
-              value={formData.descriere}
-              onChange={(e) => setFormData({ ...formData, descriere: e.target.value })}
-              placeholder="Descrierea vehiculului..."
-              rows={3}
-            />
+                          <Textarea
+                id="edit-descriere"
+                name="edit-descriere"
+                value={formData.descriere}
+                onChange={(e) => setFormData({ ...formData, descriere: e.target.value })}
+                placeholder="Descrierea vehiculului..."
+                rows={3}
+              />
           </div>
           
           {/* Image Upload for Edit */}
           <div className="space-y-2">
-            <Label>Fotografii Vehicul</Label>
-            <AdminUploadGallery
-              onImagesChange={(imageUrls) => {
-                // Store image URLs for later update
-                setImages(imageUrls as any);
-              }}
-              minImages={1}
-              maxImages={10}
-            />
+            <Label htmlFor="edit-vehicle-images">Fotografii Vehicul</Label>
+            <div id="edit-vehicle-images" aria-describedby="edit-vehicle-images-help">
+              <AdminUploadGallery
+                onImagesChange={(imageUrls) => {
+                  // Store image URLs for later update
+                  setImages(imageUrls as unknown as File[]);
+                }}
+                minImages={1}
+                maxImages={10}
+              />
+            </div>
+            <p id="edit-vehicle-images-help" className="text-sm text-gray-500">
+              Adaugă între 1 și 10 fotografii ale vehiculului
+            </p>
           </div>
           
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsEditDialogOpen(false)}
+              aria-describedby="edit-cancel-help"
+            >
               Anulează
             </Button>
             <Button 
               onClick={handleUpdateVehicle}
               disabled={updateVehicleMutation.isPending}
+              aria-describedby="edit-update-help"
             >
               {updateVehicleMutation.isPending ? "Se actualizează..." : "Actualizează"}
             </Button>
+          </div>
+          <div className="sr-only">
+            <p id="edit-cancel-help">Anulează editarea vehiculului și închide dialogul</p>
+            <p id="edit-update-help">Actualizează vehiculul cu informațiile modificate</p>
           </div>
         </DialogContent>
       </Dialog>

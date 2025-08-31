@@ -132,13 +132,20 @@ export function AdminUploadGallery({
     <div className={cn("space-y-4", className)}>
       {/* Upload Button */}
       <div className="relative">
+        <label htmlFor="file-upload" className="sr-only">
+          Selectează fișiere pentru încărcare
+        </label>
         <input
+          id="file-upload"
+          name="file-upload"
           type="file"
           multiple
           accept="image/*"
           onChange={handleFileSelect}
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
           disabled={isUploading || uploadedImages.length >= maxImages}
+          aria-describedby="upload-help"
+          aria-label="Selectează fișiere pentru încărcare"
         />
         <Button
           type="button"
@@ -149,6 +156,7 @@ export function AdminUploadGallery({
             uploadedImages.length >= maxImages && "opacity-50 cursor-not-allowed"
           )}
           disabled={isUploading || uploadedImages.length >= maxImages}
+          aria-describedby="upload-help"
         >
           <div className="flex flex-col items-center space-y-2">
             <Upload className="h-8 w-8 text-primary-foreground" />
@@ -162,6 +170,9 @@ export function AdminUploadGallery({
             </div>
           </div>
         </Button>
+        <p id="upload-help" className="sr-only">
+          Selectează una sau mai multe imagini pentru a le încărca. Acceptă formatele: JPG, PNG, GIF, WebP.
+        </p>
       </div>
 
       {/* Status Messages */}
@@ -197,6 +208,7 @@ export function AdminUploadGallery({
                 size="icon"
                 className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
                 onClick={() => removeImage(index)}
+                aria-label={`Șterge imaginea ${index + 1}`}
               >
                 <X className="h-3 w-3" />
               </Button>

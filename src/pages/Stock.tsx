@@ -57,7 +57,7 @@ const transformStockToVehicle = (stockVehicle: StockVehicle): Vehicle => ({
   horsePower: 0, // Placeholder - not in stock table
   engineCapacity: 0, // Placeholder - not in stock table
   location: 'Romania', // Placeholder - not in stock table
-  condition: 'second-hand', // Default value
+  condition: 'second-hand' as const, // Default value
   features: [], // No features in stock table
   financing: undefined, // No financing info in stock table
 });
@@ -113,6 +113,14 @@ const Stock = () => {
   };
 
   const getVehicleImage = (vehicle: Vehicle) => {
+    // Verifică dacă vehiculul are imagini reale
+    if (vehicle.images && vehicle.images.length > 0 && vehicle.images[0]) {
+      console.log('🔍 Stock: Using real image for', vehicle.brand, vehicle.model, ':', vehicle.images[0]);
+      return vehicle.images[0];
+    }
+    
+    // Fallback la imagini mock doar dacă nu există imagini reale
+    console.log('🔍 Stock: Using mock image for', vehicle.brand, vehicle.model);
     if (vehicle.brand === 'BMW') return bmwImage;
     if (vehicle.brand === 'Mercedes-Benz') return mercedesImage;
     if (vehicle.brand === 'Audi') return audiImage;
