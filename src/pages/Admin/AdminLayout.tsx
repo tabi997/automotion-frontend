@@ -18,6 +18,7 @@ const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Anunțuri", href: "/admin/stock", icon: Car },
   { name: "Lead-uri", href: "/admin/leads", icon: Users },
+  { name: "Test Upload", href: "/admin/test-upload", icon: BarChart3 },
 ];
 
 export default function AdminLayout() {
