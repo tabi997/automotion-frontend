@@ -1,81 +1,73 @@
-# AutoOrder - Premium Car Marketplace
+# Welcome to your Lovable project
 
-A sophisticated React automotive marketplace with premium design, micro-animations, and complete UI/UX functionality.
+## Project info
 
-## ✨ Features
+**URL**: https://lovable.dev/projects/34ed203d-1991-42e4-9616-f1650ad1ef5b
 
-- **Premium Design System** - Automotive-inspired colors, gradients, and micro-animations
-- **Hero Landing Page** - Stunning hero with premium car imagery and engaging content
-- **Advanced Stock Page** - Filtering, sorting, pagination with beautiful vehicle cards
-- **Mock Data Architecture** - Complete TypeScript types and simulated API calls
-- **Responsive Design** - Perfect on all devices from mobile to desktop
-- **SEO Optimized** - Proper meta tags, semantic HTML, and accessibility
+## How can I edit this code?
 
-## 🚀 Quick Start
+There are several ways of editing your application.
 
-```bash
-# Install dependencies
-npm install
+**Use Lovable**
 
-# Start development server
+Simply visit the [Lovable Project](https://lovable.dev/projects/34ed203d-1991-42e4-9616-f1650ad1ef5b) and start prompting.
+
+Changes made via Lovable will be committed automatically to this repo.
+
+**Use your preferred IDE**
+
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+
+Follow these steps:
+
+```sh
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
+
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
+
+# Step 3: Install the necessary dependencies.
+npm i
+
+# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
-
-# Build for production
-npm run build
 ```
 
-## 🏗️ Architecture
+**Edit a file directly in GitHub**
 
-- **React 18** with TypeScript
-- **Tailwind CSS** with custom design system
-- **shadcn/ui** components with automotive variants
-- **React Router** for navigation
-- **Mock API** ready for backend integration
-- **Lucide React** for premium icons
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
 
-## 📁 Project Structure
+**Use GitHub Codespaces**
 
-```
-src/
-├── components/
-│   ├── ui/          # Enhanced shadcn components
-│   └── common/      # Reusable components
-├── pages/           # Main application pages
-├── data/            # Mock JSON data
-├── types/           # TypeScript definitions
-├── lib/             # Utilities and mock API
-└── assets/          # Generated images
-```
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
 
-## 🎨 Design System
+## What technologies are used for this project?
 
-Premium automotive design with:
-- Deep blues and sophisticated oranges
-- Elegant gradients and shadows
-- Smooth micro-animations
-- Professional typography (Inter)
-- Responsive layouts
+This project is built with:
 
-## 🔧 Ready for Extension
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
 
-The codebase is structured for easy integration of:
-- Supabase backend
-- Real API endpoints
-- Payment systems
-- Authentication
-- Image uploads
+## How can I deploy this project?
 
-## 🚗 Demo Features
+Simply open [Lovable](https://lovable.dev/projects/34ed203d-1991-42e4-9616-f1650ad1ef5b) and click on Share -> Publish.
 
-- Hero section with animated elements
-- USP cards with hover effects
-- Process steps visualization
-- Featured vehicle carousel
-- Customer testimonials
-- Brand showcases
-- Advanced filtering system
-- Vehicle cards with badges
-- Responsive navigation
-- Professional footer
+## Can I connect a custom domain to my Lovable project?
 
-Built with attention to detail and premium user experience! 🌟
+Yes, you can!
+
+To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+
+Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
