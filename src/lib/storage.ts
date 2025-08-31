@@ -1,7 +1,7 @@
 import { env } from './env';
 
 export const STORAGE_CONFIG = {
-  bucket: env.storageBucket,
+  bucket: env.VITE_STORAGE_BUCKET || 'vehicle-images',
   allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
   maxFileSize: 10 * 1024 * 1024, // 10MB
   maxFiles: 10,

@@ -5,7 +5,7 @@ const envSchema = z.object({
   VITE_SUPABASE_PUBLISHABLE_KEY: z.string().min(1).optional(),
   VITE_ENABLE_UPLOAD: z.string().transform(val => val === 'true').default('true'),
   VITE_BYPASS_ADMIN_FOR_UPLOAD: z.string().transform(val => val === 'true').default('false'),
-  VITE_STORAGE_BUCKET: z.string().default('images'),
+  VITE_STORAGE_BUCKET: z.string().default('vehicle-images'),
 });
 
 export const env = envSchema.parse(import.meta.env);
@@ -30,6 +30,15 @@ export function validateEnv() {
   if (!env.VITE_ENABLE_UPLOAD) {
     console.warn('⚠️ Upload functionality is disabled (VITE_ENABLE_UPLOAD=false)');
   }
+  
+  // Debug environment variables
+  console.log('🔍 Environment variables:', {
+    VITE_SUPABASE_URL: env.VITE_SUPABASE_URL ? '✅ Set' : '❌ Missing',
+    VITE_SUPABASE_PUBLISHABLE_KEY: env.VITE_SUPABASE_PUBLISHABLE_KEY ? '✅ Set' : '❌ Missing',
+    VITE_ENABLE_UPLOAD: env.VITE_ENABLE_UPLOAD,
+    VITE_BYPASS_ADMIN_FOR_UPLOAD: env.VITE_BYPASS_ADMIN_FOR_UPLOAD,
+    VITE_STORAGE_BUCKET: env.VITE_STORAGE_BUCKET,
+  });
   
   return {
     isUploadEnabled: env.VITE_ENABLE_UPLOAD,

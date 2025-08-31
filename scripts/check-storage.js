@@ -51,30 +51,31 @@ async function checkStorage() {
     
     console.log('📦 Existing buckets:', buckets.map(b => b.name));
     
-    // Check if 'images' bucket exists
-    const imagesBucket = buckets.find(b => b.name === 'images');
+    // Check if configured bucket exists
+    const configuredBucket = env.VITE_STORAGE_BUCKET || 'vehicle-images';
+    const targetBucket = buckets.find(b => b.name === configuredBucket);
     
-    if (imagesBucket) {
-      console.log('✅ Images bucket already exists');
+    if (targetBucket) {
+      console.log(`✅ Bucket '${configuredBucket}' already exists`);
       
       // List files in the bucket
       const { data: files, error: filesError } = await supabase.storage
-        .from('images')
+        .from(configuredBucket)
         .list('', { limit: 100 });
       
       if (filesError) {
-        console.log('⚠️ Could not list files:', filesError.message);
+        console.log(`⚠️ Could not list files:`, filesError.message);
       } else {
-        console.log('📁 Files in images bucket:', files.length);
+        console.log(`📁 Files in ${configuredBucket} bucket:`, files.length);
       }
     } else {
-      console.log('❌ Images bucket not found');
+      console.log(`❌ Bucket '${configuredBucket}' not found`);
       console.log('💡 You need to create the bucket manually in Supabase dashboard:');
-      console.log('   1. Go to Storage in your Supabase dashboard');
-      console.log('   2. Click "Create a new bucket"');
-      console.log('   3. Name it "images"');
-      console.log('   4. Set it as public');
-      console.log('   5. Add RLS policies for authenticated uploads');
+      console.log(`   1. Go to Storage in your Supabase dashboard`);
+      console.log(`   2. Click "Create a new bucket"`);
+      console.log(`   3. Name it "${configuredBucket}"`);
+      console.log(`   4. Set it as public`);
+      console.log(`   5. Add RLS policies for authenticated uploads`);
     }
     
   } catch (err) {
