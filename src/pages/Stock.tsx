@@ -29,6 +29,7 @@ import {
 import { MockAPI } from '@/lib/mockApi';
 import { Vehicle, VehicleFilters, VehicleSort, PaginatedVehicles, StockVehicle } from '@/types/vehicle';
 import { StockAPI } from '@/lib/stockApi';
+import { carBrands } from '@/data/carBrands';
 
 // Import images
 import bmwImage from '@/assets/bmw-x5.jpg';
@@ -42,9 +43,9 @@ const transformStockToVehicle = (stockVehicle: StockVehicle): Vehicle => ({
   year: stockVehicle.an,
   mileage: stockVehicle.km,
   price: stockVehicle.pret,
-  fuelType: stockVehicle.combustibil as any,
-  transmission: stockVehicle.transmisie as any,
-  bodyType: stockVehicle.caroserie as any,
+  fuelType: stockVehicle.combustibil as 'benzina' | 'motorina' | 'hibrid' | 'electric' | 'gpl',
+  transmission: stockVehicle.transmisie as 'cvt' | 'manuala' | 'automata',
+  bodyType: stockVehicle.caroserie as 'berlina' | 'break' | 'suv' | 'coupe' | 'cabriolet' | 'hatchback' | 'monovolum',
   color: stockVehicle.culoare || '',
   vin: stockVehicle.vin,
   negotiable: stockVehicle.negociabil,
@@ -72,6 +73,7 @@ const Stock = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedBrandForFilter, setSelectedBrandForFilter] = useState<string>("");
 
   useEffect(() => {
     loadVehicles();
@@ -80,7 +82,21 @@ const Stock = () => {
   const loadVehicles = async () => {
     setLoading(true);
     try {
-      const vehicles = await StockAPI.getVehicles();
+      // Transform filters to match StockAPI format
+      const stockFilters = {
+        brand: filters.brand,
+        model: filters.model,
+        bodyType: filters.bodyType,
+        fuelType: filters.fuelType,
+        priceMin: filters.priceMin,
+        priceMax: filters.priceMax,
+        yearMin: filters.yearMin,
+        yearMax: filters.yearMax,
+        mileageMin: filters.mileageMin,
+        mileageMax: filters.mileageMax,
+      };
+      
+      const vehicles = await StockAPI.getVehicles(stockFilters);
       // Transform StockVehicle to Vehicle for compatibility
       const transformedVehicles = vehicles.map(transformStockToVehicle);
       setVehicles({
@@ -97,7 +113,7 @@ const Stock = () => {
     }
   };
 
-  const handleFilterChange = (key: keyof VehicleFilters, value: any) => {
+  const handleFilterChange = (key: keyof VehicleFilters, value: string | number | undefined) => {
     setFilters(prev => ({ ...prev, [key]: value }));
     setCurrentPage(1);
   };
@@ -274,11 +290,31 @@ const Stock = () => {
         <select
           className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
           value={filters.brand || ''}
-          onChange={(e) => handleFilterChange('brand', e.target.value)}
+          onChange={(e) => {
+            handleFilterChange('brand', e.target.value);
+            setSelectedBrandForFilter(e.target.value);
+            handleFilterChange('model', ''); // Reset model filter when brand changes
+          }}
         >
           <option value="">Toate mărcile</option>
-          {MockAPI.getBrands().map(brand => (
+          {carBrands.map(({ brand }) => (
             <option key={brand} value={brand}>{brand}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Model */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium mb-2">Model</label>
+        <select
+          className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+          value={filters.model || ''}
+          onChange={(e) => handleFilterChange('model', e.target.value)}
+          disabled={!selectedBrandForFilter}
+        >
+          <option value="">Toate modelele</option>
+          {selectedBrandForFilter && carBrands.find(b => b.brand === selectedBrandForFilter)?.models.map((model) => (
+            <option key={model} value={model}>{model}</option>
           ))}
         </select>
       </div>

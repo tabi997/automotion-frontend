@@ -1,6 +1,7 @@
 import { Vehicle, VehicleFilters, VehicleSort, PaginatedVehicles } from '@/types/vehicle';
 import { Lead } from '@/types/common';
 import vehiclesData from '@/data/vehicles.json';
+import { carBrands } from '@/data/carBrands';
 
 // Simulate API delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -83,7 +84,7 @@ export class MockAPI {
 
     // Apply sorting
     filtered.sort((a, b) => {
-      let aValue: any, bValue: any;
+      let aValue: number | Date, bValue: number | Date;
       
       switch (sort.field) {
         case 'price':
@@ -183,15 +184,11 @@ export class MockAPI {
 
   // Helper methods for filters
   static getBrands(): string[] {
-    return [...new Set(this.vehicles.map(v => v.brand))].sort();
+    return carBrands.map(b => b.brand);
   }
 
   static getModelsForBrand(brand: string): string[] {
-    return [...new Set(
-      this.vehicles
-        .filter(v => v.brand === brand)
-        .map(v => v.model)
-    )].sort();
+    return carBrands.find(b => b.brand === brand)?.models ?? [];
   }
 
   static getPriceRange(): { min: number; max: number } {
