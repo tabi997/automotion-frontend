@@ -31,6 +31,7 @@ export interface Vehicle {
     monthlyPayment?: number;
     downPayment?: number;
   };
+  openlane_url?: string;
 }
 
 export interface VehicleBadge {
@@ -86,6 +87,7 @@ export interface StockVehicle {
   images?: string[];
   descriere?: string;
   status: string;
+  openlane_url?: string;
   created_at: string;
   updated_at: string;
 }

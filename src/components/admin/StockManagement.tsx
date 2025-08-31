@@ -31,6 +31,7 @@ interface VehicleFormData {
   negociabil: boolean;
   descriere: string;
   status: string;
+  openlane_url: string;
 }
 
 const StockManagement = () => {
@@ -64,7 +65,8 @@ const StockManagement = () => {
     vin: "",
     negociabil: false,
     descriere: "",
-    status: "active"
+    status: "active",
+    openlane_url: ""
   });
 
   // Add image upload functionality
@@ -114,7 +116,8 @@ const StockManagement = () => {
         vin: "",
         negociabil: false,
         descriere: "",
-        status: "active"
+        status: "active",
+        openlane_url: ""
       });
       toast({
         title: "Succes",
@@ -133,12 +136,17 @@ const StockManagement = () => {
   // Update vehicle mutation
   const updateVehicleMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<VehicleFormData> }) => {
+      console.log('🔍 StockManagement: Updating vehicle with data:', { id, data });
+      
       const { error } = await supabase
         .from('stock')
         .update(data)
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('🔍 StockManagement: Supabase update error:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-vehicles"] });
@@ -219,7 +227,8 @@ const StockManagement = () => {
       vin: vehicle.vin || "",
       negociabil: vehicle.negociabil || false,
       descriere: vehicle.descriere || "",
-      status: vehicle.status
+      status: vehicle.status,
+      openlane_url: vehicle.openlane_url || ""
     });
     setIsEditDialogOpen(true);
   };
@@ -400,6 +409,21 @@ const StockManagement = () => {
                   onChange={(e) => setFormData({ ...formData, vin: e.target.value })}
                   placeholder="WBA3A9C50EP000000"
                 />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="openlane_url">Link OpenLane</Label>
+                <Input
+                  id="openlane_url"
+                  name="openlane_url"
+                  type="url"
+                  value={formData.openlane_url}
+                  onChange={(e) => setFormData({ ...formData, openlane_url: e.target.value })}
+                  placeholder="https://www.openlane.eu/auction/..."
+                />
+                <p className="text-xs text-gray-500">
+                  Link-ul către licitația OpenLane pentru acest vehicul
+                </p>
               </div>
               
               <div className="space-y-2">
@@ -758,6 +782,21 @@ const StockManagement = () => {
                 onChange={(e) => setFormData({ ...formData, vin: e.target.value })}
                 placeholder="WBA3A9C50EP000000"
               />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="edit-openlane_url">Link OpenLane</Label>
+              <Input
+                id="edit-openlane_url"
+                name="edit-openlane_url"
+                type="url"
+                value={formData.openlane_url}
+                onChange={(e) => setFormData({ ...formData, openlane_url: e.target.value })}
+                placeholder="https://www.openlane.eu/auction/..."
+              />
+              <p className="text-xs text-gray-500">
+                Link-ul către licitația OpenLane pentru acest vehicul
+              </p>
             </div>
             
             <div className="space-y-2">
