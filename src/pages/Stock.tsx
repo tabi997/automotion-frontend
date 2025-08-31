@@ -130,11 +130,13 @@ const Stock = () => {
   const renderVehicleCard = (vehicle: Vehicle) => (
     <div key={vehicle.id} className="automotive-card overflow-hidden hover-lift group">
       <div className="relative">
-        <img 
-          src={getVehicleImage(vehicle)}
-          alt={`${vehicle.brand} ${vehicle.model}`}
-          className="w-full h-48 object-cover group-hover:scale-105 transition-smooth"
-        />
+        <Link to={`/vehicul/${vehicle.id}`} className="block">
+          <img 
+            src={getVehicleImage(vehicle)}
+            alt={`${vehicle.brand} ${vehicle.model}`}
+            className="w-full h-48 object-cover group-hover:scale-105 transition-smooth cursor-pointer"
+          />
+        </Link>
         
         {/* Badges */}
         <div className="absolute top-4 left-4 flex flex-wrap gap-2">
@@ -164,9 +166,11 @@ const Stock = () => {
       <div className="p-6">
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h3 className="text-xl font-semibold mb-1">
-              {vehicle.brand} {vehicle.model}
-            </h3>
+            <Link to={`/vehicul/${vehicle.id}`} className="block hover:text-primary transition-colors">
+              <h3 className="text-xl font-semibold mb-1 cursor-pointer">
+                {vehicle.brand} {vehicle.model}
+              </h3>
+            </Link>
             <p className="text-muted-foreground text-sm">
               {vehicle.year} • {vehicle.location}
             </p>
@@ -195,9 +199,16 @@ const Stock = () => {
         
         {/* Actions */}
         <div className="flex gap-3">
-          <Button variant="premium" size="sm" className="flex-1">
-            <Eye className="h-4 w-4 mr-2" />
-            Detalii
+          <Button 
+            variant="premium" 
+            size="sm" 
+            className="flex-1"
+            asChild
+          >
+            <Link to={`/vehicul/${vehicle.id}`}>
+              <Eye className="h-4 w-4 mr-2" />
+              Detalii
+            </Link>
           </Button>
           <Button variant="outline" size="sm">
             <Phone className="h-4 w-4" />
