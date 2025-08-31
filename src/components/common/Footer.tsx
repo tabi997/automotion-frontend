@@ -9,10 +9,10 @@ const footerSections = {
   company: {
     title: 'AutoOrder',
     links: [
-      { label: 'Despre noi', href: '/despre' },
       { label: 'Cum funcționează', href: '/#process' },
-      { label: 'Cariere', href: '/cariere' },
-      { label: 'Presă', href: '/presa' },
+      { label: 'Stoc Auto', href: '/stoc' },
+      { label: 'Comandă Auto', href: '/comanda' },
+      { label: 'Finanțare', href: '/finantare' },
     ]
   },
   services: {
@@ -22,25 +22,25 @@ const footerSections = {
       { label: 'Comandă Auto', href: '/comanda' },
       { label: 'Finanțare', href: '/finantare' },
       { label: 'Buyback', href: '/buyback' },
-      { label: 'Asigurări', href: '/asigurari' },
+      { label: 'Contact', href: '/contact' },
     ]
   },
   support: {
     title: 'Suport',
     links: [
       { label: 'Contact', href: '/contact' },
-      { label: 'FAQ', href: '/faq' },
-      { label: 'Ghid cumpărător', href: '/ghid' },
-      { label: 'Garanții', href: '/garantii' },
+      { label: 'Stoc Auto', href: '/stoc' },
+      { label: 'Comandă Auto', href: '/comanda' },
+      { label: 'Finanțare', href: '/finantare' },
     ]
   },
   legal: {
     title: 'Legal',
     links: [
-      { label: 'Termeni și condiții', href: '/termeni' },
-      { label: 'Politica de confidențialitate', href: '/confidentialitate' },
-      { label: 'Politica cookies', href: '/cookies' },
-      { label: 'GDPR', href: '/gdpr' },
+      { label: 'Contact', href: '/contact' },
+      { label: 'Stoc Auto', href: '/stoc' },
+      { label: 'Comandă Auto', href: '/comanda' },
+      { label: 'Finanțare', href: '/finantare' },
     ]
   }
 };

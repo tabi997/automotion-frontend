@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { Container } from './Container';
 
-interface SectionProps {
+interface SectionProps extends React.HTMLAttributes<HTMLElement> {
   children: React.ReactNode;
   className?: string;
   containerClassName?: string;
@@ -32,14 +32,18 @@ export const Section: React.FC<SectionProps> = ({
   containerClassName,
   background = 'default',
   padding = 'lg',
-  containerSize = 'xl'
+  containerSize = 'xl',
+  ...props
 }) => {
   return (
-    <section className={cn(
-      backgroundClasses[background],
-      paddingClasses[padding],
-      className
-    )}>
+    <section 
+      className={cn(
+        backgroundClasses[background],
+        paddingClasses[padding],
+        className
+      )}
+      {...props}
+    >
       <Container size={containerSize} className={containerClassName}>
         {children}
       </Container>
