@@ -11,7 +11,7 @@ const footerSections = {
     links: [
       { label: 'Cum funcționează', href: '/#process' },
       { label: 'Stoc Auto', href: '/stoc' },
-      { label: 'Comandă Auto', href: '/comanda' },
+      { label: 'Servicii', href: '/comanda' },
       { label: 'Finanțare', href: '/finantare' },
     ]
   },
@@ -20,9 +20,8 @@ const footerSections = {
     links: [
       { label: 'Stoc Auto', href: '/stoc' },
       { label: 'Comandă Auto', href: '/comanda' },
+      { label: 'Vinde Mașina', href: '/buyback' },
       { label: 'Finanțare', href: '/finantare' },
-      { label: 'Buyback', href: '/buyback' },
-      { label: 'Contact', href: '/contact' },
     ]
   },
   support: {
@@ -30,7 +29,7 @@ const footerSections = {
     links: [
       { label: 'Contact', href: '/contact' },
       { label: 'Stoc Auto', href: '/stoc' },
-      { label: 'Comandă Auto', href: '/comanda' },
+      { label: 'Servicii', href: '/comanda' },
       { label: 'Finanțare', href: '/finantare' },
     ]
   },
@@ -39,7 +38,7 @@ const footerSections = {
     links: [
       { label: 'Contact', href: '/contact' },
       { label: 'Stoc Auto', href: '/stoc' },
-      { label: 'Comandă Auto', href: '/comanda' },
+      { label: 'Servicii', href: '/comanda' },
       { label: 'Finanțare', href: '/finantare' },
     ]
   }

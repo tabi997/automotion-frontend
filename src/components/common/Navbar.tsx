@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -16,14 +16,20 @@ import {
 interface NavItem {
   href: string;
   label: string;
-  badge?: string;
+  children?: NavItem[];
 }
 
 const navigation: NavItem[] = [
   { href: '/', label: 'Acasă' },
   { href: '/stoc', label: 'Stoc Auto' },
-  { href: '/buyback', label: 'Vinde Mașina', badge: 'Nou' },
-  { href: '/comanda', label: 'Comandă Mașină' },
+  { 
+    href: '#', 
+    label: 'Servicii',
+    children: [
+      { href: '/comanda', label: 'Comandă Mașină' },
+      { href: '/buyback', label: 'Vinde Mașina' }
+    ]
+  },
   { href: '/finantare', label: 'Finanțare' },
   { href: '/contact', label: 'Contact' },
 ];
@@ -31,7 +37,9 @@ const navigation: NavItem[] = [
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const location = useLocation();
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -44,14 +52,28 @@ export const Navbar = () => {
 
   useEffect(() => {
     setIsOpen(false);
+    setOpenDropdown(null);
   }, [location.pathname]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setOpenDropdown(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleDropdownToggle = (label: string) => {
+    setOpenDropdown(openDropdown === label ? null : label);
+  };
 
   return (
     <nav className={cn(
       "fixed top-0 left-0 right-0 z-50 transition-smooth",
-      isScrolled 
-        ? "bg-background/95 backdrop-blur-md shadow-medium border-b border-border" 
-        : "bg-transparent"
+      "bg-background/95 backdrop-blur-md shadow-medium border-b border-border"
     )}>
       <div className="container-auto">
         <div className="flex items-center justify-between h-16 lg:h-20">
@@ -66,25 +88,58 @@ export const Navbar = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-1">
+          <div className="hidden lg:flex items-center space-x-1" ref={dropdownRef}>
             {navigation.map((item) => (
-              <Link
-                key={item.href}
-                to={item.href}
-                className={cn(
-                  "relative px-4 py-2 rounded-lg text-sm font-medium transition-smooth hover:bg-accent/10",
-                  location.pathname === item.href
-                    ? "text-primary bg-primary/10"
-                    : "text-muted-foreground hover:text-foreground"
+              <div key={item.href} className="relative">
+                {item.children ? (
+                  <div>
+                    <button
+                      onClick={() => handleDropdownToggle(item.label)}
+                      className={cn(
+                        "relative px-4 py-2 rounded-lg text-sm font-medium transition-smooth hover:bg-accent/10 flex items-center space-x-1",
+                        "text-foreground hover:text-primary"
+                      )}
+                    >
+                      <span>{item.label}</span>
+                      <ChevronDown className={cn(
+                        "h-3 w-3 transition-transform",
+                        openDropdown === item.label ? "rotate-180" : ""
+                      )} />
+                    </button>
+                    
+                    {openDropdown === item.label && (
+                      <div className="absolute top-full left-0 mt-1 w-48 bg-card border border-border rounded-lg shadow-large py-2 z-50 animate-fade-in">
+                        {item.children.map((child) => (
+                          <Link
+                            key={child.href}
+                            to={child.href}
+                            className={cn(
+                              "block px-4 py-2 text-sm font-medium transition-smooth hover:bg-accent/10",
+                              location.pathname === child.href
+                                ? "text-primary bg-primary/10"
+                                : "text-foreground hover:text-primary"
+                            )}
+                          >
+                            {child.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    to={item.href}
+                    className={cn(
+                      "relative px-4 py-2 rounded-lg text-sm font-medium transition-smooth hover:bg-accent/10",
+                      location.pathname === item.href
+                        ? "text-primary bg-primary/10"
+                        : "text-foreground hover:text-primary"
+                    )}
+                  >
+                    {item.label}
+                  </Link>
                 )}
-              >
-                {item.label}
-                {item.badge && (
-                  <span className="absolute -top-1 -right-1 bg-accent text-accent-foreground text-xs px-1.5 py-0.5 rounded-full font-semibold">
-                    {item.badge}
-                  </span>
-                )}
-              </Link>
+              </div>
             ))}
           </div>
 
@@ -130,25 +185,56 @@ export const Navbar = () => {
           <div className="lg:hidden border-t border-border bg-background/95 backdrop-blur-md">
             <div className="py-4 space-y-2">
               {navigation.map((item) => (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  className={cn(
-                    "block px-4 py-3 rounded-lg text-sm font-medium transition-smooth",
-                    location.pathname === item.href
-                      ? "text-primary bg-primary/10"
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent/10"
+                <div key={item.href}>
+                  {item.children ? (
+                    <div>
+                      <button
+                        onClick={() => handleDropdownToggle(item.label)}
+                        className={cn(
+                          "w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-smooth flex items-center justify-between",
+                          "text-foreground hover:text-primary hover:bg-accent/10"
+                        )}
+                      >
+                        <span>{item.label}</span>
+                        <ChevronDown className={cn(
+                          "h-3 w-3 transition-transform",
+                          openDropdown === item.label ? "rotate-180" : ""
+                        )} />
+                      </button>
+                      
+                      {openDropdown === item.label && (
+                        <div className="pl-4 space-y-1 animate-fade-in">
+                          {item.children.map((child) => (
+                            <Link
+                              key={child.href}
+                              to={child.href}
+                              className={cn(
+                                "block px-4 py-2 rounded-lg text-sm font-medium transition-smooth",
+                                location.pathname === child.href
+                                  ? "text-primary bg-primary/10"
+                                  : "text-foreground hover:text-primary hover:bg-accent/10"
+                              )}
+                            >
+                              {child.label}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <Link
+                      to={item.href}
+                      className={cn(
+                        "block px-4 py-3 rounded-lg text-sm font-medium transition-smooth",
+                        location.pathname === item.href
+                          ? "text-primary bg-primary/10"
+                          : "text-foreground hover:text-primary hover:bg-accent/10"
+                      )}
+                    >
+                      {item.label}
+                    </Link>
                   )}
-                >
-                  <div className="flex items-center justify-between">
-                    {item.label}
-                    {item.badge && (
-                      <span className="bg-accent text-accent-foreground text-xs px-2 py-1 rounded-full font-semibold">
-                        {item.badge}
-                      </span>
-                    )}
-                  </div>
-                </Link>
+                </div>
               ))}
               
               <div className="pt-4 space-y-3 border-t border-border">
