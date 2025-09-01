@@ -79,32 +79,32 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6 sm:py-8">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <div className="flex items-center gap-3 mb-2">
-            <Shield className="h-8 w-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Administrare</h1>
+            <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Administrare</h1>
           </div>
-          <p className="text-gray-600">
+          <p className="text-sm sm:text-base text-gray-600">
             Gestionează stocul, lead-urile și setările platformei
           </p>
         </div>
 
         {/* Dashboard Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
           {dashboardCards.map((card, index) => (
             <Card key={index} className="hover:shadow-lg transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">
+                <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">
                   {card.title}
                 </CardTitle>
-                <div className={`p-2 rounded-full ${card.color}`}>
-                  <card.icon className="h-4 w-4 text-white" />
+                <div className={`p-1.5 sm:p-2 rounded-full ${card.color}`}>
+                  <card.icon className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-gray-900">
+                <div className="text-xl sm:text-2xl font-bold text-gray-900">
                   {card.value}
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
@@ -118,37 +118,40 @@ const Admin = () => {
         {/* Main Content Tabs */}
         <Card>
           <CardHeader>
-            <CardTitle>Gestionare Platformă</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-lg sm:text-xl">Gestionare Platformă</CardTitle>
+            <CardDescription className="text-sm">
               Selectează secțiunea pe care dorești să o administrezi
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="stock" className="flex items-center gap-2">
-                  <Car className="h-4 w-4" />
-                  Stoc Vehicule
+              <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 h-auto sm:h-10">
+                <TabsTrigger value="stock" className="flex items-center gap-2 py-2 sm:py-0 text-xs sm:text-sm">
+                  <Car className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Stoc Vehicule</span>
+                  <span className="sm:hidden">Stoc</span>
                 </TabsTrigger>
-                <TabsTrigger value="leads" className="flex items-center gap-2">
-                  <MessageSquare className="h-4 w-4" />
-                  Lead-uri
+                <TabsTrigger value="leads" className="flex items-center gap-2 py-2 sm:py-0 text-xs sm:text-sm">
+                  <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Lead-uri</span>
+                  <span className="sm:hidden">Lead-uri</span>
                 </TabsTrigger>
-                <TabsTrigger value="settings" className="flex items-center gap-2">
-                  <Settings className="h-4 w-4" />
-                  Setări
+                <TabsTrigger value="settings" className="flex items-center gap-2 py-2 sm:py-0 text-xs sm:text-sm">
+                  <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Setări</span>
+                  <span className="sm:hidden">Setări</span>
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="stock" className="mt-6">
+              <TabsContent value="stock" className="mt-4 sm:mt-6">
                 <StockManagement />
               </TabsContent>
 
-              <TabsContent value="leads" className="mt-6">
+              <TabsContent value="leads" className="mt-4 sm:mt-6">
                 <LeadManagement />
               </TabsContent>
 
-              <TabsContent value="settings" className="mt-6">
+              <TabsContent value="settings" className="mt-4 sm:mt-6">
                 <SettingsManagement />
               </TabsContent>
             </Tabs>

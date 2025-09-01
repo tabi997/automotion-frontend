@@ -7,10 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Search, Eye, CheckCircle, Clock, Filter, Trash2, AlertTriangle } from "lucide-react";
+import { Search, Eye, CheckCircle, Clock, Filter, Trash2, AlertTriangle, Users, TrendingUp, MessageSquare } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { deleteOldLeadsFromAllTables, getLeadCleanupStats } from "@/lib/actions";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface LeadSell {
   id: string;
@@ -253,42 +254,471 @@ const LeadManagement = () => {
     </Badge>
   );
 
+  const getStatusVariant = (status: string) => {
+    if (status === 'processed') return 'default';
+    if (status === 'new') return 'outline';
+    if (status === 'archived') return 'secondary';
+    return 'secondary';
+  };
+
+  const getStatusText = (status: string) => {
+    if (status === 'processed') return 'Procesat';
+    if (status === 'new') return 'Nou';
+    if (status === 'archived') return 'Arhivat';
+    return 'În așteptare';
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900">Gestionare Lead-uri</h2>
-        <p className="text-gray-600">Administrează lead-urile și mesajele de contact</p>
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Gestionare Lead-uri</h2>
+          <p className="text-sm sm:text-base text-gray-600">Administrează cererile de vânzare, finanțare și mesajele de contact</p>
+        </div>
+        
+        <Button 
+          variant="outline" 
+          onClick={() => setIsCleanupDialogOpen(true)}
+          className="w-full sm:w-auto"
+        >
+          <Trash2 className="h-4 w-4 mr-2" />
+          <span className="hidden sm:inline">Curăță Lead-uri</span>
+          <span className="sm:hidden">Curăță</span>
+        </Button>
       </div>
 
-      {/* Search and Filters */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Caută după nume, email sau detalii..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+      {/* Search and Filter */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="Caută după nume, email sau telefon..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <Select value={filterStatus} onValueChange={setFilterStatus}>
+          <SelectTrigger className="w-full sm:w-48">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Toate lead-urile</SelectItem>
+            <SelectItem value="new">Noi</SelectItem>
+            <SelectItem value="processed">Procesate</SelectItem>
+            <SelectItem value="archived">Arhivate</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Tabs */}
+      <Tabs defaultValue="sell" className="w-full">
+        <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 h-auto sm:h-10">
+          <TabsTrigger value="sell" className="flex items-center gap-2 py-2 sm:py-0 text-xs sm:text-sm">
+            <Users className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Lead-uri Vânzare</span>
+            <span className="sm:hidden">Vânzare</span>
+          </TabsTrigger>
+          <TabsTrigger value="finance" className="flex items-center gap-2 py-2 sm:py-0 text-xs sm:text-sm">
+            <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Lead-uri Finanțare</span>
+            <span className="sm:hidden">Finanțare</span>
+          </TabsTrigger>
+          <TabsTrigger value="contact" className="flex items-center gap-2 py-2 sm:py-0 text-xs sm:text-sm">
+            <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Mesaje Contact</span>
+            <span className="sm:hidden">Contact</span>
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="sell" className="mt-4 sm:mt-6">
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="min-w-32 sm:min-w-40">Client</TableHead>
+                    <TableHead className="hidden sm:table-cell">Vehicul</TableHead>
+                    <TableHead className="hidden lg:table-cell">Preț</TableHead>
+                    <TableHead className="hidden lg:table-cell">Locație</TableHead>
+                    <TableHead className="hidden sm:table-cell">Data</TableHead>
+                    <TableHead className="min-w-20 sm:min-w-24">Status</TableHead>
+                    <TableHead className="w-20 sm:w-24">Acțiuni</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sellLeadsLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8">
+                        <div className="flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                          <span className="ml-2">Se încarcă...</span>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : filteredSellLeads.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8">
+                        <div className="flex flex-col items-center">
+                          <Users className="h-12 w-12 text-gray-400 mb-2" />
+                          <p className="text-gray-500">Nu s-au găsit lead-uri de vânzare</p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredSellLeads.map((lead) => (
+                      <TableRow key={lead.id}>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="font-medium text-sm sm:text-base">{lead.nume}</span>
+                            <span className="text-xs sm:text-sm text-gray-500">{lead.email}</span>
+                            <span className="text-xs sm:text-sm text-gray-500">{lead.telefon}</span>
+                            <div className="sm:hidden text-xs text-gray-500 mt-1">
+                              {lead.marca} {lead.model} • €{lead.pret.toLocaleString()}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="hidden sm:table-cell">
+                          <div className="flex flex-col">
+                            <span className="font-medium">{lead.marca} {lead.model}</span>
+                            <span className="text-sm text-gray-500">{lead.an} • {lead.km.toLocaleString()} km</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="hidden lg:table-cell font-semibold">€{lead.pret.toLocaleString()}</TableCell>
+                        <TableCell className="hidden lg:table-cell">{lead.judet}, {lead.oras}</TableCell>
+                        <TableCell className="hidden sm:table-cell text-sm">
+                          {new Date(lead.created_at).toLocaleDateString('ro-RO')}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={getStatusVariant(lead.status)}>
+                            {getStatusText(lead.status)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1 sm:gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleViewLead(lead, 'sell')}
+                              className="h-8 w-8 p-0 sm:h-9 sm:w-9"
+                            >
+                              <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
             </div>
-            
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">Toate</option>
-              <option value="pending">În așteptare</option>
-              <option value="processed">Procesate</option>
-            </select>
           </div>
-        </CardContent>
-      </Card>
+        </TabsContent>
+
+        <TabsContent value="finance" className="mt-4 sm:mt-6">
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="min-w-32 sm:min-w-40">Client</TableHead>
+                    <TableHead className="hidden sm:table-cell">Finanțare</TableHead>
+                    <TableHead className="hidden lg:table-cell">Venit</TableHead>
+                    <TableHead className="hidden lg:table-cell">Istoric</TableHead>
+                    <TableHead className="hidden sm:table-cell">Data</TableHead>
+                    <TableHead className="min-w-20 sm:min-w-24">Status</TableHead>
+                    <TableHead className="w-20 sm:w-24">Acțiuni</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {financeLeadsLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8">
+                        <div className="flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                          <span className="ml-2">Se încarcă...</span>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : filteredFinanceLeads.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8">
+                        <div className="flex flex-col items-center">
+                          <TrendingUp className="h-12 w-12 text-gray-400 mb-2" />
+                          <p className="text-gray-500">Nu s-au găsit lead-uri de finanțare</p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredFinanceLeads.map((lead) => (
+                      <TableRow key={lead.id}>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="font-medium text-sm sm:text-base">{lead.nume}</span>
+                            <span className="text-xs sm:text-sm text-gray-500">{lead.email}</span>
+                            <span className="text-xs sm:text-sm text-gray-500">{lead.telefon}</span>
+                            <div className="sm:hidden text-xs text-gray-500 mt-1">
+                              €{lead.pret.toLocaleString()} • {lead.avans}% avans
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="hidden sm:table-cell">
+                          <div className="flex flex-col">
+                            <span className="font-medium">€{lead.pret.toLocaleString()}</span>
+                            <span className="text-sm text-gray-500">{lead.avans}% avans • {lead.perioada} luni</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="hidden lg:table-cell">€{lead.venit_lunar.toLocaleString()}/lună</TableCell>
+                        <TableCell className="hidden lg:table-cell">{lead.istoric_creditare}</TableCell>
+                        <TableCell className="hidden sm:table-cell text-sm">
+                          {new Date(lead.created_at).toLocaleDateString('ro-RO')}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={getStatusVariant(lead.status)}>
+                            {getStatusText(lead.status)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1 sm:gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleViewLead(lead, 'finance')}
+                              className="h-8 w-8 p-0 sm:h-9 sm:w-9"
+                            >
+                              <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="contact" className="mt-4 sm:mt-6">
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="min-w-32 sm:min-w-40">Client</TableHead>
+                    <TableHead className="hidden sm:table-cell">Subiect</TableHead>
+                    <TableHead className="hidden lg:table-cell">Mesaj</TableHead>
+                    <TableHead className="hidden sm:table-cell">Data</TableHead>
+                    <TableHead className="min-w-20 sm:min-w-24">Status</TableHead>
+                    <TableHead className="w-20 sm:w-24">Acțiuni</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {contactMessagesLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8">
+                        <div className="flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                          <span className="ml-2">Se încarcă...</span>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : filteredContactMessages.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8">
+                        <div className="flex flex-col items-center">
+                          <MessageSquare className="h-12 w-12 text-gray-400 mb-2" />
+                          <p className="text-gray-500">Nu s-au găsit mesaje de contact</p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredContactMessages.map((message) => (
+                      <TableRow key={message.id}>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="font-medium text-sm sm:text-base">{message.nume}</span>
+                            <span className="text-xs sm:text-sm text-gray-500">{message.email}</span>
+                            <span className="text-xs sm:text-sm text-gray-500">{message.telefon}</span>
+                            <div className="sm:hidden text-xs text-gray-500 mt-1">
+                              {message.subiect}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="hidden sm:table-cell">{message.subiect}</TableCell>
+                        <TableCell className="hidden lg:table-cell">
+                          <div className="max-w-xs truncate">{message.mesaj}</div>
+                        </TableCell>
+                        <TableCell className="hidden sm:table-cell text-sm">
+                          {new Date(message.created_at).toLocaleDateString('ro-RO')}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={getStatusVariant(message.status)}>
+                            {getStatusText(message.status)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1 sm:gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleViewLead(message, 'contact')}
+                              className="h-8 w-8 p-0 sm:h-9 sm:w-9"
+                            >
+                              <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      {/* View Lead Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedLead?.type === 'sell' && 'Detalii Lead Vânzare'}
+              {selectedLead?.type === 'finance' && 'Detalii Lead Finanțare'}
+              {selectedLead?.type === 'contact' && 'Detalii Mesaj Contact'}
+            </DialogTitle>
+            <DialogDescription>
+              Informații complete despre lead
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedLead && (
+            <div className="space-y-4">
+              {selectedLead.type === 'sell' && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-semibold mb-2">Informații Utilizator</h4>
+                    <div className="space-y-2 text-sm">
+                      <div><strong>Nume:</strong> {selectedLead.nume}</div>
+                      <div><strong>Email:</strong> {selectedLead.email}</div>
+                      <div><strong>Telefon:</strong> {selectedLead.telefon}</div>
+                      <div><strong>Preferință contact:</strong> {selectedLead.preferinta_contact}</div>
+                      <div><strong>Interval orar:</strong> {selectedLead.interval_orar}</div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-semibold mb-2">Informații Vehicul</h4>
+                    <div className="space-y-2 text-sm">
+                      <div><strong>Marcă:</strong> {selectedLead.marca}</div>
+                      <div><strong>Model:</strong> {selectedLead.model}</div>
+                      <div><strong>An:</strong> {selectedLead.an}</div>
+                      <div><strong>Kilometri:</strong> {selectedLead.km.toLocaleString()} km</div>
+                      <div><strong>Combustibil:</strong> {selectedLead.combustibil}</div>
+                      <div><strong>Transmisie:</strong> {selectedLead.transmisie}</div>
+                      <div><strong>Caroserie:</strong> {selectedLead.caroserie}</div>
+                      <div><strong>Culoare:</strong> {selectedLead.culoare}</div>
+                      <div><strong>VIN:</strong> {selectedLead.vin}</div>
+                      <div><strong>Preț:</strong> €{selectedLead.pret.toLocaleString()}</div>
+                      <div><strong>Negociabil:</strong> {selectedLead.negociabil ? 'Da' : 'Nu'}</div>
+                      <div><strong>Locație:</strong> {selectedLead.oras}, {selectedLead.judet}</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {selectedLead.type === 'finance' && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-semibold mb-2">Informații Utilizator</h4>
+                    <div className="space-y-2 text-sm">
+                      <div><strong>Nume:</strong> {selectedLead.nume}</div>
+                      <div><strong>Email:</strong> {selectedLead.email}</div>
+                      <div><strong>Telefon:</strong> {selectedLead.telefon}</div>
+                      <div><strong>Venit lunar:</strong> €{selectedLead.venit_lunar.toLocaleString()}</div>
+                      <div><strong>Tip contract:</strong> {selectedLead.tip_contract}</div>
+                      <div><strong>Istoric creditare:</strong> {selectedLead.istoric_creditare}</div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-semibold mb-2">Detalii Finanțare</h4>
+                    <div className="space-y-2 text-sm">
+                      <div><strong>Preț vehicul:</strong> €{selectedLead.pret.toLocaleString()}</div>
+                      <div><strong>Avans:</strong> €{selectedLead.avans.toLocaleString()}</div>
+                      <div><strong>Perioada:</strong> {selectedLead.perioada} luni</div>
+                      <div><strong>Dobândă:</strong> {selectedLead.dobanda}%</div>
+                      <div><strong>Link stoc:</strong> {selectedLead.link_stoc}</div>
+                    </div>
+                  </div>
+                  
+                  {selectedLead.mesaj && (
+                    <div className="col-span-2">
+                      <h4 className="font-semibold mb-2">Mesaj</h4>
+                      <p className="text-sm bg-gray-50 p-3 rounded">{selectedLead.mesaj}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {selectedLead.type === 'contact' && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="font-semibold mb-2">Informații Utilizator</h4>
+                      <div className="space-y-2 text-sm">
+                        <div><strong>Nume:</strong> {selectedLead.nume}</div>
+                        <div><strong>Email:</strong> {selectedLead.email}</div>
+                        <div><strong>Telefon:</strong> {selectedLead.telefon}</div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-semibold mb-2">Detalii Mesaj</h4>
+                      <div className="space-y-2 text-sm">
+                        <div><strong>Subiect:</strong> {selectedLead.subiect}</div>
+                        <div><strong>Data:</strong> {new Date(selectedLead.created_at).toLocaleDateString('ro-RO')}</div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-semibold mb-2">Mesaj</h4>
+                    <p className="text-sm bg-gray-50 p-3 rounded">{selectedLead.mesaj}</p>
+                  </div>
+                </div>
+              )}
+              
+                                <div className="pt-4 border-t">
+                    <div className="flex justify-between items-center">
+                      <div className="text-sm text-gray-500">
+                        <strong>Status:</strong> {selectedLead.status === 'processed' ? 'Procesat' : 'În așteptare'}
+                      </div>
+                      
+                      {selectedLead.status !== 'processed' && (
+                        <Button
+                          onClick={() => {
+                            handleMarkProcessed(
+                              selectedLead.type === 'sell' ? 'lead_sell' : 
+                              selectedLead.type === 'finance' ? 'lead_finance' : 'contact_messages',
+                              selectedLead.id
+                            );
+                            setIsViewDialogOpen(false);
+                          }}
+                          disabled={markProcessedMutation.isPending}
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Marchează ca Procesat
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Cleanup Section */}
       <Card data-testid="cleanup-section">
@@ -451,444 +881,6 @@ const LeadManagement = () => {
           </div>
         </CardContent>
       </Card>
-
-      {/* Leads Tabs */}
-      <Tabs defaultValue="sell" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="sell">
-            Lead-uri Vânzare ({filteredSellLeads.length})
-          </TabsTrigger>
-          <TabsTrigger value="finance">
-            Lead-uri Finanțare ({filteredFinanceLeads.length})
-          </TabsTrigger>
-          <TabsTrigger value="contact">
-            Mesaje Contact ({filteredContactMessages.length})
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Sell Leads Tab */}
-        <TabsContent value="sell" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Lead-uri Vânzare Vehicule</CardTitle>
-              <CardDescription>
-                Cereri de vânzare de vehicule de la utilizatori
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {sellLeadsLoading ? (
-                <div className="text-center py-8">Se încarcă...</div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Utilizator</TableHead>
-                        <TableHead>Vehicul</TableHead>
-                        <TableHead>Preț</TableHead>
-                        <TableHead>Locație</TableHead>
-                        <TableHead>Data</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Acțiuni</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredSellLeads.map((lead) => (
-                        <TableRow key={lead.id}>
-                          <TableCell>
-                            <div>
-                              <div className="font-medium">{lead.nume}</div>
-                              <div className="text-sm text-gray-500">{lead.email}</div>
-                              <div className="text-sm text-gray-500">{lead.telefon}</div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div>
-                              <div className="font-medium">{lead.marca} {lead.model}</div>
-                              <div className="text-sm text-gray-500">
-                                {lead.an} • {lead.km.toLocaleString()} km
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="font-medium">€{lead.pret.toLocaleString()}</div>
-                            {lead.negociabil && (
-                              <Badge variant="outline" className="text-xs">Negociabil</Badge>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <div>{lead.oras}, {lead.judet}</div>
-                          </TableCell>
-                          <TableCell>
-                            {new Date(lead.created_at).toLocaleDateString('ro-RO')}
-                          </TableCell>
-                          <TableCell>
-                            {getStatusBadge(lead.status)}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleViewLead(lead, 'sell')}
-                              >
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              
-                              {lead.status !== 'processed' && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleMarkProcessed('lead_sell', lead.id)}
-                                  disabled={markProcessedMutation.isPending}
-                                >
-                                  <CheckCircle className="h-4 w-4" />
-                                </Button>
-                              )}
-
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleDeleteLead('lead_sell', lead.id, lead.nume)}
-                                disabled={deleteLeadMutation.isPending}
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Finance Leads Tab */}
-        <TabsContent value="finance" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Lead-uri Finanțare</CardTitle>
-              <CardDescription>
-                Cereri de finanțare pentru vehicule
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {financeLeadsLoading ? (
-                <div className="text-center py-8">Se încarcă...</div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Utilizator</TableHead>
-                        <TableHead>Detalii Finanțare</TableHead>
-                        <TableHead>Venit Lunar</TableHead>
-                        <TableHead>Data</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Acțiuni</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredFinanceLeads.map((lead) => (
-                        <TableRow key={lead.id}>
-                          <TableCell>
-                            <div>
-                              <div className="font-medium">{lead.nume}</div>
-                              <div className="text-sm text-gray-500">{lead.email}</div>
-                              <div className="text-sm text-gray-500">{lead.telefon}</div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div>
-                              <div className="font-medium">€{lead.pret.toLocaleString()}</div>
-                              <div className="text-sm text-gray-500">
-                                Avans: €{lead.avans.toLocaleString()} • {lead.perioada} luni
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="font-medium">€{lead.venit_lunar.toLocaleString()}</div>
-                          </TableCell>
-                          <TableCell>
-                            {new Date(lead.created_at).toLocaleDateString('ro-RO')}
-                          </TableCell>
-                          <TableCell>
-                            {getStatusBadge(lead.status)}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleViewLead(lead, 'finance')}
-                              >
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              
-                              {lead.status !== 'processed' && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleMarkProcessed('lead_finance', lead.id)}
-                                  disabled={markProcessedMutation.isPending}
-                                >
-                                  <CheckCircle className="h-4 w-4" />
-                                </Button>
-                              )}
-
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleDeleteLead('lead_finance', lead.id, lead.nume)}
-                                disabled={deleteLeadMutation.isPending}
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Contact Messages Tab */}
-        <TabsContent value="contact" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Mesaje de Contact</CardTitle>
-              <CardDescription>
-                Mesaje primite prin formularul de contact
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {contactMessagesLoading ? (
-                <div className="text-center py-8">Se încarcă...</div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Utilizator</TableHead>
-                        <TableHead>Subiect</TableHead>
-                        <TableHead>Data</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Acțiuni</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredContactMessages.map((message) => (
-                        <TableRow key={message.id}>
-                          <TableCell>
-                            <div>
-                              <div className="font-medium">{message.nume}</div>
-                              <div className="text-sm text-gray-500">{message.email}</div>
-                              <div className="text-sm text-gray-500">{message.telefon}</div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="font-medium">{message.subiect}</div>
-                            <div className="text-sm text-gray-500 truncate max-w-xs">
-                              {message.mesaj}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            {new Date(message.created_at).toLocaleDateString('ro-RO')}
-                          </TableCell>
-                          <TableCell>
-                            {getStatusBadge(message.status)}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleViewLead(message, 'contact')}
-                              >
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              
-                              {message.status !== 'processed' && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleMarkProcessed('contact_messages', message.id)}
-                                  disabled={markProcessedMutation.isPending}
-                                >
-                                  <CheckCircle className="h-4 w-4" />
-                                </Button>
-                              )}
-
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleDeleteLead('contact_messages', message.id, message.nume)}
-                                disabled={deleteLeadMutation.isPending}
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-
-      {/* View Lead Dialog */}
-      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {selectedLead?.type === 'sell' && 'Detalii Lead Vânzare'}
-              {selectedLead?.type === 'finance' && 'Detalii Lead Finanțare'}
-              {selectedLead?.type === 'contact' && 'Detalii Mesaj Contact'}
-            </DialogTitle>
-            <DialogDescription>
-              Informații complete despre lead
-            </DialogDescription>
-          </DialogHeader>
-          
-          {selectedLead && (
-            <div className="space-y-4">
-              {selectedLead.type === 'sell' && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="font-semibold mb-2">Informații Utilizator</h4>
-                    <div className="space-y-2 text-sm">
-                      <div><strong>Nume:</strong> {selectedLead.nume}</div>
-                      <div><strong>Email:</strong> {selectedLead.email}</div>
-                      <div><strong>Telefon:</strong> {selectedLead.telefon}</div>
-                      <div><strong>Preferință contact:</strong> {selectedLead.preferinta_contact}</div>
-                      <div><strong>Interval orar:</strong> {selectedLead.interval_orar}</div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold mb-2">Informații Vehicul</h4>
-                    <div className="space-y-2 text-sm">
-                      <div><strong>Marcă:</strong> {selectedLead.marca}</div>
-                      <div><strong>Model:</strong> {selectedLead.model}</div>
-                      <div><strong>An:</strong> {selectedLead.an}</div>
-                      <div><strong>Kilometri:</strong> {selectedLead.km.toLocaleString()} km</div>
-                      <div><strong>Combustibil:</strong> {selectedLead.combustibil}</div>
-                      <div><strong>Transmisie:</strong> {selectedLead.transmisie}</div>
-                      <div><strong>Caroserie:</strong> {selectedLead.caroserie}</div>
-                      <div><strong>Culoare:</strong> {selectedLead.culoare}</div>
-                      <div><strong>VIN:</strong> {selectedLead.vin}</div>
-                      <div><strong>Preț:</strong> €{selectedLead.pret.toLocaleString()}</div>
-                      <div><strong>Negociabil:</strong> {selectedLead.negociabil ? 'Da' : 'Nu'}</div>
-                      <div><strong>Locație:</strong> {selectedLead.oras}, {selectedLead.judet}</div>
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              {selectedLead.type === 'finance' && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="font-semibold mb-2">Informații Utilizator</h4>
-                    <div className="space-y-2 text-sm">
-                      <div><strong>Nume:</strong> {selectedLead.nume}</div>
-                      <div><strong>Email:</strong> {selectedLead.email}</div>
-                      <div><strong>Telefon:</strong> {selectedLead.telefon}</div>
-                      <div><strong>Venit lunar:</strong> €{selectedLead.venit_lunar.toLocaleString()}</div>
-                      <div><strong>Tip contract:</strong> {selectedLead.tip_contract}</div>
-                      <div><strong>Istoric creditare:</strong> {selectedLead.istoric_creditare}</div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold mb-2">Detalii Finanțare</h4>
-                    <div className="space-y-2 text-sm">
-                      <div><strong>Preț vehicul:</strong> €{selectedLead.pret.toLocaleString()}</div>
-                      <div><strong>Avans:</strong> €{selectedLead.avans.toLocaleString()}</div>
-                      <div><strong>Perioada:</strong> {selectedLead.perioada} luni</div>
-                      <div><strong>Dobândă:</strong> {selectedLead.dobanda}%</div>
-                      <div><strong>Link stoc:</strong> {selectedLead.link_stoc}</div>
-                    </div>
-                  </div>
-                  
-                  {selectedLead.mesaj && (
-                    <div className="col-span-2">
-                      <h4 className="font-semibold mb-2">Mesaj</h4>
-                      <p className="text-sm bg-gray-50 p-3 rounded">{selectedLead.mesaj}</p>
-                    </div>
-                  )}
-                </div>
-              )}
-              
-              {selectedLead.type === 'contact' && (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <h4 className="font-semibold mb-2">Informații Utilizator</h4>
-                      <div className="space-y-2 text-sm">
-                        <div><strong>Nume:</strong> {selectedLead.nume}</div>
-                        <div><strong>Email:</strong> {selectedLead.email}</div>
-                        <div><strong>Telefon:</strong> {selectedLead.telefon}</div>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h4 className="font-semibold mb-2">Detalii Mesaj</h4>
-                      <div className="space-y-2 text-sm">
-                        <div><strong>Subiect:</strong> {selectedLead.subiect}</div>
-                        <div><strong>Data:</strong> {new Date(selectedLead.created_at).toLocaleDateString('ro-RO')}</div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold mb-2">Mesaj</h4>
-                    <p className="text-sm bg-gray-50 p-3 rounded">{selectedLead.mesaj}</p>
-                  </div>
-                </div>
-              )}
-              
-                                <div className="pt-4 border-t">
-                    <div className="flex justify-between items-center">
-                      <div className="text-sm text-gray-500">
-                        <strong>Status:</strong> {selectedLead.status === 'processed' ? 'Procesat' : 'În așteptare'}
-                      </div>
-                      
-                      {selectedLead.status !== 'processed' && (
-                        <Button
-                          onClick={() => {
-                            handleMarkProcessed(
-                              selectedLead.type === 'sell' ? 'lead_sell' : 
-                              selectedLead.type === 'finance' ? 'lead_finance' : 'contact_messages',
-                              selectedLead.id
-                            );
-                            setIsViewDialogOpen(false);
-                          }}
-                          disabled={markProcessedMutation.isPending}
-                        >
-                          <CheckCircle className="h-4 w-4 mr-2" />
-                          Marchează ca Procesat
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

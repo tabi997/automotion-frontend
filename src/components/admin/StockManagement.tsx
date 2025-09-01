@@ -262,33 +262,34 @@ const StockManagement = () => {
   const conditions = ["nou", "second-hand", "demo"];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header Actions */}
-                <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900" id="page-title">Gestionare Stoc Vehicule</h2>
-              <p className="text-gray-600" id="page-description">Administrează vehiculele din stocul platformei</p>
-            </div>
-        
-                    <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-              <DialogTrigger asChild>
-                <Button 
-                  className="flex items-center gap-2"
-                  aria-describedby="page-description"
-                >
-                  <Plus className="h-4 w-4" />
-                  Adaugă Vehicul
-                </Button>
-              </DialogTrigger>
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900" id="page-title">Gestionare Stoc Vehicule</h2>
+          <p className="text-sm sm:text-base text-gray-600" id="page-description">Administrează vehiculele din stocul platformei</p>
+        </div>
+    
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <DialogTrigger asChild>
+            <Button 
+              className="flex items-center gap-2 w-full sm:w-auto"
+              aria-describedby="page-description"
+            >
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">Adaugă Vehicul</span>
+              <span className="sm:hidden">Adaugă</span>
+            </Button>
+          </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Adaugă Vehicul Nou</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-lg sm:text-xl">Adaugă Vehicul Nou</DialogTitle>
+              <DialogDescription className="text-sm">
                 Completează informațiile despre vehiculul nou
               </DialogDescription>
             </DialogHeader>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="marca">Marcă *</Label>
                 {/* Debug info */}
@@ -298,16 +299,18 @@ const StockManagement = () => {
                 <Select
                   value={formData.marca}
                   onValueChange={(value) => {
-                    setFormData({ ...formData, marca: value, model: "" }); // Reset model when brand changes
+                    setFormData({ ...formData, marca: value });
+                    setSelectedBrand(value);
+                    setFormData(prev => ({ ...prev, model: '' })); // Reset model when brand changes
                   }}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="marca" name="marca">
                     <SelectValue placeholder="Selectează marca" />
                   </SelectTrigger>
                   <SelectContent>
                     {carBrands?.map(({ brand }) => (
                       <SelectItem key={brand} value={brand}>{brand}</SelectItem>
-                    )) || []}
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -317,15 +320,15 @@ const StockManagement = () => {
                 <Select
                   value={formData.model}
                   onValueChange={(value) => setFormData({ ...formData, model: value })}
-                  disabled={!formData.marca}
+                  disabled={!selectedBrand}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder={formData.marca ? "Selectează modelul" : "Selectează mai întâi marca"} />
+                  <SelectTrigger id="model" name="model">
+                    <SelectValue placeholder="Selectează modelul" />
                   </SelectTrigger>
                   <SelectContent>
-                    {carBrands.find(b => b.brand === formData.marca)?.models.map((model) => (
+                    {selectedBrand && carBrands?.find(b => b.brand === selectedBrand)?.models.map((model) => (
                       <SelectItem key={model} value={model}>{model}</SelectItem>
-                    )) || []}
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -337,9 +340,8 @@ const StockManagement = () => {
                   name="an"
                   type="number"
                   value={formData.an}
-                  onChange={(e) => setFormData({ ...formData, an: parseInt(e.target.value) })}
-                  min="1900"
-                  max={new Date().getFullYear() + 1}
+                  onChange={(e) => setFormData({ ...formData, an: parseInt(e.target.value) || 0 })}
+                  placeholder="2020"
                 />
               </div>
               
@@ -350,20 +352,20 @@ const StockManagement = () => {
                   name="pret"
                   type="number"
                   value={formData.pret}
-                  onChange={(e) => setFormData({ ...formData, pret: parseInt(e.target.value) })}
-                  min="0"
+                  onChange={(e) => setFormData({ ...formData, pret: parseInt(e.target.value) || 0 })}
+                  placeholder="25000"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="km">Kilometri *</Label>
+                <Label htmlFor="km">Kilometraj *</Label>
                 <Input
                   id="km"
                   name="km"
                   type="number"
                   value={formData.km}
-                  onChange={(e) => setFormData({ ...formData, km: parseInt(e.target.value) })}
-                  min="0"
+                  onChange={(e) => setFormData({ ...formData, km: parseInt(e.target.value) || 0 })}
+                  placeholder="50000"
                 />
               </div>
               
@@ -396,7 +398,7 @@ const StockManagement = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="caroserie">Tip Caroserie *</Label>
+                <Label htmlFor="caroserie">Caroserie *</Label>
                 <Select value={formData.caroserie} onValueChange={(value) => setFormData({ ...formData, caroserie: value })}>
                   <SelectTrigger id="caroserie" name="caroserie">
                     <SelectValue />
@@ -503,416 +505,157 @@ const StockManagement = () => {
               </p>
             </div>
             
-            <div className="flex justify-end gap-2">
+            <div className="flex flex-col sm:flex-row justify-end gap-2">
               <Button 
                 variant="outline" 
                 onClick={() => setIsAddDialogOpen(false)}
-                aria-describedby="cancel-help"
+                className="w-full sm:w-auto"
+                aria-describedby="add-cancel-help"
               >
                 Anulează
               </Button>
               <Button 
                 onClick={handleAddVehicle}
                 disabled={addVehicleMutation.isPending}
-                aria-describedby="add-help"
+                className="w-full sm:w-auto"
+                aria-describedby="add-submit-help"
               >
                 {addVehicleMutation.isPending ? "Se adaugă..." : "Adaugă Vehicul"}
               </Button>
             </div>
             <div className="sr-only">
-              <p id="cancel-help">Anulează adăugarea vehiculului și închide dialogul</p>
-              <p id="add-help">Adaugă vehiculul în stoc cu informațiile completate</p>
+              <p id="add-cancel-help">Anulează adăugarea vehiculului și închide dialogul</p>
+              <p id="add-submit-help">Adaugă vehiculul nou în stoc</p>
             </div>
           </DialogContent>
         </Dialog>
       </div>
 
-      {/* Search and Filters */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  id="search-vehicles"
-                  name="search-vehicles"
-                  placeholder="Caută după marcă sau model..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                  aria-describedby="search-help"
-                />
-              </div>
-              <p id="search-help" className="sr-only">Caută vehicule după marcă sau model</p>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="filter-status" className="sr-only">Filtrează după stare</Label>
-              <Select value={filterType} onValueChange={setFilterType}>
-                <SelectTrigger id="filter-status" name="filter-status" className="w-full sm:w-48" aria-describedby="filter-help">
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Filtrează după stare" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Toate</SelectItem>
-                  <SelectItem value="active">Activ</SelectItem>
-                  <SelectItem value="inactive">Inactiv</SelectItem>
-                  <SelectItem value="sold">Vândute</SelectItem>
-                </SelectContent>
-              </Select>
-              <p id="filter-help" className="sr-only">Selectează starea vehiculelor pentru a filtra lista</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Search and Filter */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="Caută după marcă sau model..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <Select value={filterType} onValueChange={setFilterType}>
+          <SelectTrigger className="w-full sm:w-48">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Toate vehiculele</SelectItem>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="inactive">Inactive</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
       {/* Vehicles Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Vehicule în Stoc</CardTitle>
-          <CardDescription>
-            {filteredVehicles.length} vehicule găsite
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="text-center py-8">Se încarcă...</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table role="table" aria-label="Lista vehiculelor din stoc">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead scope="col">Vehicul</TableHead>
-                    <TableHead scope="col">Preț</TableHead>
-                    <TableHead scope="col">Stare</TableHead>
-                    <TableHead scope="col">Locație</TableHead>
-                    <TableHead scope="col">Data Adăugării</TableHead>
-                    <TableHead scope="col">Acțiuni</TableHead>
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-12 sm:w-16">ID</TableHead>
+                <TableHead className="min-w-32 sm:min-w-40">Marcă/Model</TableHead>
+                <TableHead className="hidden sm:table-cell">An</TableHead>
+                <TableHead className="hidden sm:table-cell">KM</TableHead>
+                <TableHead className="min-w-20 sm:min-w-24">Preț</TableHead>
+                <TableHead className="hidden lg:table-cell">Status</TableHead>
+                <TableHead className="w-20 sm:w-24">Acțiuni</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-8">
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                      <span className="ml-2">Se încarcă...</span>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : filteredVehicles.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-8">
+                    <div className="flex flex-col items-center">
+                      <Car className="h-12 w-12 text-gray-400 mb-2" />
+                      <p className="text-gray-500">Nu s-au găsit vehicule</p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredVehicles.map((vehicle) => (
+                  <TableRow key={vehicle.id}>
+                    <TableCell className="font-mono text-xs sm:text-sm">{vehicle.id}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-sm sm:text-base">{vehicle.marca}</span>
+                        <span className="text-xs sm:text-sm text-gray-500">{vehicle.model}</span>
+                        <div className="sm:hidden text-xs text-gray-500">
+                          {vehicle.an} • {vehicle.km.toLocaleString()} km
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell">{vehicle.an}</TableCell>
+                    <TableCell className="hidden sm:table-cell">{vehicle.km.toLocaleString()}</TableCell>
+                    <TableCell className="font-semibold">€{vehicle.pret.toLocaleString()}</TableCell>
+                    <TableCell className="hidden lg:table-cell">
+                      <Badge variant={vehicle.status === 'active' ? 'default' : 'secondary'}>
+                        {vehicle.status === 'active' ? 'Activ' : 'Inactiv'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditVehicle(vehicle)}
+                          className="h-8 w-8 p-0 sm:h-9 sm:w-9"
+                        >
+                          <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 sm:h-9 sm:w-9 text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Șterge vehiculul</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Ești sigur că vrei să ștergi acest vehicul? Această acțiune nu poate fi anulată.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Anulează</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteVehicle(vehicle.id)}
+                                className="bg-red-600 hover:bg-red-700"
+                              >
+                                Șterge
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredVehicles.map((vehicle) => (
-                    <TableRow key={vehicle.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                            <Car className="h-6 w-6 text-gray-500" />
-                          </div>
-                          <div>
-                            <div className="font-medium">{vehicle.marca} {vehicle.model}</div>
-                            <div className="text-sm text-gray-500">
-                              {vehicle.an} • {vehicle.km.toLocaleString()} km
-                            </div>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="font-medium">€{vehicle.pret.toLocaleString()}</div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={vehicle.status === 'active' ? 'default' : 'secondary'}>
-                          {vehicle.status === 'active' ? 'Activ' : 
-                           vehicle.status === 'inactive' ? 'Inactiv' : 'Vândut'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{/* Locație is not in StockVehicle, so it's empty */}</TableCell>
-                      <TableCell>
-                        {new Date(vehicle.created_at).toLocaleDateString('ro-RO')}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEditVehicle(vehicle)}
-                            aria-label={`Editează vehiculul ${vehicle.marca} ${vehicle.model}`}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          
-                                                      <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  aria-label={`Șterge vehiculul ${vehicle.marca} ${vehicle.model}`}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Ești sigur?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Această acțiune nu poate fi anulată. Vehiculul va fi șters definitiv din stoc.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Anulează</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => handleDeleteVehicle(vehicle.id)}
-                                  className="bg-red-600 hover:bg-red-700"
-                                >
-                                  Șterge
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Edit Vehicle Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Editează Vehicul</DialogTitle>
-            <DialogDescription>
-              Modifică informațiile despre vehicul
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-marca">Marcă *</Label>
-              <Select
-                value={formData.marca}
-                onValueChange={(value) => {
-                  setFormData({ ...formData, marca: value, model: "" }); // Reset model when brand changes
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selectează marca" />
-                </SelectTrigger>
-                <SelectContent>
-                  {carBrands.map(({ brand }) => (
-                    <SelectItem key={brand} value={brand}>{brand}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="edit-model">Model *</Label>
-              <Select
-                value={formData.model}
-                onValueChange={(value) => setFormData({ ...formData, model: value })}
-                disabled={!formData.marca}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={formData.marca ? "Selectează modelul" : "Selectează mai întâi marca"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {carBrands.find(b => b.brand === formData.marca)?.models.map((model) => (
-                    <SelectItem key={model} value={model}>{model}</SelectItem>
-                  )) || []}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="edit-an">An *</Label>
-              <Input
-                id="edit-an"
-                name="edit-an"
-                type="number"
-                value={formData.an}
-                onChange={(e) => setFormData({ ...formData, an: parseInt(e.target.value) })}
-                min="1900"
-                max={new Date().getFullYear() + 1}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="edit-pret">Preț (€) *</Label>
-              <Input
-                id="edit-pret"
-                name="edit-pret"
-                type="number"
-                value={formData.pret}
-                onChange={(e) => setFormData({ ...formData, pret: parseInt(e.target.value) })}
-                min="0"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="edit-km">Kilometri *</Label>
-              <Input
-                id="edit-km"
-                name="edit-km"
-                type="number"
-                value={formData.km}
-                onChange={(e) => setFormData({ ...formData, km: parseInt(e.target.value) })}
-                min="0"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="edit-combustibil">Combustibil *</Label>
-              <Select value={formData.combustibil} onValueChange={(value) => setFormData({ ...formData, combustibil: value })}>
-                <SelectTrigger id="edit-combustibil" name="edit-combustibil">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {fuelTypes.map(type => (
-                    <SelectItem key={type} value={type}>{type}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="edit-transmisie">Transmisie *</Label>
-              <Select value={formData.transmisie} onValueChange={(value) => setFormData({ ...formData, transmisie: value })}>
-                <SelectTrigger id="edit-transmisie" name="edit-transmisie">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {transmissions.map(type => (
-                    <SelectItem key={type} value={type}>{type}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="edit-caroserie">Tip Caroserie *</Label>
-              <Select value={formData.caroserie} onValueChange={(value) => setFormData({ ...formData, caroserie: value })}>
-                <SelectTrigger id="edit-caroserie" name="edit-caroserie">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {bodyTypes.map(type => (
-                    <SelectItem key={type} value={type}>{type}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="edit-culoare">Culoare</Label>
-              <Input
-                id="edit-culoare"
-                name="edit-culoare"
-                value={formData.culoare}
-                onChange={(e) => setFormData({ ...formData, culoare: e.target.value })}
-                placeholder="Negru Safir"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="edit-vin">Vin</Label>
-              <Input
-                id="edit-vin"
-                name="edit-vin"
-                value={formData.vin}
-                onChange={(e) => setFormData({ ...formData, vin: e.target.value })}
-                placeholder="WBA3A9C50EP000000"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="edit-openlane_url">Link OpenLane</Label>
-              <Input
-                id="edit-openlane_url"
-                name="edit-openlane_url"
-                type="url"
-                value={formData.openlane_url}
-                onChange={(e) => setFormData({ ...formData, openlane_url: e.target.value })}
-                placeholder="https://www.openlane.eu/auction/..."
-              />
-              <p className="text-xs text-gray-500">
-                Link-ul către licitația OpenLane pentru acest vehicul
-              </p>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="edit-negociabil">Negociabil</Label>
-              <Select value={formData.negociabil ? "true" : "false"} onValueChange={(value) => setFormData({ ...formData, negociabil: value === "true" })}>
-                <SelectTrigger id="edit-negociabil" name="edit-negociabil">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="true">Da</SelectItem>
-                  <SelectItem value="false">Nu</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="edit-status">Status *</Label>
-              <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value as 'active' | 'inactive' })}>
-                <SelectTrigger id="edit-status" name="edit-status">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Activ</SelectItem>
-                  <SelectItem value="inactive">Inactiv</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="edit-descriere">Descriere</Label>
-                          <Textarea
-                id="edit-descriere"
-                name="edit-descriere"
-                value={formData.descriere}
-                onChange={(e) => setFormData({ ...formData, descriere: e.target.value })}
-                placeholder="Descrierea vehiculului..."
-                rows={3}
-              />
-          </div>
-          
-          {/* Image Upload for Edit */}
-          <div className="space-y-2">
-            <Label htmlFor="edit-vehicle-images">Fotografii Vehicul</Label>
-            <div id="edit-vehicle-images" aria-describedby="edit-vehicle-images-help">
-              <AdminUploadGallery
-                onImagesChange={(imageUrls) => {
-                  // Store image URLs for later update
-                  setImages(imageUrls as unknown as File[]);
-                }}
-                minImages={1}
-                maxImages={10}
-              />
-            </div>
-            <p id="edit-vehicle-images-help" className="text-sm text-gray-500">
-              Adaugă între 1 și 10 fotografii ale vehiculului
-            </p>
-          </div>
-          
-          <div className="flex justify-end gap-2">
-            <Button 
-              variant="outline" 
-              onClick={() => setIsEditDialogOpen(false)}
-              aria-describedby="edit-cancel-help"
-            >
-              Anulează
-            </Button>
-            <Button 
-              onClick={handleUpdateVehicle}
-              disabled={updateVehicleMutation.isPending}
-              aria-describedby="edit-update-help"
-            >
-              {updateVehicleMutation.isPending ? "Se actualizează..." : "Actualizează"}
-            </Button>
-          </div>
-          <div className="sr-only">
-            <p id="edit-cancel-help">Anulează editarea vehiculului și închide dialogul</p>
-            <p id="edit-update-help">Actualizează vehiculul cu informațiile modificate</p>
-          </div>
-        </DialogContent>
-      </Dialog>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
     </div>
   );
 };
