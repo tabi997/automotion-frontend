@@ -263,11 +263,11 @@ const Index = () => {
 
   const featuredCarsSection = (
     <Section background="muted">
-      <div className="text-center mb-16">
-        <h2 className="text-3xl md:text-4xl font-bold mb-4">
+      <div className="text-center mb-12 sm:mb-16">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">
           {loading ? 'Se încarcă...' : vehicles.length > 0 ? 'Mașini Premium din Stocul Nostru' : 'Stocul Nostru'}
         </h2>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+        <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
           {loading 
             ? 'Se încarcă vehiculele din stocul nostru...' 
             : vehicles.length > 0 
@@ -277,7 +277,7 @@ const Index = () => {
         </p>
       </div>
       
-      <div className="relative mb-12">
+      <div className="relative mb-8 sm:mb-12">
         <Carousel
           opts={{
             align: "start",
@@ -289,10 +289,10 @@ const Index = () => {
                          {loading ? (
                // Loading skeleton
                [...Array(3)].map((_, index) => (
-                 <CarouselItem key={`loading-${index}`} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
+                 <CarouselItem key={`loading-${index}`} className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3">
                    <div className="automotive-card overflow-hidden animate-pulse">
-                     <div className="h-48 bg-muted" />
-                     <div className="p-6 space-y-3">
+                     <div className="h-40 sm:h-48 bg-muted" />
+                     <div className="p-4 sm:p-6 space-y-3">
                        <div className="h-4 bg-muted rounded w-3/4" />
                        <div className="h-3 bg-muted rounded w-1/2" />
                        <div className="h-8 bg-muted rounded w-full" />
@@ -302,11 +302,11 @@ const Index = () => {
                ))
              ) : vehicles.length === 0 ? (
                // Empty state
-               <CarouselItem className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
-                 <div className="automotive-card p-8 text-center">
-                   <Car className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                   <h3 className="text-lg font-semibold mb-2">Nu sunt mașini disponibile</h3>
-                   <p className="text-muted-foreground mb-4">
+               <CarouselItem className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3">
+                 <div className="automotive-card p-6 sm:p-8 text-center">
+                   <Car className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mx-auto mb-4" />
+                   <h3 className="text-base sm:text-lg font-semibold mb-2">Nu sunt mașini disponibile</h3>
+                   <p className="text-sm sm:text-base text-muted-foreground mb-4">
                      În acest moment nu avem vehicule în stoc.
                    </p>
                    <Button variant="outline" size="sm" asChild>
@@ -316,17 +316,17 @@ const Index = () => {
                </CarouselItem>
              ) : (
                vehicles.map((vehicle, index) => (
-                 <CarouselItem key={vehicle.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
+                 <CarouselItem key={vehicle.id} className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3">
                    <div className="automotive-card overflow-hidden hover-lift">
                      <div className="relative">
                        <Link to={`/vehicul/${vehicle.id}`} className="block">
                          <img 
                            src={getVehicleImage(vehicle)}
                            alt={`${vehicle.brand} ${vehicle.model}`}
-                           className="w-full h-48 object-cover cursor-pointer group-hover:scale-105 transition-smooth"
+                           className="w-full h-40 sm:h-48 object-cover cursor-pointer group-hover:scale-105 transition-smooth"
                          />
                        </Link>
-                       <div className="absolute top-4 left-4 flex flex-wrap gap-2">
+                       <div className="absolute top-3 left-3 flex flex-wrap gap-1 sm:gap-2">
                          {/* Dynamic badges based on vehicle data */}
                          {vehicle.year >= new Date().getFullYear() - 1 && (
                            <Badge variant="success" size="sm">Nou</Badge>
@@ -340,18 +340,18 @@ const Index = () => {
                        </div>
                      </div>
                      
-                     <div className="p-6">
+                     <div className="p-4 sm:p-6">
                        <Link to={`/vehicul/${vehicle.id}`} className="block hover:text-primary transition-colors">
-                         <h3 className="text-xl font-semibold mb-2 cursor-pointer">
+                         <h3 className="text-lg sm:text-xl font-semibold mb-2 cursor-pointer">
                            {vehicle.brand} {vehicle.model}
                          </h3>
                        </Link>
-                       <p className="text-muted-foreground mb-2">An: {vehicle.year}</p>
-                       <p className="text-muted-foreground mb-4">{vehicle.mileage.toLocaleString()} km</p>
+                       <p className="text-sm text-muted-foreground mb-2">An: {vehicle.year}</p>
+                       <p className="text-sm text-muted-foreground mb-4">{vehicle.mileage.toLocaleString()} km</p>
                        
                        <div className="flex items-center justify-between">
                          <div>
-                           <span className="text-2xl font-bold text-primary">
+                           <span className="text-xl sm:text-2xl font-bold text-primary">
                              €{vehicle.price.toLocaleString()}
                            </span>
                          </div>
@@ -369,8 +369,8 @@ const Index = () => {
                ))
              )}
           </CarouselContent>
-          <CarouselPrevious className="left-4" />
-          <CarouselNext className="right-4" />
+          <CarouselPrevious className="left-2 sm:left-4" />
+          <CarouselNext className="right-2 sm:right-4" />
         </Carousel>
       </div>
       

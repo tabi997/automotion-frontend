@@ -598,25 +598,40 @@ const Stock = () => {
       
       {/* Main Content - Moved closer to hero section */}
       <Section padding="none" className="pb-24">
-        <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
+          {/* Mobile Filter Toggle */}
+          <div className="lg:hidden px-4">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowFilters(!showFilters)}
+              className="w-full flex items-center justify-between"
+            >
+              <span className="flex items-center gap-2">
+                <Filter className="h-4 w-4" />
+                Filtre
+              </span>
+              <ChevronDown className={`h-4 w-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+            </Button>
+          </div>
+
           {/* Filters Sidebar */}
-          <div className={`lg:w-80 stock-filters-sidebar ${showFilters ? 'block' : 'hidden lg:block'}`}>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold">Filtre</h3>
+          <div className={`lg:w-80 stock-filters-sidebar ${showFilters ? 'block' : 'hidden lg:block'} mx-4 lg:mx-0`}>
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h3 className="text-base sm:text-lg font-semibold">Filtre</h3>
               <Button variant="ghost" size="sm" onClick={clearFilters}>
                 Resetează
               </Button>
             </div>
             
             {/* Search */}
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <label className="block text-sm font-medium mb-2">Caută</label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input
                   type="text"
                   placeholder="Caută mărcă, model..."
-                  className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                   value={filters.search || ''}
                   onChange={(e) => handleFilterChange('search', e.target.value)}
                 />
@@ -624,10 +639,10 @@ const Stock = () => {
             </div>
             
             {/* Brand */}
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <label className="block text-sm font-medium mb-2">Marcă</label>
               <select
-                className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                 value={filters.brand || ''}
                 onChange={(e) => {
                   handleFilterChange('brand', e.target.value);
@@ -643,10 +658,10 @@ const Stock = () => {
             </div>
 
             {/* Model */}
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <label className="block text-sm font-medium mb-2">Model</label>
               <select
-                className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                 value={filters.model || ''}
                 onChange={(e) => handleFilterChange('model', e.target.value)}
                 disabled={!selectedBrandForFilter}
@@ -659,10 +674,10 @@ const Stock = () => {
             </div>
             
             {/* Body Type */}
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <label className="block text-sm font-medium mb-2">Caroserie</label>
               <select
-                className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                 value={filters.bodyType || ''}
                 onChange={(e) => handleFilterChange('bodyType', e.target.value)}
               >
@@ -676,10 +691,10 @@ const Stock = () => {
             </div>
             
             {/* Fuel Type */}
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <label className="block text-sm font-medium mb-2">Combustibil</label>
               <select
-                className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                 value={filters.fuelType || ''}
                 onChange={(e) => handleFilterChange('fuelType', e.target.value)}
               >
@@ -693,20 +708,20 @@ const Stock = () => {
             </div>
             
             {/* Price Range */}
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <label className="block text-sm font-medium mb-2">Preț (€)</label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2 sm:gap-3">
                 <input
                   type="number"
                   placeholder="Min"
-                  className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                   value={filters.priceMin || ''}
                   onChange={(e) => handleFilterChange('priceMin', e.target.value ? parseInt(e.target.value) : undefined)}
                 />
                 <input
                   type="number"
                   placeholder="Max"
-                  className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                   value={filters.priceMax || ''}
                   onChange={(e) => handleFilterChange('priceMax', e.target.value ? parseInt(e.target.value) : undefined)}
                 />
@@ -714,20 +729,20 @@ const Stock = () => {
             </div>
             
             {/* Year Range */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium mb-2">An fabricație</label>
-              <div className="grid grid-cols-2 gap-3">
+            <div className="mb-4 sm:mb-6">
+              <label className="block text-sm font-medium mb-2">An</label>
+              <div className="grid grid-cols-2 gap-2 sm:gap-3">
                 <input
                   type="number"
                   placeholder="Min"
-                  className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                   value={filters.yearMin || ''}
                   onChange={(e) => handleFilterChange('yearMin', e.target.value ? parseInt(e.target.value) : undefined)}
                 />
                 <input
                   type="number"
                   placeholder="Max"
-                  className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                   value={filters.yearMax || ''}
                   onChange={(e) => handleFilterChange('yearMax', e.target.value ? parseInt(e.target.value) : undefined)}
                 />
@@ -735,20 +750,20 @@ const Stock = () => {
             </div>
             
             {/* Mileage Range */}
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <label className="block text-sm font-medium mb-2">Kilometraj</label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2 sm:gap-3">
                 <input
                   type="number"
                   placeholder="Min km"
-                  className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                   value={filters.mileageMin || ''}
                   onChange={(e) => handleFilterChange('mileageMin', e.target.value ? parseInt(e.target.value) : undefined)}
                 />
                 <input
                   type="number"
                   placeholder="Max km"
-                  className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                   value={filters.mileageMax || ''}
                   onChange={(e) => handleFilterChange('mileageMax', e.target.value ? parseInt(e.target.value) : undefined)}
                 />
