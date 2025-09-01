@@ -420,6 +420,23 @@
     .vehicle-card-title {
       @apply text-base;
     }
+    
+    /* Form improvements for mobile */
+    .form-step-navigation {
+      @apply flex-wrap justify-center gap-2;
+    }
+    
+    .form-progress-text {
+      @apply text-center text-sm;
+    }
+    
+    .form-navigation-buttons {
+      @apply flex-col gap-3;
+    }
+    
+    .form-navigation-button {
+      @apply w-full justify-center;
+    }
   }
   
   .hero-text {
