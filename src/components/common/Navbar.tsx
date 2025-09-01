@@ -189,7 +189,10 @@ export const Navbar = () => {
                   {item.children ? (
                     <div className="relative">
                       <button
-                        onClick={() => handleDropdownToggle(item.label)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleDropdownToggle(item.label);
+                        }}
                         className={cn(
                           "w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-smooth flex items-center justify-between",
                           "text-foreground hover:text-primary hover:bg-accent/10"
@@ -208,7 +211,8 @@ export const Navbar = () => {
                             <Link
                               key={child.href}
                               to={child.href}
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 setIsOpen(false);
                                 setOpenDropdown(null);
                               }}
