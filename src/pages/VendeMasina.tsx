@@ -1,22 +1,18 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Navbar } from "@/components/common/Navbar";
 import { Footer } from "@/components/common/Footer";
 import { Container } from "@/components/common/Container";
 import { Section } from "@/components/common/Section";
-import { FormSection } from "@/components/forms/FormSection";
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { MultiStepForm, FormStep } from "@/components/forms/MultiStepForm";
+import { 
+  CarBasicInfo, 
+  CarTechnicalSpecs, 
+  CarLocation, 
+  CarContactInfo 
+} from "@/components/forms/SellCarFormSteps";
 import { 
   Car, 
   DollarSign, 
@@ -25,9 +21,11 @@ import {
   CheckCircle, 
   Upload,
   ChevronRight,
-  AlertCircle
+  AlertCircle,
+  Zap,
+  Star
 } from "lucide-react";
-import { SellCarSchema, type SellCarInput, carOptions, judete } from "@/lib/validation";
+import { SellCarSchema, type SellCarInput } from "@/lib/validation";
 import { submitSellLead } from "@/lib/actions";
 import { useToast } from "@/hooks/use-toast";
 
@@ -63,28 +61,37 @@ const faqItems = [
   }
 ];
 
+const trustIndicators = [
+  {
+    icon: Zap,
+    title: "Evaluare rapidă",
+    description: "Răspuns în 24 de ore"
+  },
+  {
+    icon: Shield,
+    title: "Tranzacție sigură",
+    description: "Plata garantată și sigură"
+  },
+  {
+    icon: Star,
+    title: "Experiență verificată",
+    description: "Mii de clienți mulțumiți"
+  }
+];
+
 export default function VendeMasina() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const { toast } = useToast();
 
-  const form = useForm<SellCarInput>({
-    resolver: zodResolver(SellCarSchema),
-    defaultValues: {
-      negociabil: false,
-      preferinta_contact: "telefon",
-      gdpr: false
-    }
-  });
-
-  const onSubmit = async (data: SellCarInput) => {
-    setIsSubmitting(true);
+  const handleFormComplete = async (formData: any) => {
     try {
-      const result = await submitSellLead(data);
+      // Validate the form data
+      const validatedData = SellCarSchema.parse(formData);
+      
+      const result = await submitSellLead(validatedData);
       
       if (result.success) {
         setSubmitSuccess(true);
-        form.reset();
         toast({
           title: "Cererea a fost trimisă cu succes!",
           description: "Te vom contacta în cel mai scurt timp pentru evaluarea mașinii tale.",
@@ -98,14 +105,47 @@ export default function VendeMasina() {
       }
     } catch (error) {
       toast({
-        title: "Eroare",
-        description: "A apărut o eroare. Încearcă din nou.",
+        title: "Eroare de validare",
+        description: "Te rugăm să verifici informațiile introduse.",
         variant: "destructive"
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
+
+  const handleStepChange = (currentStep: number, data: any) => {
+    console.log(`Step ${currentStep + 1} completed:`, data);
+  };
+
+  const formSteps: FormStep[] = [
+    {
+      id: "car-basic-info",
+      title: "Informații de bază",
+      description: "Marca, modelul, anul și kilometrajul mașinii",
+      component: <CarBasicInfo formData={{}} updateFormData={() => {}} />,
+      isRequired: true
+    },
+    {
+      id: "car-technical-specs",
+      title: "Specificații tehnice",
+      description: "Combustibil, transmisie, caroserie și preț",
+      component: <CarTechnicalSpecs formData={{}} updateFormData={() => {}} />,
+      isRequired: true
+    },
+    {
+      id: "car-location",
+      title: "Locația vehiculului",
+      description: "Unde se află mașina în prezent",
+      component: <CarLocation formData={{}} updateFormData={() => {}} />,
+      isRequired: true
+    },
+    {
+      id: "car-contact-info",
+      title: "Date de contact",
+      description: "Cum te putem contacta pentru evaluare",
+      component: <CarContactInfo formData={{}} updateFormData={() => {}} />,
+      isRequired: true
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -137,6 +177,19 @@ export default function VendeMasina() {
                 </Badge>
               ))}
             </div>
+
+            {/* Trust Indicators */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+              {trustIndicators.map((indicator, index) => (
+                <div key={index} className="text-center space-y-2">
+                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+                    <indicator.icon className="h-6 w-6 text-primary" />
+                  </div>
+                  <h3 className="font-semibold">{indicator.title}</h3>
+                  <p className="text-sm text-muted-foreground">{indicator.description}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </Container>
       </Section>
@@ -160,407 +213,15 @@ export default function VendeMasina() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Form */}
             <div className="lg:col-span-2">
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                  {/* Car Details */}
-                  <FormSection 
-                    title="Detalii Mașină" 
-                    description="Completează informațiile tehnice ale vehiculului"
-                  >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="marca"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Marca *</FormLabel>
-                            <FormControl>
-                              <Input placeholder="ex: BMW" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="model"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Model *</FormLabel>
-                            <FormControl>
-                              <Input placeholder="ex: X5" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="an"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Anul fabricației *</FormLabel>
-                            <FormControl>
-                              <Input 
-                                type="number" 
-                                placeholder="2020" 
-                                {...field} 
-                                onChange={(e) => field.onChange(Number(e.target.value))}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="km"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Kilometraj *</FormLabel>
-                            <FormControl>
-                              <Input 
-                                type="number" 
-                                placeholder="50000" 
-                                {...field} 
-                                onChange={(e) => field.onChange(Number(e.target.value))}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="combustibil"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Combustibil *</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selectează combustibilul" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {carOptions.combustibil.map((option) => (
-                                  <SelectItem key={option.value} value={option.value}>
-                                    {option.label}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="transmisie"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Transmisie *</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selectează transmisia" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {carOptions.transmisie.map((option) => (
-                                  <SelectItem key={option.value} value={option.value}>
-                                    {option.label}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="caroserie"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Caroserie *</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selectează caroseria" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {carOptions.caroserie.map((option) => (
-                                  <SelectItem key={option.value} value={option.value}>
-                                    {option.label}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="culoare"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Culoare</FormLabel>
-                            <FormControl>
-                              <Input placeholder="ex: Negru metalic" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="vin"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Numărul de șasiu (VIN)</FormLabel>
-                            <FormControl>
-                              <Input placeholder="WBAVA31030L..." {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="pret"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Prețul dorit (EUR)</FormLabel>
-                            <FormControl>
-                              <Input 
-                                type="number" 
-                                placeholder="25000" 
-                                {...field} 
-                                onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <FormField
-                      control={form.control}
-                      name="negociabil"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>Prețul este negociabil</FormLabel>
-                            <p className="text-sm text-muted-foreground">
-                              Bifează dacă ești dispus să negociezi prețul
-                            </p>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                  </FormSection>
-
-                  {/* Location */}
-                  <FormSection 
-                    title="Locația Vehiculului" 
-                    description="Unde se află mașina în prezent"
-                  >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="judet"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Județul *</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selectează județul" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {judete.map((judet) => (
-                                  <SelectItem key={judet} value={judet}>
-                                    {judet}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="oras"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Orașul *</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Localitatea exactă" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </FormSection>
-
-
-
-                  {/* Contact Details */}
-                  <FormSection 
-                    title="Date de Contact" 
-                    description="Cum te putem contacta pentru ofertă"
-                  >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="nume"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Numele complet *</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Numele și prenumele" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="telefon"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Numărul de telefon *</FormLabel>
-                            <FormControl>
-                              <Input placeholder="+40721234567" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Adresa de email *</FormLabel>
-                            <FormControl>
-                              <Input type="email" placeholder="nume@email.com" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="preferinta_contact"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Preferința de contact *</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {carOptions.preferinta_contact.map((option) => (
-                                  <SelectItem key={option.value} value={option.value}>
-                                    {option.label}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <FormField
-                      control={form.control}
-                      name="interval_orar"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Intervalul orar preferat</FormLabel>
-                          <FormControl>
-                            <Input placeholder="ex: 09:00 - 18:00" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="gdpr"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>Consimțământ prelucrare date *</FormLabel>
-                            <p className="text-sm text-muted-foreground">
-                              Sunt de acord cu prelucrarea datelor personale conform GDPR
-                            </p>
-                          </div>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <Button 
-                      type="submit" 
-                      size="lg" 
-                      className="w-full" 
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                          Se trimite...
-                        </>
-                      ) : (
-                        <>
-                          <Upload className="h-4 w-4 mr-2" />
-                          Trimite pentru Evaluare
-                        </>
-                      )}
-                    </Button>
-                  </FormSection>
-                </form>
-              </Form>
+              <MultiStepForm
+                steps={formSteps}
+                onComplete={handleFormComplete}
+                onStepChange={handleStepChange}
+                title="Evaluare mașină"
+                description="Completează formularul pas cu pas pentru o evaluare rapidă și profesională"
+                showProgress={true}
+                allowBackNavigation={true}
+              />
             </div>
 
             {/* Sidebar */}
@@ -584,6 +245,34 @@ export default function VendeMasina() {
                       </div>
                     </div>
                   ))}
+                </CardContent>
+              </Card>
+
+              {/* Trust & Security */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Shield className="h-5 w-5" />
+                    <span>Siguranță și Confidențialitate</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="h-4 w-4 text-success" />
+                    <span className="text-sm">Evaluare gratuită și fără obligații</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="h-4 w-4 text-success" />
+                    <span className="text-sm">Datele tale sunt protejate</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="h-4 w-4 text-success" />
+                    <span className="text-sm">Tranzacție transparentă</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="h-4 w-4 text-success" />
+                    <span className="text-sm">Fără comisioane ascunse</span>
+                  </div>
                 </CardContent>
               </Card>
 

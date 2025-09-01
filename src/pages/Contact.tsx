@@ -1,19 +1,13 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Navbar } from "@/components/common/Navbar";
 import { Footer } from "@/components/common/Footer";
 import { Container } from "@/components/common/Container";
 import { Section } from "@/components/common/Section";
-import { FormSection } from "@/components/forms/FormSection";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { MultiStepForm, FormStep } from "@/components/forms/MultiStepForm";
+import { ContactBasicInfo, ContactPreferences, ContactMessage } from "@/components/forms/ContactFormSteps";
 import { 
   MapPin, 
   Phone, 
@@ -21,7 +15,8 @@ import {
   Clock, 
   MessageSquare,
   CheckCircle,
-  Send
+  Shield,
+  Zap
 } from "lucide-react";
 import { ContactSchema, type ContactInput } from "@/lib/validation";
 import { submitContactMessage } from "@/lib/actions";
@@ -58,26 +53,37 @@ const schedule = [
   { day: "Duminică", hours: "Închis" }
 ];
 
+const benefits = [
+  {
+    icon: Zap,
+    title: "Răspuns rapid",
+    description: "Te contactăm în maxim 24 de ore"
+  },
+  {
+    icon: Shield,
+    title: "Date protejate",
+    description: "Informațiile tale sunt în siguranță"
+  },
+  {
+    icon: MessageSquare,
+    title: "Comunicare directă",
+    description: "Vorbim direct cu echipa specializată"
+  }
+];
+
 export default function Contact() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const { toast } = useToast();
 
-  const form = useForm<ContactInput>({
-    resolver: zodResolver(ContactSchema),
-    defaultValues: {
-      gdpr: false
-    }
-  });
-
-  const onSubmit = async (data: ContactInput) => {
-    setIsSubmitting(true);
+  const handleFormComplete = async (formData: any) => {
     try {
-      const result = await submitContactMessage(data);
+      // Validate the form data
+      const validatedData = ContactSchema.parse(formData);
+      
+      const result = await submitContactMessage(validatedData);
       
       if (result.success) {
         setSubmitSuccess(true);
-        form.reset();
         toast({
           title: "Mesajul a fost trimis cu succes!",
           description: "Te vom contacta în cel mai scurt timp.",
@@ -91,14 +97,40 @@ export default function Contact() {
       }
     } catch (error) {
       toast({
-        title: "Eroare",
-        description: "A apărut o eroare. Încearcă din nou.",
+        title: "Eroare de validare",
+        description: "Te rugăm să verifici informațiile introduse.",
         variant: "destructive"
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
+
+  const handleStepChange = (currentStep: number, data: any) => {
+    console.log(`Step ${currentStep + 1} completed:`, data);
+  };
+
+  const formSteps: FormStep[] = [
+    {
+      id: "basic-info",
+      title: "Informații de bază",
+      description: "Numele și emailul pentru a începe conversația",
+      component: <ContactBasicInfo formData={{}} updateFormData={() => {}} />,
+      isRequired: true
+    },
+    {
+      id: "contact-preferences",
+      title: "Preferințe contact",
+      description: "Cum preferi să te contactăm",
+      component: <ContactPreferences formData={{}} updateFormData={() => {}} />,
+      isRequired: false
+    },
+    {
+      id: "message",
+      title: "Mesajul tău",
+      description: "Spune-ne despre ce vrei să vorbim",
+      component: <ContactMessage formData={{}} updateFormData={() => {}} />,
+      isRequired: true
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -121,6 +153,19 @@ export default function Contact() {
               Suntem aici să te ajutăm să găsești vehiculul perfect sau să îți răspundem la orice întrebare. 
               Contactează-ne prin oricare dintre modalitățile de mai jos.
             </p>
+
+            {/* Benefits */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+              {benefits.map((benefit, index) => (
+                <div key={index} className="text-center space-y-2">
+                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+                    <benefit.icon className="h-6 w-6 text-primary" />
+                  </div>
+                  <h3 className="font-semibold">{benefit.title}</h3>
+                  <p className="text-sm text-muted-foreground">{benefit.description}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </Container>
       </Section>
@@ -185,135 +230,43 @@ export default function Contact() {
                   ))}
                 </CardContent>
               </Card>
+
+              {/* Trust Indicators */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Shield className="h-5 w-5" />
+                    <span>Siguranță și Confidențialitate</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="h-4 w-4 text-success" />
+                    <span className="text-sm">Datele tale sunt protejate</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="h-4 w-4 text-success" />
+                    <span className="text-sm">Nu partajăm informații cu terți</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="h-4 w-4 text-success" />
+                    <span className="text-sm">Conformitate GDPR</span>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
             {/* Contact Form */}
             <div className="lg:col-span-2">
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  <FormSection 
-                    title="Scrie-ne un Mesaj" 
-                    description="Completează formularul și te vom contacta în cel mai scurt timp"
-                  >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="nume"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Numele complet *</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Numele și prenumele" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Adresa de email *</FormLabel>
-                            <FormControl>
-                              <Input type="email" placeholder="nume@email.com" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="telefon"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Numărul de telefon</FormLabel>
-                            <FormControl>
-                              <Input placeholder="+40721234567" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="subiect"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Subiectul *</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Despre ce vrei să vorbești?" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <FormField
-                      control={form.control}
-                      name="mesaj"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Mesajul *</FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              placeholder="Scrie aici mesajul tău detaliat..."
-                              className="min-h-[120px]"
-                              {...field} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="gdpr"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>Consimțământ prelucrare date *</FormLabel>
-                            <p className="text-sm text-muted-foreground">
-                              Sunt de acord cu prelucrarea datelor personale conform GDPR
-                            </p>
-                          </div>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <Button 
-                      type="submit" 
-                      size="lg" 
-                      className="w-full" 
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                          Se trimite...
-                        </>
-                      ) : (
-                        <>
-                          <Send className="h-4 w-4 mr-2" />
-                          Trimite Mesajul
-                        </>
-                      )}
-                    </Button>
-                  </FormSection>
-                </form>
-              </Form>
+              <MultiStepForm
+                steps={formSteps}
+                onComplete={handleFormComplete}
+                onStepChange={handleStepChange}
+                title="Contactează-ne"
+                description="Completează formularul pas cu pas pentru a ne contacta rapid și eficient"
+                showProgress={true}
+                allowBackNavigation={true}
+              />
             </div>
           </div>
         </Container>
@@ -334,15 +287,16 @@ export default function Contact() {
                 <div className="text-center space-y-2">
                   <MapPin className="h-8 w-8 mx-auto text-muted-foreground" />
                   <p className="text-muted-foreground">Hartă integrată va fi disponibilă în curând</p>
-                  <Button variant="outline" asChild>
+                  <Badge variant="outline" asChild>
                     <a 
                       href={`https://maps.google.com/?q=${encodeURIComponent(settings.contact.address)}`}
                       target="_blank"
                       rel="noopener noreferrer"
+                      className="cursor-pointer"
                     >
                       Deschide în Google Maps
                     </a>
-                  </Button>
+                  </Badge>
                 </div>
               </div>
             </CardContent>
