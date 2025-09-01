@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { StockAPI } from '@/lib/stockApi';
 import { StockVehicle } from '@/types/vehicle';
+import settings from '@/data/settings.json';
 
 const VehicleDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -394,9 +395,11 @@ const VehicleDetail = () => {
               Contactează-ne pentru mai multe detalii, programări de vizualizare sau oferte personalizate.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button variant="premium" size="lg" onClick={handleContactClick}>
-                <Phone className="h-5 w-5 mr-2" />
-                Sună acum
+              <Button variant="premium" size="lg" asChild>
+                <a href={`tel:${settings.contact.phone}`}>
+                  <Phone className="h-5 w-5 mr-2" />
+                  Sună acum
+                </a>
               </Button>
               <Button variant="outline" size="lg" asChild>
                 <Link to="/contact">
