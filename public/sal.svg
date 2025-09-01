@@ -1,0 +1,43 @@
+<svg width="250" height="50" viewBox="0 0 250 50" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="250" height="50" fill="#ffffff"/>
+  <rect x="2" y="2" width="246" height="46" fill="#1e3a8a" rx="4"/>
+  
+  <!-- ANPC Official Logo Elements -->
+  <g transform="translate(8, 8)">
+    <!-- Romanian Coat of Arms (simplified) -->
+    <g transform="translate(15, 20)">
+      <!-- Shield base -->
+      <path d="M0 -12 L8 -8 L8 8 L0 12 L-8 8 L-8 -8 Z" fill="#d4af37" stroke="#1e3a8a" stroke-width="0.5"/>
+      <!-- Eagle head -->
+      <circle cx="0" cy="-6" r="3" fill="#d4af37"/>
+      <!-- Cross in beak -->
+      <rect x="-0.5" y="-8" width="1" height="2" fill="#1e3a8a"/>
+      <rect x="-1" y="-7" width="2" height="1" fill="#1e3a8a"/>
+    </g>
+    
+    <!-- EU Stars -->
+    <g transform="translate(35, 20)">
+      <!-- 4 EU stars in arc -->
+      <path d="M0 -8 L1.5 -3 L6 -3 L2.25 1 L3.75 6 L0 4 L-3.75 6 L-2.25 1 L-6 -3 L-1.5 -3 Z" fill="#d4af37"/>
+      <path d="M8 -4 L9.5 1 L14 1 L10.25 5 L11.75 10 L8 8 L4.25 10 L5.75 5 L2 1 L6.5 1 Z" fill="#d4af37"/>
+      <path d="M4 8 L5.5 13 L10 13 L6.25 17 L7.75 22 L4 20 L0.25 22 L1.75 17 L-2 13 L2.5 13 Z" fill="#d4af37"/>
+      <path d="M-4 8 L-2.5 13 L2 13 L-1.75 17 L-0.25 22 L-4 20 L-7.75 22 L-6.25 17 L-10 13 L-5.5 13 Z" fill="#d4af37"/>
+    </g>
+    
+    <!-- Curved lines -->
+    <path d="M5 5 Q15 0 25 5" stroke="#1e3a8a" stroke-width="1" fill="none"/>
+    <path d="M5 35 Q15 40 25 35" stroke="#dc2626" stroke-width="1" fill="none"/>
+  </g>
+  
+  <!-- ANPC Text -->
+  <text x="70" y="18" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#1e3a8a">ANPC</text>
+  <text x="70" y="28" font-family="Arial, sans-serif" font-size="6" fill="#1e3a8a">AUTORITATEA NAȚIONALĂ</text>
+  <text x="70" y="35" font-family="Arial, sans-serif" font-size="6" fill="#1e3a8a">PENTRU PROTECȚIA CONSUMATORILOR</text>
+  
+  <!-- SAL Badge -->
+  <rect x="160" y="8" width="70" height="34" fill="#ffffff" rx="3"/>
+  <text x="195" y="20" font-family="Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#1e3a8a">SAL</text>
+  <text x="195" y="30" font-family="Arial, sans-serif" font-size="6" text-anchor="middle" fill="#1e3a8a">Soluționarea Alternativă</text>
+  <text x="195" y="37" font-family="Arial, sans-serif" font-size="6" text-anchor="middle" fill="#1e3a8a">a Litigiilor</text>
+</svg>

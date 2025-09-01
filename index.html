@@ -16,6 +16,27 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@lovable_dev" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+
+    <script>
+      // Force scroll to top on page refresh
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+      }
+      
+      // Reset scroll position on page load
+      window.addEventListener('load', function() {
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      });
+      
+      // Also reset on DOMContentLoaded
+      document.addEventListener('DOMContentLoaded', function() {
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      });
+    </script>
   </head>
 
   <body>

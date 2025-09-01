@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ScrollToTop } from "@/components/common/ScrollToTop";
 import { ScrollToTopButton } from "@/components/common/ScrollToTopButton";
+import { CookieConsent } from "@/components/common/CookieConsent";
 import Index from "./pages/Index";
 import Stock from "./pages/Stock";
 import VehicleDetail from "./pages/VehicleDetail";
@@ -11,6 +12,9 @@ import VendeMasina from "./pages/VendeMasina";
 import Finantare from "./pages/Finantare";
 import Contact from "./pages/Contact";
 import ComandaMasina from "./pages/ComandaMasina";
+import TermeniConditii from "./pages/TermeniConditii";
+import PoliticaConfidentialitate from "./pages/PoliticaConfidentialitate";
+import PoliticaCookie from "./pages/PoliticaCookie";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Auth/Login";
 import AdminLayout from "./pages/Admin/AdminLayout";
@@ -35,6 +39,7 @@ const App = () => (
       >
         <ScrollToTop />
         <ScrollToTopButton />
+        <CookieConsent />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/stoc" element={<Stock />} />
@@ -43,6 +48,9 @@ const App = () => (
           <Route path="/finantare" element={<Finantare />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/comanda" element={<ComandaMasina />} />
+          <Route path="/termeni-conditii" element={<TermeniConditii />} />
+          <Route path="/politica-confidentialitate" element={<PoliticaConfidentialitate />} />
+          <Route path="/politica-cookie-uri" element={<PoliticaCookie />} />
           <Route path="/login" element={<Login />} />
           
           {/* Admin Routes - Protected by AuthGate */}
