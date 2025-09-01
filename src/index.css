@@ -220,7 +220,148 @@
   .automotive-card:hover {
     @apply shadow-large translate-y-[-2px];
   }
+
+  /* Enhanced Stock Page Layout */
+  .stock-hero-section {
+    @apply bg-gradient-to-br from-background via-background to-accent/5;
+  }
   
+  .stock-stats-grid {
+    @apply grid grid-cols-2 md:grid-cols-4 gap-4;
+  }
+  
+  .stock-stat-card {
+    @apply text-center p-4 bg-card rounded-lg border border-border hover:border-primary/30 transition-colors;
+  }
+  
+  .stock-service-highlight {
+    @apply text-center p-4 hover:bg-accent/5 rounded-lg transition-colors;
+  }
+  
+  .stock-toolbar {
+    @apply bg-card/50 backdrop-blur-sm border border-border rounded-lg p-4 sticky top-4 z-10;
+  }
+  
+  .stock-filters-sidebar {
+    @apply bg-card border border-border rounded-xl p-6 shadow-medium;
+  }
+  
+  .stock-vehicle-grid {
+    @apply grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3;
+  }
+  
+  .stock-vehicle-list {
+    @apply grid gap-4 grid-cols-1;
+  }
+  
+  /* Enhanced Vehicle Cards for Stock Page */
+  .stock-vehicle-card {
+    @apply automotive-card overflow-hidden hover-lift bg-gradient-to-br from-card to-card/80;
+  }
+  
+  .stock-vehicle-card:hover {
+    @apply shadow-large translate-y-[-3px] border-primary/20;
+  }
+  
+  .stock-vehicle-image {
+    @apply w-full h-48 object-cover transition-smooth cursor-pointer;
+  }
+  
+  .stock-vehicle-badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold tracking-wide shadow-lg border backdrop-blur-sm bg-opacity-90;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  }
+  
+  .stock-vehicle-price {
+    @apply absolute bottom-3 right-3 bg-primary text-primary-foreground px-3 py-1.5 rounded-lg font-bold shadow-medium;
+  }
+  
+  .stock-vehicle-actions {
+    @apply absolute top-3 right-3 flex flex-col gap-1.5 opacity-0 transition-smooth;
+  }
+  
+  .stock-vehicle-action-btn {
+    @apply p-1.5 bg-white/90 rounded-lg hover:bg-white shadow-medium hover:scale-110 transition-transform;
+  }
+  
+  /* Enhanced Pagination */
+  .stock-pagination {
+    @apply flex items-center justify-center gap-2 mt-10;
+  }
+  
+  .stock-pagination-button {
+    @apply px-4 py-2 transition-all hover:scale-105;
+  }
+  
+  .stock-pagination-page {
+    @apply px-3 py-2 min-w-[40px] transition-all hover:scale-105;
+  }
+  
+  /* Enhanced Empty State */
+  .stock-empty-state {
+    @apply text-center py-16 bg-gradient-to-br from-muted/20 to-muted/10 rounded-2xl border border-muted/30;
+  }
+  
+  .stock-empty-icon {
+    @apply w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6;
+  }
+  
+  /* Enhanced CTA Section */
+  .stock-cta-section {
+    @apply mt-12 p-6 bg-gradient-to-r from-primary/5 to-accent/5 rounded-xl border border-primary/10 hover:border-primary/20 transition-colors;
+  }
+  
+  /* Responsive Improvements for Stock Page */
+  @media (max-width: 1024px) {
+    .stock-vehicle-grid {
+      @apply grid-cols-1 md:grid-cols-2;
+    }
+    
+    .stock-filters-sidebar {
+      @apply p-4;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .stock-hero-section {
+      @apply pt-16;
+    }
+    
+    .stock-stats-grid {
+      @apply grid-cols-2 gap-3;
+    }
+    
+    .stock-stat-card {
+      @apply p-3;
+    }
+    
+    .stock-service-highlight {
+      @apply p-3;
+    }
+    
+    .stock-toolbar {
+      @apply p-3;
+    }
+  }
+  
+  @media (max-width: 640px) {
+    .stock-vehicle-grid {
+      @apply grid-cols-1 gap-4;
+    }
+    
+    .stock-vehicle-card {
+      @apply mx-2;
+    }
+    
+    .stock-pagination {
+      @apply flex-wrap gap-1;
+    }
+    
+    .stock-pagination-button {
+      @apply px-3 py-1.5 text-sm;
+    }
+  }
+
   /* Improved badge positioning and styling */
   .vehicle-badge {
     @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold tracking-wide shadow-lg border backdrop-blur-sm bg-opacity-90;
