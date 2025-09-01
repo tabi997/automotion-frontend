@@ -89,11 +89,11 @@ export function MultiStepForm({
       {/* Progress Bar */}
       {showProgress && (
         <div className="mb-8">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2">
+            <span className="text-sm font-medium text-center sm:text-left">
               Pasul {currentStep + 1} din {steps.length}
             </span>
-            <span className="text-sm text-muted-foreground">
+            <span className="text-sm text-muted-foreground text-center sm:text-right">
               {Math.round(progress)}% completat
             </span>
           </div>
@@ -159,45 +159,45 @@ export function MultiStepForm({
       </Card>
 
       {/* Navigation Buttons */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
         <Button
           variant="outline"
           onClick={handleBack}
           disabled={isFirstStep || !allowBackNavigation}
-          className="flex items-center"
+          className="flex items-center w-full sm:w-auto justify-center"
         >
           <ChevronLeft className="h-4 w-4 mr-2" />
           Înapoi
         </Button>
 
-        <div className="flex items-center space-x-4">
-          <span className="text-sm text-muted-foreground">
+        <div className="flex flex-col items-center gap-2 order-first sm:order-none">
+          <span className="text-sm text-muted-foreground text-center">
             Pasul {currentStep + 1} din {steps.length}
           </span>
-          
-          <Button
-            onClick={handleNext}
-            disabled={!canProceed || isSubmitting}
-            className="flex items-center"
-          >
-            {isSubmitting ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                Se trimite...
-              </>
-            ) : isLastStep ? (
-              <>
-                Finalizează
-                <CheckCircle className="h-4 w-4 ml-2" />
-              </>
-            ) : (
-              <>
-                Următorul pas
-                <ChevronRight className="h-4 w-4 ml-2" />
-              </>
-            )}
-          </Button>
         </div>
+        
+        <Button
+          onClick={handleNext}
+          disabled={!canProceed || isSubmitting}
+          className="flex items-center w-full sm:w-auto justify-center"
+        >
+          {isSubmitting ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+              Se trimite...
+            </>
+          ) : isLastStep ? (
+            <>
+              Finalizează
+              <CheckCircle className="h-4 w-4 ml-2" />
+            </>
+          ) : (
+            <>
+              Următorul pas
+              <ChevronRight className="h-4 w-4 ml-2" />
+            </>
+          )}
+        </Button>
       </div>
     </div>
   );
