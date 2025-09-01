@@ -40,6 +40,7 @@ import { MockAPI } from '@/lib/mockApi';
 import { Vehicle, VehicleFilters, VehicleSort, PaginatedVehicles, StockVehicle, VehicleBadge } from '@/types/vehicle';
 import { StockAPI } from '@/lib/stockApi';
 import { carBrands } from '@/data/carBrands';
+import settings from '@/data/settings.json';
 
 // Import images
 import bmwImage from '@/assets/bmw-x5.jpg';
@@ -313,8 +314,11 @@ const Stock = () => {
             size="sm" 
             className="vehicle-card-action-btn compact"
             title="Contactează"
+            asChild
           >
-            <Phone className="h-3.5 w-3.5" />
+            <a href={`tel:${settings.contact.phone}`} className="flex items-center justify-center">
+              <Phone className="h-3.5 w-3.5" />
+            </a>
           </Button>
            
           {/* OpenLane Button - Improved styling */}
