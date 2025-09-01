@@ -621,15 +621,6 @@ const Stock = () => {
             <div className="stock-toolbar mb-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowFilters(!showFilters)}
-                    className="lg:hidden"
-                  >
-                    <SlidersHorizontal className="h-4 w-4 mr-2" />
-                    Filtre
-                  </Button>
                   
                   {vehicles && (
                     <div className="flex items-center gap-3">
