@@ -378,7 +378,7 @@ const Stock = () => {
           {/* Compact CTA Section */}
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-6">
             <Button size="default" className="bg-gradient-to-r from-primary to-primary-light hover:from-primary-light hover:to-primary text-white px-6 py-2">
-              <Link to="/comanda-masina" className="flex items-center gap-2">
+              <Link to="/comanda" className="flex items-center gap-2">
                 Comandă Mașina Ta
                 <ArrowRight className="h-4 w-4" />
               </Link>
@@ -793,7 +793,7 @@ const Stock = () => {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <Button size="default" className="bg-gradient-to-r from-primary to-primary-light hover:from-primary-light hover:to-primary text-white">
-                    <Link to="/comanda-masina" className="flex items-center gap-2">
+                    <Link to="/comanda" className="flex items-center gap-2">
                       Comandă Mașina Ta
                       <ArrowRight className="h-4 w-4" />
                     </Link>
@@ -819,7 +819,7 @@ const Stock = () => {
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     <Button size="default" className="bg-gradient-to-r from-accent to-accent-light hover:from-accent-light hover:to-accent text-white">
-                      <Link to="/comanda-masina" className="flex items-center gap-2">
+                      <Link to="/comanda" className="flex items-center gap-2">
                         Comandă Mașina Dorită
                         <ArrowRight className="h-4 w-4" />
                       </Link>
