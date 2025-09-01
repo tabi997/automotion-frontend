@@ -219,7 +219,6 @@ export const Navbar = () => {
                               key={child.href}
                               to={child.href}
                               onClick={(e) => {
-                                e.preventDefault();
                                 e.stopPropagation();
                                 setIsOpen(false);
                                 setMobileDropdownOpen(null);
