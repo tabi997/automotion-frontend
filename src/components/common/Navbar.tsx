@@ -182,12 +182,12 @@ export const Navbar = () => {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="lg:hidden border-t border-border bg-background/95 backdrop-blur-md">
+          <div className="lg:hidden border-t border-border bg-background/95 backdrop-blur-md relative z-40">
             <div className="py-4 space-y-2">
               {navigation.map((item) => (
                 <div key={item.href}>
                   {item.children ? (
-                    <div>
+                    <div className="relative">
                       <button
                         onClick={() => handleDropdownToggle(item.label)}
                         className={cn(
@@ -203,11 +203,15 @@ export const Navbar = () => {
                       </button>
                       
                       {openDropdown === item.label && (
-                        <div className="pl-4 space-y-1 animate-fade-in">
+                        <div className="pl-4 space-y-1 animate-fade-in relative z-50">
                           {item.children.map((child) => (
                             <Link
                               key={child.href}
                               to={child.href}
+                              onClick={() => {
+                                setIsOpen(false);
+                                setOpenDropdown(null);
+                              }}
                               className={cn(
                                 "block px-4 py-2 rounded-lg text-sm font-medium transition-smooth",
                                 location.pathname === child.href
@@ -224,6 +228,7 @@ export const Navbar = () => {
                   ) : (
                     <Link
                       to={item.href}
+                      onClick={() => setIsOpen(false)}
                       className={cn(
                         "block px-4 py-3 rounded-lg text-sm font-medium transition-smooth",
                         location.pathname === item.href
@@ -246,7 +251,7 @@ export const Navbar = () => {
                 </Button>
                 
                 <Button variant="hero" size="default" className="w-full" asChild>
-                  <Link to="/stoc">
+                  <Link to="/stoc" onClick={() => setIsOpen(false)}>
                     Explorează Stocul
                   </Link>
                 </Button>
