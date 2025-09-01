@@ -38,6 +38,7 @@ export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [mobileDropdownOpen, setMobileDropdownOpen] = useState<string | null>(null);
   const location = useLocation();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -53,6 +54,7 @@ export const Navbar = () => {
   useEffect(() => {
     setIsOpen(false);
     setOpenDropdown(null);
+    setMobileDropdownOpen(null);
   }, [location.pathname]);
 
   useEffect(() => {
@@ -68,6 +70,10 @@ export const Navbar = () => {
 
   const handleDropdownToggle = (label: string) => {
     setOpenDropdown(openDropdown === label ? null : label);
+  };
+
+  const handleMobileDropdownToggle = (label: string) => {
+    setMobileDropdownOpen(mobileDropdownOpen === label ? null : label);
   };
 
   return (
@@ -191,7 +197,8 @@ export const Navbar = () => {
                       <button
                         onClick={(e) => {
                           e.preventDefault();
-                          handleDropdownToggle(item.label);
+                          e.stopPropagation();
+                          handleMobileDropdownToggle(item.label);
                         }}
                         className={cn(
                           "w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-smooth flex items-center justify-between",
@@ -201,20 +208,21 @@ export const Navbar = () => {
                         <span>{item.label}</span>
                         <ChevronDown className={cn(
                           "h-3 w-3 transition-transform",
-                          openDropdown === item.label ? "rotate-180" : ""
+                          mobileDropdownOpen === item.label ? "rotate-180" : ""
                         )} />
                       </button>
                       
-                      {openDropdown === item.label && (
-                        <div className="pl-4 space-y-1 animate-fade-in relative z-50">
+                      {mobileDropdownOpen === item.label && (
+                        <div className="pl-4 space-y-1 animate-fade-in">
                           {item.children.map((child) => (
                             <Link
                               key={child.href}
                               to={child.href}
                               onClick={(e) => {
+                                e.preventDefault();
                                 e.stopPropagation();
                                 setIsOpen(false);
-                                setOpenDropdown(null);
+                                setMobileDropdownOpen(null);
                               }}
                               className={cn(
                                 "block px-4 py-2 rounded-lg text-sm font-medium transition-smooth",
